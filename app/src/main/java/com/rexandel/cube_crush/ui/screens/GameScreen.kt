@@ -1,90 +1,74 @@
 package com.rexandel.cube_crush.ui.screens
 
-import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.view.View
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-class GameScreen(context: Context) : View(context) {
-    private val gridWidth = 8
-    private val gridHeight = 8
-    private val cellSize = 120f
-    private var score = 1500
-    private val record = 248000
+@Composable
+fun GameScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Рекорд: 248000",
+                fontSize = 20.sp,
+                modifier = Modifier.weight(1f)
+            )
 
-    private val gridPaint = Paint().apply {
-        color = Color.GRAY
-        style = Paint.Style.STROKE
-        strokeWidth = 2f
-    }
+            Button(
+                onClick = { /* pass */ }
+            ) {
+                Text("Пауза")
+            }
+        }
 
-    private val backgroundPaint = Paint().apply {
-        color = Color.LTGRAY
-        style = Paint.Style.FILL
-    }
-
-    private val textPaint = Paint().apply {
-        color = Color.BLACK
-        textSize = 60f
-    }
-
-    private val buttonPaint = Paint().apply {
-        color = Color.GRAY
-    }
-
-    private val buttonTextPaint = Paint().apply {
-        color = Color.WHITE
-        textSize = 40f
-    }
-
-    private val scorePaint = Paint().apply {
-        color = Color.BLACK
-        textSize = 96f
-        textAlign = Paint.Align.CENTER
-    }
-
-    private fun drawPauseButton(canvas: Canvas) {
-        val buttonWidth = 200f
-        val buttonHeight = 100f
-        val buttonX = width - buttonWidth - 50f
-        val buttonY = 50f
-
-        canvas.drawRoundRect(
-            buttonX,
-            buttonY,
-            buttonX + buttonWidth,
-            buttonY + buttonHeight,
-            20f,
-            20f,
-            buttonPaint
+        Text(
+            text = "1500",
+            fontSize = 48.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        canvas.drawText("Пауза", buttonX + 40f, buttonY + 60f, buttonTextPaint)
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        canvas.drawColor(Color.WHITE)
-
-        canvas.drawText("Рекорд: $record", 50f, 80f, textPaint)
-
-        drawPauseButton(canvas)
-
-        val startX = (width - gridWidth * cellSize) / 2
-        val startY = (height - gridHeight * cellSize) / 2
-
-        val scoreX = startX + (gridWidth * cellSize) / 2
-        val scoreY = startY - 50f
-
-        canvas.drawText(score.toString(), scoreX, scoreY, scorePaint)
-
-        canvas.drawRect(startX, startY, startX + gridWidth * cellSize, startY + gridHeight * cellSize, backgroundPaint)
-
-        for (row in 0 until gridHeight) {
-            for (col in 0 until gridWidth) {
-                val left = startX + col * cellSize
-                val top = startY + row * cellSize
-                canvas.drawRect(left, top, left + cellSize, top + cellSize, gridPaint)
+        Box(
+            modifier = Modifier
+                .background(Color.LightGray)
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(8),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(1.dp)
+            ) {
+                items(64) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(2.dp)
+                            .background(Color.White)
+                    )
+                }
             }
         }
     }
