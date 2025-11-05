@@ -18,6 +18,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,13 +34,15 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rexandel.cube_crush.model.Block
 import com.rexandel.cube_crush.viewmodel.GameViewModel
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Composable
 fun GameScreen() {
-    val gameViewModel = remember { GameViewModel() }
+    val gameViewModel: GameViewModel = viewModel()
     val gameState = gameViewModel.gameState
 
     var isDragging by remember { mutableStateOf(false) }
@@ -95,8 +99,17 @@ fun GameScreen() {
                 .background(Color.LightGray)
                 .padding(16.dp)
                 .onGloballyPositioned { coordinates ->
-                    boardPosition = coordinates.positionInRoot()
-                    boardSize = with(coordinates.size) { (width / 8).dp }
+                    val newPosition = coordinates.positionInRoot()
+                    val newSize = with(coordinates.size) { (width / 8).dp }
+
+                    if (boardPosition == Offset.Zero ||
+                        abs(boardPosition.x - newPosition.x) > 1f ||
+                        abs(boardPosition.y - newPosition.y) > 1f) {
+                        boardPosition = newPosition
+                    }
+                    if (boardSize != newSize) {
+                        boardSize = newSize
+                    }
                 }
         ) {
             GameBoard(
@@ -116,8 +129,9 @@ fun GameScreen() {
                 modifier = Modifier
                     .align(Alignment.Center)
                     .onGloballyPositioned { coordinates ->
+                        val newPosition = coordinates.positionInRoot()
                         if (shapeStartPosition == Offset.Zero) {
-                            shapeStartPosition = coordinates.positionInRoot()
+                            shapeStartPosition = newPosition
                         }
                     }
             ) {
@@ -153,25 +167,29 @@ fun GameScreen() {
                                 val absoluteX = shapeStartPosition.x + dragOffset.x
                                 val absoluteY = shapeStartPosition.y + dragOffset.y
 
-                                val boardX = ((absoluteX - boardPosition.x) / boardSize.value).toInt()
-                                val boardY = ((absoluteY - boardPosition.y) / boardSize.value).toInt()
+                                if (boardSize.value > 0) {
+                                    val boardX = ((absoluteX - boardPosition.x) / boardSize.value).toInt()
+                                    val boardY = ((absoluteY - boardPosition.y) / boardSize.value).toInt()
 
-                                snapPreviewPosition = findSnapPosition(boardX, boardY)
+                                    snapPreviewPosition = findSnapPosition(boardX, boardY)
+                                }
                             },
                             onDragEnd = {
-                                val finalPosition = snapPreviewPosition ?: run {
+                                val finalPosition = if (snapPreviewPosition != null) {
+                                    snapPreviewPosition
+                                } else if (boardSize.value > 0) {
                                     val absoluteX = shapeStartPosition.x + dragOffset.x
                                     val absoluteY = shapeStartPosition.y + dragOffset.y
                                     val boardX = ((absoluteX - boardPosition.x) / boardSize.value).toInt()
                                     val boardY = ((absoluteY - boardPosition.y) / boardSize.value).toInt()
                                     findSnapPosition(boardX, boardY)
+                                } else {
+                                    null
                                 }
 
                                 if (finalPosition != null) {
                                     val success = gameViewModel.placeSquare(finalPosition)
-                                    if (success) {
-                                        // pass
-                                    }
+                                    // Не нужно обрабатывать success здесь
                                 }
 
                                 isDragging = false
@@ -193,7 +211,6 @@ fun GameScreen() {
 private fun findSnapPosition(boardX: Int, boardY: Int): Pair<Int, Int>? {
     val clampedX = boardX.coerceIn(0, 6)
     val clampedY = boardY.coerceIn(0, 6)
-
     return Pair(clampedX, clampedY)
 }
 
@@ -204,25 +221,36 @@ fun GameBoard(
     gameViewModel: GameViewModel,
     modifier: Modifier = Modifier
 ) {
-    val flattenedBlocks = remember(board) {
-        board.flatten()
+    val flattenedBlocks by remember(board) {
+        derivedStateOf { board.flatten() }
     }
 
-    val canPlaceHere = snapPreviewPosition?.let { position ->
-        canPlaceSquareAtPosition(board, position)
-    } ?: false
+    val canPlaceHere by remember(snapPreviewPosition, board) {
+        derivedStateOf {
+            snapPreviewPosition?.let { position ->
+                canPlaceSquareAtPosition(board, position)
+            } ?: false
+        }
+    }
 
     Box(modifier = modifier) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
             modifier = Modifier
         ) {
-            items(flattenedBlocks) { block ->
-                val isHighlighted = snapPreviewPosition?.let { (snapX, snapY) ->
-                    val relativeX = block.x - snapX
-                    val relativeY = block.y - snapY
-                    relativeX in 0..1 && relativeY in 0..1
-                } ?: false
+            items(
+                items = flattenedBlocks,
+                key = { block -> "block_${block.x}_${block.y}" }
+            ) { block ->
+                val isHighlighted by remember(snapPreviewPosition, block) {
+                    derivedStateOf {
+                        snapPreviewPosition?.let { (snapX, snapY) ->
+                            val relativeX = block.x - snapX
+                            val relativeY = block.y - snapY
+                            relativeX in 0..1 && relativeY in 0..1
+                        } ?: false
+                    }
+                }
 
                 BoardBlockView(
                     block = block,
@@ -237,22 +265,17 @@ fun GameBoard(
 private fun canPlaceSquareAtPosition(board: List<List<Block>>, position: Pair<Int, Int>): Boolean {
     val (startX, startY) = position
 
-    val squareShape = listOf(
-        Pair(0, 0), Pair(1, 0),
-        Pair(0, 1), Pair(1, 1)
-    )
+    if (startX < 0 || startX > 6 || startY < 0 || startY > 6) {
+        return false
+    }
 
-    for (block in squareShape) {
-        val (dx, dy) = block
-        val x = startX + dx
-        val y = startY + dy
-
-        if (x < 0 || x >= 8 || y < 0 || y >= 8) {
-            return false
-        }
-
-        if (board[y][x].color != null) {
-            return false
+    for (dy in 0..1) {
+        for (dx in 0..1) {
+            val x = startX + dx
+            val y = startY + dy
+            if (board[y][x].color != null) {
+                return false
+            }
         }
     }
     return true
@@ -266,31 +289,39 @@ fun BoardBlockView(
 ) {
     val blockColor = block.color?.colorValue ?: Color.White
 
-    val backgroundColor = when {
-        !isHighlighted -> blockColor
-        isValidPosition && block.color == null -> Color(0x802196F3)
-        isValidPosition && block.color != null -> {
-            Color(
-                red = (0x21 * 0.3 + blockColor.red * 255 * 0.7).toInt() / 255f,
-                green = (0x96 * 0.3 + blockColor.green * 255 * 0.7).toInt() / 255f,
-                blue = (0xF3 * 0.3 + blockColor.blue * 255 * 0.7).toInt() / 255f,
-                alpha = 1f
-            )
-        }
-        else -> {
-            Color(
-                red = (0xFF * 0.3 + blockColor.red * 255 * 0.7).toInt() / 255f,
-                green = (0x44 * 0.3 + blockColor.green * 255 * 0.7).toInt() / 255f,
-                blue = (0x44 * 0.3 + blockColor.blue * 255 * 0.7).toInt() / 255f,
-                alpha = 1f
-            )
+    val backgroundColor by remember(blockColor, isHighlighted, isValidPosition) {
+        derivedStateOf {
+            when {
+                !isHighlighted -> blockColor
+                isValidPosition && block.color == null -> Color(0x802196F3)
+                isValidPosition && block.color != null -> {
+                    Color(
+                        red = (0x21 * 0.3 + blockColor.red * 255 * 0.7).toInt() / 255f,
+                        green = (0x96 * 0.3 + blockColor.green * 255 * 0.7).toInt() / 255f,
+                        blue = (0xF3 * 0.3 + blockColor.blue * 255 * 0.7).toInt() / 255f,
+                        alpha = 1f
+                    )
+                }
+                else -> {
+                    Color(
+                        red = (0xFF * 0.3 + blockColor.red * 255 * 0.7).toInt() / 255f,
+                        green = (0x44 * 0.3 + blockColor.green * 255 * 0.7).toInt() / 255f,
+                        blue = (0x44 * 0.3 + blockColor.blue * 255 * 0.7).toInt() / 255f,
+                        alpha = 1f
+                    )
+                }
+            }
         }
     }
 
-    val borderColor = when {
-        !isHighlighted -> Color.Gray
-        isValidPosition -> Color(0xFF2196F3)
-        else -> Color(0xFFFF4444)
+    val borderColor by remember(isHighlighted, isValidPosition) {
+        derivedStateOf {
+            when {
+                !isHighlighted -> Color.Gray
+                isValidPosition -> Color(0xFF2196F3)
+                else -> Color(0xFFFF4444)
+            }
+        }
     }
 
     val borderWidth = if (isHighlighted) 2.dp else 1.dp
