@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                 val userRepository = remember { UserRepository(context) }
 
                 LaunchedEffect(Unit) {
-                    kotlinx.coroutines.delay(2000)
+                    kotlinx.coroutines.delay(5000)
                     showSplash = false
 
                     val currentUser = userRepository.getCurrentUser()
