@@ -24,9 +24,8 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val userRepository = remember { UserRepository(context) }
 
-                // Проверяем, авторизован ли пользователь
                 LaunchedEffect(Unit) {
-                    kotlinx.coroutines.delay(2000) // Сплишскрин 2 секунды
+                    kotlinx.coroutines.delay(2000)
                     showSplash = false
 
                     val currentUser = userRepository.getCurrentUser()
