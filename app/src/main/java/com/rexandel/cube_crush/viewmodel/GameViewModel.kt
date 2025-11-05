@@ -4,17 +4,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.rexandel.cube_crush.model.Block
-import com.rexandel.cube_crush.model.BlockColor
-import com.rexandel.cube_crush.model.GameState
+import com.rexandel.cube_crush.model.*
 import kotlin.random.Random
 
 class GameViewModel : ViewModel() {
 
     private val boardWidth = 8
     private val boardHeight = 8
-    private val shapeColor = BlockColor.BLUE
-
+    private val availableShapesCount = 3
     var gameState by mutableStateOf(createNewGame())
         private set
 
@@ -26,8 +23,11 @@ class GameViewModel : ViewModel() {
         }
 
         val boardWithInitialBlocks = addInitialRandomBlocks(board)
+        val initialShapes = generateRandomShapes(availableShapesCount)
+
         return GameState(
             board = boardWithInitialBlocks,
+            availableShapes = initialShapes,
             score = 0,
             highScore = 0
         )
@@ -43,7 +43,8 @@ class GameViewModel : ViewModel() {
                 val x = Random.nextInt(boardWidth)
                 val y = Random.nextInt(boardHeight)
                 if (newBoard[y][x].color == null) {
-                    newBoard[y][x] = newBoard[y][x].copy(color = shapeColor)
+                    val randomColor = BlockColor.values().random()
+                    newBoard[y][x] = newBoard[y][x].copy(color = randomColor)
                     placed = true
                 }
             }
@@ -51,34 +52,58 @@ class GameViewModel : ViewModel() {
         return newBoard
     }
 
-    private val squareShape = listOf(
-        Pair(0, 0), Pair(1, 0),
-        Pair(0, 1), Pair(1, 1)
-    )
+    private fun generateRandomShapes(count: Int): List<Shape> {
+        return List(count) {
+            createSquareShape()
+        }
+    }
 
-    fun placeSquare(position: Pair<Int, Int>): Boolean {
+    private fun createSquareShape(): Shape {
+        val color = BlockColor.values().random()
+        return Shape(
+            type = ShapeType.SQUARE,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0), Pair(1, 0),
+                Pair(0, 1), Pair(1, 1)
+            )
+        )
+    }
+
+    fun placeShape(shapeIndex: Int, position: Pair<Int, Int>): Boolean {
         val currentState = gameState
 
-        if (canPlaceSquare(position)) {
-            val newBoard = placeSquareOnBoard(position)
+        if (shapeIndex !in currentState.availableShapes.indices) {
+            return false
+        }
+
+        val shape = currentState.availableShapes[shapeIndex]
+
+        if (canPlaceShape(shape, position)) {
+            val newBoard = placeShapeOnBoard(shape, position)
             val (boardAfterLineClear, linesCleared) = checkAndClearLines(newBoard)
             val newScore = currentState.score + (linesCleared * 100)
 
+            val newShapes = currentState.availableShapes.toMutableList().apply {
+                this[shapeIndex] = createSquareShape()
+            }
+
             gameState = currentState.copy(
                 board = boardAfterLineClear,
+                availableShapes = newShapes,
                 score = newScore,
                 highScore = maxOf(currentState.highScore, newScore),
-                isGameOver = checkGameOver(boardAfterLineClear)
+                isGameOver = checkGameOver(boardAfterLineClear, newShapes)
             )
             return true
         }
         return false
     }
 
-    private fun canPlaceSquare(position: Pair<Int, Int>): Boolean {
+    private fun canPlaceShape(shape: Shape, position: Pair<Int, Int>): Boolean {
         val (startX, startY) = position
 
-        for (block in squareShape) {
+        for (block in shape.blocks) {
             val (dx, dy) = block
             val x = startX + dx
             val y = startY + dy
@@ -94,16 +119,16 @@ class GameViewModel : ViewModel() {
         return true
     }
 
-    private fun placeSquareOnBoard(position: Pair<Int, Int>): List<List<Block>> {
+    private fun placeShapeOnBoard(shape: Shape, position: Pair<Int, Int>): List<List<Block>> {
         val newBoard = gameState.board.map { it.toMutableList() }.toMutableList()
         val (startX, startY) = position
 
-        for (block in squareShape) {
+        for (block in shape.blocks) {
             val (dx, dy) = block
             val x = startX + dx
             val y = startY + dy
 
-            newBoard[y][x] = newBoard[y][x].copy(color = shapeColor)
+            newBoard[y][x] = newBoard[y][x].copy(color = shape.color)
         }
         return newBoard
     }
@@ -150,11 +175,13 @@ class GameViewModel : ViewModel() {
         return newBoard
     }
 
-    private fun checkGameOver(board: List<List<Block>>): Boolean {
-        for (y in 0 until boardHeight - 1) {
-            for (x in 0 until boardWidth - 1) {
-                if (canPlaceSquare(Pair(x, y))) {
-                    return false
+    private fun checkGameOver(board: List<List<Block>>, availableShapes: List<Shape>): Boolean {
+        for (shape in availableShapes) {
+            for (y in 0 until boardHeight - 1) {
+                for (x in 0 until boardWidth - 1) {
+                    if (canPlaceShape(shape, Pair(x, y))) {
+                        return false
+                    }
                 }
             }
         }

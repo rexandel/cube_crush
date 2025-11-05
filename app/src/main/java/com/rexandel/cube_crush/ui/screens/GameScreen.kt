@@ -3,6 +3,7 @@ package com.rexandel.cube_crush.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +19,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,8 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rexandel.cube_crush.model.Block
+import com.rexandel.cube_crush.model.BlockColor
+import com.rexandel.cube_crush.model.Shape
+import com.rexandel.cube_crush.model.ShapeType
 import com.rexandel.cube_crush.viewmodel.GameViewModel
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Composable
@@ -45,11 +47,11 @@ fun GameScreen() {
     val gameViewModel: GameViewModel = viewModel()
     val gameState = gameViewModel.gameState
 
-    var isDragging by remember { mutableStateOf(false) }
-    var dragOffset by remember { mutableStateOf(Offset.Zero) }
+    var draggingShapeIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffsets by remember { mutableStateOf(List(3) { Offset.Zero }) }
     var boardPosition by remember { mutableStateOf(Offset.Zero) }
     var boardSize by remember { mutableStateOf(0.dp) }
-    var shapeStartPosition by remember { mutableStateOf(Offset.Zero) }
+    var shapeStartPositions by remember { mutableStateOf<List<Offset>>(emptyList()) }
     var snapPreviewPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
 
     if (gameState.isGameOver) {
@@ -99,111 +101,90 @@ fun GameScreen() {
                 .background(Color.LightGray)
                 .padding(16.dp)
                 .onGloballyPositioned { coordinates ->
-                    val newPosition = coordinates.positionInRoot()
-                    val newSize = with(coordinates.size) { (width / 8).dp }
-
-                    if (boardPosition == Offset.Zero ||
-                        abs(boardPosition.x - newPosition.x) > 1f ||
-                        abs(boardPosition.y - newPosition.y) > 1f) {
-                        boardPosition = newPosition
-                    }
-                    if (boardSize != newSize) {
-                        boardSize = newSize
-                    }
+                    boardPosition = coordinates.positionInRoot()
+                    boardSize = with(coordinates.size) { (width / 8).dp }
                 }
         ) {
             GameBoard(
                 board = gameState.board,
                 snapPreviewPosition = snapPreviewPosition,
-                gameViewModel = gameViewModel,
+                draggingShape = draggingShapeIndex?.let { gameState.availableShapes.getOrNull(it) },
                 modifier = Modifier.align(Alignment.Center)
             )
         }
 
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .onGloballyPositioned { coordinates ->
-                        val newPosition = coordinates.positionInRoot()
-                        if (shapeStartPosition == Offset.Zero) {
-                            shapeStartPosition = newPosition
+            gameState.availableShapes.forEachIndexed { index, shape ->
+                DraggableShape(
+                    shape = shape,
+                    shapeIndex = index,
+                    isDragging = draggingShapeIndex == index,
+                    isActive = draggingShapeIndex == null || draggingShapeIndex == index,
+                    dragOffset = dragOffsets.getOrNull(index) ?: Offset.Zero,
+                    onDragStart = { shapeIndex ->
+                        draggingShapeIndex = shapeIndex
+                        dragOffsets = dragOffsets.mapIndexed { i, offset ->
+                            if (i == shapeIndex) Offset.Zero else offset
                         }
+                        snapPreviewPosition = null
+                    },
+                    onDrag = { shapeIndex, dragAmount ->
+                        dragOffsets = dragOffsets.mapIndexed { i, currentOffset ->
+                            if (i == shapeIndex) currentOffset + dragAmount else currentOffset
+                        }
+
+                        val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex) ?: return@DraggableShape
+                        val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
+                        val absolutePosition = shapeStartPosition + currentDragOffset
+
+                        if (boardSize.value > 0) {
+                            val boardX = ((absolutePosition.x - boardPosition.x) / boardSize.value).toInt()
+                            val boardY = ((absolutePosition.y - boardPosition.y) / boardSize.value).toInt()
+
+                            snapPreviewPosition = findSnapPosition(boardX, boardY)
+                        }
+                    },
+                    onDragEnd = { shapeIndex ->
+                        val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex)
+                        val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
+
+                        val finalPosition = if (snapPreviewPosition != null) {
+                            snapPreviewPosition
+                        } else if (boardSize.value > 0 && shapeStartPosition != null) {
+                            val absolutePosition = shapeStartPosition + currentDragOffset
+                            val boardX = ((absolutePosition.x - boardPosition.x) / boardSize.value).toInt()
+                            val boardY = ((absolutePosition.y - boardPosition.y) / boardSize.value).toInt()
+                            findSnapPosition(boardX, boardY)
+                        } else {
+                            null
+                        }
+
+                        if (finalPosition != null) {
+                            gameViewModel.placeShape(shapeIndex, finalPosition)
+                        }
+
+                        draggingShapeIndex = null
+                        dragOffsets = dragOffsets.mapIndexed { i, offset ->
+                            if (i == shapeIndex) Offset.Zero else offset
+                        }
+                        snapPreviewPosition = null
+                    },
+                    onPositioned = { position ->
+                        val newPositions = shapeStartPositions.toMutableList()
+                        if (newPositions.size <= index) {
+                            newPositions.add(index, position)
+                        } else {
+                            newPositions[index] = position
+                        }
+                        shapeStartPositions = newPositions
                     }
-            ) {
-                if (isDragging) {
-                    Box(
-                        modifier = Modifier
-                            .offset {
-                                IntOffset(dragOffset.x.roundToInt(), dragOffset.y.roundToInt())
-                            }
-                    ) {
-                        SquareShape()
-                    }
-                } else {
-                    SquareShape()
-                }
+                )
             }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(90.dp)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                isDragging = true
-                                dragOffset = Offset.Zero
-                                snapPreviewPosition = null
-                            },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                dragOffset += dragAmount
-
-                                val absoluteX = shapeStartPosition.x + dragOffset.x
-                                val absoluteY = shapeStartPosition.y + dragOffset.y
-
-                                if (boardSize.value > 0) {
-                                    val boardX = ((absoluteX - boardPosition.x) / boardSize.value).toInt()
-                                    val boardY = ((absoluteY - boardPosition.y) / boardSize.value).toInt()
-
-                                    snapPreviewPosition = findSnapPosition(boardX, boardY)
-                                }
-                            },
-                            onDragEnd = {
-                                val finalPosition = if (snapPreviewPosition != null) {
-                                    snapPreviewPosition
-                                } else if (boardSize.value > 0) {
-                                    val absoluteX = shapeStartPosition.x + dragOffset.x
-                                    val absoluteY = shapeStartPosition.y + dragOffset.y
-                                    val boardX = ((absoluteX - boardPosition.x) / boardSize.value).toInt()
-                                    val boardY = ((absoluteY - boardPosition.y) / boardSize.value).toInt()
-                                    findSnapPosition(boardX, boardY)
-                                } else {
-                                    null
-                                }
-
-                                if (finalPosition != null) {
-                                    val success = gameViewModel.placeSquare(finalPosition)
-                                    // Не нужно обрабатывать success здесь
-                                }
-
-                                isDragging = false
-                                dragOffset = Offset.Zero
-                                snapPreviewPosition = null
-                            },
-                            onDragCancel = {
-                                isDragging = false
-                                dragOffset = Offset.Zero
-                                snapPreviewPosition = null
-                            }
-                        )
-                    }
-            )
         }
     }
 }
@@ -215,20 +196,116 @@ private fun findSnapPosition(boardX: Int, boardY: Int): Pair<Int, Int>? {
 }
 
 @Composable
+fun DraggableShape(
+    shape: Shape,
+    shapeIndex: Int,
+    isDragging: Boolean,
+    isActive: Boolean,
+    dragOffset: Offset,
+    onDragStart: (Int) -> Unit,
+    onDrag: (Int, Offset) -> Unit,
+    onDragEnd: (Int) -> Unit,
+    onPositioned: (Offset) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .onGloballyPositioned { coordinates ->
+                onPositioned(coordinates.positionInRoot())
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        if (isDragging) dragOffset.x.roundToInt() else 0,
+                        if (isDragging) dragOffset.y.roundToInt() else 0
+                    )
+                }
+        ) {
+            when (shape.type) {
+                ShapeType.SQUARE -> SquareShape(shape.color)
+            }
+        }
+
+        if (isActive) {
+            Box(
+                modifier = Modifier
+                    .size(90.dp)
+                    .pointerInput(shapeIndex) {
+                        detectDragGestures(
+                            onDragStart = { offset ->
+                                onDragStart(shapeIndex)
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                onDrag(shapeIndex, dragAmount)
+                            },
+                            onDragEnd = {
+                                onDragEnd(shapeIndex)
+                            },
+                            onDragCancel = {
+                                onDragEnd(shapeIndex)
+                            }
+                        )
+                    }
+            )
+        } else {
+            Box(
+                modifier = Modifier.size(90.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun SquareShape(color: BlockColor) {
+    Column {
+        Row {
+            BlockView(color)
+            BlockView(color)
+        }
+        Row {
+            BlockView(color)
+            BlockView(color)
+        }
+    }
+}
+
+@Composable
+fun BlockView(color: BlockColor) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .padding(2.dp)
+            .background(
+                color = color.colorValue,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+            )
+    )
+}
+
+@Composable
 fun GameBoard(
     board: List<List<Block>>,
     snapPreviewPosition: Pair<Int, Int>?,
-    gameViewModel: GameViewModel,
+    draggingShape: Shape?,
     modifier: Modifier = Modifier
 ) {
     val flattenedBlocks by remember(board) {
         derivedStateOf { board.flatten() }
     }
 
-    val canPlaceHere by remember(snapPreviewPosition, board) {
+    val canPlaceHere by remember(snapPreviewPosition, board, draggingShape) {
         derivedStateOf {
             snapPreviewPosition?.let { position ->
-                canPlaceSquareAtPosition(board, position)
+                draggingShape?.let { shape ->
+                    canPlaceShapeAtPosition(board, shape, position)
+                } ?: false
             } ?: false
         }
     }
@@ -242,12 +319,14 @@ fun GameBoard(
                 items = flattenedBlocks,
                 key = { block -> "block_${block.x}_${block.y}" }
             ) { block ->
-                val isHighlighted by remember(snapPreviewPosition, block) {
+                val isHighlighted by remember(snapPreviewPosition, block, draggingShape) {
                     derivedStateOf {
                         snapPreviewPosition?.let { (snapX, snapY) ->
-                            val relativeX = block.x - snapX
-                            val relativeY = block.y - snapY
-                            relativeX in 0..1 && relativeY in 0..1
+                            draggingShape?.let { shape ->
+                                shape.blocks.any { (dx, dy) ->
+                                    block.x == snapX + dx && block.y == snapY + dy
+                                }
+                            } ?: false
                         } ?: false
                     }
                 }
@@ -262,20 +341,20 @@ fun GameBoard(
     }
 }
 
-private fun canPlaceSquareAtPosition(board: List<List<Block>>, position: Pair<Int, Int>): Boolean {
+private fun canPlaceShapeAtPosition(board: List<List<Block>>, shape: Shape, position: Pair<Int, Int>): Boolean {
     val (startX, startY) = position
 
-    if (startX < 0 || startX > 6 || startY < 0 || startY > 6) {
-        return false
-    }
+    for (block in shape.blocks) {
+        val (dx, dy) = block
+        val x = startX + dx
+        val y = startY + dy
 
-    for (dy in 0..1) {
-        for (dx in 0..1) {
-            val x = startX + dx
-            val y = startY + dy
-            if (board[y][x].color != null) {
-                return false
-            }
+        if (x < 0 || x >= 8 || y < 0 || y >= 8) {
+            return false
+        }
+
+        if (board[y][x].color != null) {
+            return false
         }
     }
     return true
@@ -337,38 +416,6 @@ fun BoardBlockView(
             .border(
                 width = borderWidth,
                 color = borderColor,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
-            )
-    )
-}
-
-@Composable
-fun SquareShape() {
-    Column {
-        Row {
-            BlockView()
-            BlockView()
-        }
-        Row {
-            BlockView()
-            BlockView()
-        }
-    }
-}
-
-@Composable
-fun BlockView() {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .padding(2.dp)
-            .background(
-                color = Color(0xFF2196F3),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
-            )
-            .border(
-                width = 1.dp,
-                color = Color.Gray,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
             )
     )
