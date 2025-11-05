@@ -12,6 +12,7 @@ class GameViewModel : ViewModel() {
     private val boardWidth = 8
     private val boardHeight = 8
     private val shapesPerMove = 3
+
     var gameState by mutableStateOf(createNewGame())
         private set
 
@@ -55,18 +56,110 @@ class GameViewModel : ViewModel() {
 
     private fun generateRandomShapes(count: Int): List<Shape> {
         return List(count) {
-            createSquareShape()
+            createRandomShape()
         }
     }
 
-    private fun createSquareShape(): Shape {
+    private fun createRandomShape(): Shape {
         val color = BlockColor.values().random()
+        val shapeType = ShapeType.values().random()
+
+        return when (shapeType) {
+            ShapeType.SQUARE -> createSquareShape(color)
+            ShapeType.LINE_1x4 -> createLine1x4Shape(color)
+            ShapeType.LINE_1x3 -> createLine1x3Shape(color)
+            ShapeType.LINE_1x2 -> createLine1x2Shape(color)
+            ShapeType.LINE_4x1 -> createLine4x1Shape(color)
+            ShapeType.LINE_3x1 -> createLine3x1Shape(color)
+            ShapeType.LINE_2x1 -> createLine2x1Shape(color)
+            ShapeType.TRIANGLE_3 -> createTriangle3Shape(color)
+        }
+    }
+
+    private fun createSquareShape(color: BlockColor): Shape {
         return Shape(
             type = ShapeType.SQUARE,
             color = color,
             blocks = listOf(
                 Pair(0, 0), Pair(1, 0),
                 Pair(0, 1), Pair(1, 1)
+            )
+        )
+    }
+
+    private fun createLine1x4Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.LINE_1x4,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0),
+                Pair(0, 1),
+                Pair(0, 2),
+                Pair(0, 3)
+            )
+        )
+    }
+
+    private fun createLine1x3Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.LINE_1x3,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0),
+                Pair(0, 1),
+                Pair(0, 2)
+            )
+        )
+    }
+
+    private fun createLine1x2Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.LINE_1x2,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0),
+                Pair(0, 1)
+            )
+        )
+    }
+
+    private fun createLine4x1Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.LINE_4x1,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0), Pair(1, 0), Pair(2, 0), Pair(3, 0)
+            )
+        )
+    }
+
+    private fun createLine3x1Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.LINE_3x1,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0), Pair(1, 0), Pair(2, 0)
+            )
+        )
+    }
+
+    private fun createLine2x1Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.LINE_2x1,
+            color = color,
+            blocks = listOf(
+                Pair(0, 0), Pair(1, 0)
+            )
+        )
+    }
+
+    private fun createTriangle3Shape(color: BlockColor): Shape {
+        return Shape(
+            type = ShapeType.TRIANGLE_3,
+            color = color,
+            blocks = listOf(
+                Pair(1, 0),  // Верхний блок
+                Pair(0, 1), Pair(1, 1)  // Нижние блоки
             )
         )
     }
@@ -79,7 +172,6 @@ class GameViewModel : ViewModel() {
         }
 
         val shape = currentState.availableShapes[shapeIndex]
-
         if (shape == null) {
             return false
         }
@@ -200,8 +292,8 @@ class GameViewModel : ViewModel() {
         for (shape in availableShapes) {
             if (shape == null) continue
 
-            for (y in 0 until boardHeight - 1) {
-                for (x in 0 until boardWidth - 1) {
+            for (y in 0 until boardHeight) {
+                for (x in 0 until boardWidth) {
                     if (canPlaceShape(shape, Pair(x, y))) {
                         return false
                     }

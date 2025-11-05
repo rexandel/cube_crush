@@ -1,5 +1,6 @@
 package com.rexandel.cube_crush.ui.screens
 
+import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -18,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -224,10 +224,10 @@ private fun findSnapPosition(
     val boardRight = boardPosition.x + 8 * boardSize
     val boardBottom = boardPosition.y + 8 * boardSize
 
-    if (absoluteX < boardPosition.x - boardSize * 2 ||
-        absoluteX > boardRight + boardSize * 2 ||
-        absoluteY < boardPosition.y - boardSize * 2 ||
-        absoluteY > boardBottom + boardSize * 2) {
+    if (absoluteX < boardPosition.x - boardSize ||
+        absoluteX > boardRight + boardSize ||
+        absoluteY < boardPosition.y - boardSize ||
+        absoluteY > boardBottom + boardSize) {
         return null
     }
 
@@ -237,8 +237,8 @@ private fun findSnapPosition(
     val relativeX = absoluteX - boardPosition.x
     val relativeY = absoluteY - boardPosition.y
 
-    val boardX = (relativeX / boardSize).toInt()
-    val boardY = (relativeY / boardSize).toInt()
+    val boardX = (relativeX / boardSize).roundToInt()
+    val boardY = (relativeY / boardSize).roundToInt()
 
     val clampedX = boardX.coerceIn(0, 8 - shapeWidth)
     val clampedY = boardY.coerceIn(0, 8 - shapeHeight)
@@ -248,9 +248,16 @@ private fun findSnapPosition(
 
 private fun calculateShapeCenterOffset(shape: Shape): Offset {
     val blocks = shape.blocks
-    val centerX = blocks.map { it.first }.average().toFloat() * 40f
-    val centerY = blocks.map { it.second }.average().toFloat() * 40f
-    return Offset(centerX, centerY)
+
+    val minX = blocks.minOf { it.first }
+    val maxX = blocks.maxOf { it.first }
+    val minY = blocks.minOf { it.second }
+    val maxY = blocks.maxOf { it.second }
+
+    val centerX = (minX + maxX) / 2f
+    val centerY = (minY + maxY) / 2f
+
+    return Offset(centerX * 40f, centerY * 40f)
 }
 
 @Composable
@@ -273,6 +280,17 @@ fun DraggableShape(
 
     val fingerOffset = remember { Offset(0f, -200f) }
 
+    val dragAreaSize by remember(shape) {
+        derivedStateOf {
+            when {
+                shape.type == ShapeType.LINE_1x4 -> 130.dp
+                shape.blocks.maxOf { it.second } >= 3 -> 110.dp
+                shape.blocks.maxOf { it.first } >= 3 -> 110.dp
+                else -> 90.dp
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .onGloballyPositioned { coordinates ->
@@ -290,13 +308,20 @@ fun DraggableShape(
         ) {
             when (shape.type) {
                 ShapeType.SQUARE -> SquareShape(shape.color)
+                ShapeType.LINE_1x4 -> Line1x4Shape(shape.color)
+                ShapeType.LINE_1x3 -> Line1x3Shape(shape.color)
+                ShapeType.LINE_1x2 -> Line1x2Shape(shape.color)
+                ShapeType.LINE_4x1 -> Line4x1Shape(shape.color)
+                ShapeType.LINE_3x1 -> Line3x1Shape(shape.color)
+                ShapeType.LINE_2x1 -> Line2x1Shape(shape.color)
+                ShapeType.TRIANGLE_3 -> Triangle3Shape(shape.color)
             }
         }
 
         if (isActive) {
             Box(
                 modifier = Modifier
-                    .size(90.dp)
+                    .size(dragAreaSize)
                     .pointerInput(shapeIndex) {
                         detectDragGestures(
                             onDragStart = { offset ->
@@ -317,8 +342,75 @@ fun DraggableShape(
             )
         } else {
             Box(
-                modifier = Modifier.size(90.dp)
+                modifier = Modifier.size(dragAreaSize)
             )
+        }
+    }
+}
+@Composable
+fun Line1x4Shape(color: BlockColor) {
+    Column {
+        BlockView(color)
+        BlockView(color)
+        BlockView(color)
+        BlockView(color)
+    }
+}
+
+@Composable
+fun Line1x3Shape(color: BlockColor) {
+    Column {
+        BlockView(color)
+        BlockView(color)
+        BlockView(color)
+    }
+}
+
+@Composable
+fun Line1x2Shape(color: BlockColor) {
+    Column {
+        BlockView(color)
+        BlockView(color)
+    }
+}
+
+@Composable
+fun Line4x1Shape(color: BlockColor) {
+    Row {
+        BlockView(color)
+        BlockView(color)
+        BlockView(color)
+        BlockView(color)
+    }
+}
+
+@Composable
+fun Line3x1Shape(color: BlockColor) {
+    Row {
+        BlockView(color)
+        BlockView(color)
+        BlockView(color)
+    }
+}
+
+@Composable
+fun Line2x1Shape(color: BlockColor) {
+    Row {
+        BlockView(color)
+        BlockView(color)
+    }
+}
+
+@Composable
+fun Triangle3Shape(color: BlockColor) {
+    Column {
+        Row {
+            Box(modifier = Modifier.size(40.dp))
+            BlockView(color)
+        }
+        Row {
+            BlockView(color)
+            BlockView(color)
         }
     }
 }
