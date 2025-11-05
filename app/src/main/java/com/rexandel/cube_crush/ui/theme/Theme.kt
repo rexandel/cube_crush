@@ -23,7 +23,7 @@ fun CubeCrushTheme(
 ) {
     MaterialTheme(
         colorScheme = LightColorScheme,
-        typography = Typography,
+        typography = CustomTypography,
         content = content
     )
 }

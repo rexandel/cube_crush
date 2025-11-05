@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,6 +92,7 @@ fun GameScreen() {
         Text(
             text = gameState.score.toString(),
             fontSize = 48.sp,
+            fontWeight = FontWeight.Black,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
