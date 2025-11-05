@@ -224,10 +224,12 @@ private fun findSnapPosition(
     val boardRight = boardPosition.x + 8 * boardSize
     val boardBottom = boardPosition.y + 8 * boardSize
 
-    if (absoluteX < boardPosition.x - boardSize ||
-        absoluteX > boardRight + boardSize ||
-        absoluteY < boardPosition.y - boardSize ||
-        absoluteY > boardBottom + boardSize) {
+    val captureMargin = boardSize * 0.5f
+
+    if (absoluteX < boardPosition.x - captureMargin ||
+        absoluteX > boardRight + captureMargin ||
+        absoluteY < boardPosition.y - captureMargin ||
+        absoluteY > boardBottom + captureMargin) {
         return null
     }
 
@@ -249,13 +251,8 @@ private fun findSnapPosition(
 private fun calculateShapeCenterOffset(shape: Shape): Offset {
     val blocks = shape.blocks
 
-    val minX = blocks.minOf { it.first }
-    val maxX = blocks.maxOf { it.first }
-    val minY = blocks.minOf { it.second }
-    val maxY = blocks.maxOf { it.second }
-
-    val centerX = (minX + maxX) / 2f
-    val centerY = (minY + maxY) / 2f
+    val centerX = blocks.map { it.first + 0.5f }.average().toFloat()
+    val centerY = blocks.map { it.second + 0.5f }.average().toFloat()
 
     return Offset(centerX * 40f, centerY * 40f)
 }
@@ -278,16 +275,21 @@ fun DraggableShape(
         }
     }
 
-    val fingerOffset = remember { Offset(0f, -200f) }
+    val fingerOffset = remember { Offset(0f, -120f) }
 
     val dragAreaSize by remember(shape) {
         derivedStateOf {
-            when {
-                shape.type == ShapeType.LINE_1x4 -> 130.dp
-                shape.blocks.maxOf { it.second } >= 3 -> 110.dp
-                shape.blocks.maxOf { it.first } >= 3 -> 110.dp
-                else -> 90.dp
+            val width = shape.blocks.maxOf { it.first } + 1
+            val height = shape.blocks.maxOf { it.second } + 1
+
+            val baseSize = 90.dp
+            val extraSize = when {
+                width >= 3 || height >= 3 -> 40.dp
+                width >= 2 || height >= 2 -> 20.dp
+                else -> 0.dp
             }
+
+            baseSize + extraSize
         }
     }
 
@@ -322,6 +324,10 @@ fun DraggableShape(
             Box(
                 modifier = Modifier
                     .size(dragAreaSize)
+                    .background(
+                        if (isDragging) Color.Transparent else Color.Transparent,
+                        androidx.compose.foundation.shape.CircleShape
+                    )
                     .pointerInput(shapeIndex) {
                         detectDragGestures(
                             onDragStart = { offset ->
