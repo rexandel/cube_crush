@@ -40,6 +40,8 @@ import com.rexandel.cube_crush.model.Block
 import com.rexandel.cube_crush.model.BlockColor
 import com.rexandel.cube_crush.model.Shape
 import com.rexandel.cube_crush.model.ShapeType
+import com.rexandel.cube_crush.ui.theme.DarkBlue
+import com.rexandel.cube_crush.ui.theme.DarkYellow
 import com.rexandel.cube_crush.viewmodel.GameViewModel
 import kotlin.math.roundToInt
 
@@ -66,7 +68,7 @@ fun GameScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(DarkBlue)
     ) {
         Row(
             modifier = Modifier
@@ -77,7 +79,8 @@ fun GameScreen() {
             Text(
                 text = "Рекорд: ${gameState.highScore}",
                 fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                color = Color.White
             )
 
             Button(
@@ -93,14 +96,15 @@ fun GameScreen() {
             text = gameState.score.toString(),
             fontSize = 48.sp,
             fontWeight = FontWeight.Black,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = Color.White
         )
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .background(Color.LightGray)
+                .background(DarkBlue)
                 .padding(16.dp)
                 .onGloballyPositioned { coordinates ->
                     boardPosition = coordinates.positionInRoot()
@@ -214,7 +218,6 @@ fun GameScreen() {
         }
     }
 }
-
 
 private fun findSnapPosition(
     absoluteX: Float,
@@ -476,7 +479,7 @@ fun GameBoard(
         }
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier){
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
             modifier = Modifier
@@ -538,23 +541,7 @@ fun BoardBlockView(
         derivedStateOf {
             when {
                 !isHighlighted -> blockColor
-                isValidPosition && block.color == null -> Color(0x802196F3)
-                isValidPosition && block.color != null -> {
-                    Color(
-                        red = (0x21 * 0.3 + blockColor.red * 255 * 0.7).toInt() / 255f,
-                        green = (0x96 * 0.3 + blockColor.green * 255 * 0.7).toInt() / 255f,
-                        blue = (0xF3 * 0.3 + blockColor.blue * 255 * 0.7).toInt() / 255f,
-                        alpha = 1f
-                    )
-                }
-                else -> {
-                    Color(
-                        red = (0xFF * 0.3 + blockColor.red * 255 * 0.7).toInt() / 255f,
-                        green = (0x44 * 0.3 + blockColor.green * 255 * 0.7).toInt() / 255f,
-                        blue = (0x44 * 0.3 + blockColor.blue * 255 * 0.7).toInt() / 255f,
-                        alpha = 1f
-                    )
-                }
+                else -> DarkYellow
             }
         }
     }
@@ -563,8 +550,7 @@ fun BoardBlockView(
         derivedStateOf {
             when {
                 !isHighlighted -> Color.Gray
-                isValidPosition -> Color(0xFF2196F3)
-                else -> Color(0xFFFF4444)
+                else -> DarkYellow
             }
         }
     }
@@ -586,7 +572,6 @@ fun BoardBlockView(
             )
     )
 }
-
 @Composable
 fun GameOverDialog(
     score: Int,

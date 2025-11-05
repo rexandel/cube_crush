@@ -1,5 +1,7 @@
 package com.rexandel.cube_crush.model
 
+import com.rexandel.cube_crush.ui.theme.Yellow
+
 data class Block(
     val x: Int,
     val y: Int,
@@ -7,7 +9,7 @@ data class Block(
 )
 
 enum class BlockColor(val colorValue: androidx.compose.ui.graphics.Color) {
-    BLUE(androidx.compose.ui.graphics.Color(0xFF2196F3))
+    YELLOW(Yellow)
 }
 
 data class Shape(
