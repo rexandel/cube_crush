@@ -142,26 +142,47 @@ fun GameScreen() {
 
                             val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex) ?: return@DraggableShape
                             val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
-                            val absolutePosition = shapeStartPosition + currentDragOffset
+                            val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
 
-                            if (boardSize.value > 0) {
-                                val boardX = ((absolutePosition.x - boardPosition.x) / boardSize.value).toInt()
-                                val boardY = ((absolutePosition.y - boardPosition.y) / boardSize.value).toInt()
+                            if (boardSize.value > 0 && currentShape != null) {
+                                val shapeCenterOffset = calculateShapeCenterOffset(currentShape)
+                                val fingerOffset = Offset(0f, -200f)
+                                val absolutePosition = shapeStartPosition + currentDragOffset
 
-                                snapPreviewPosition = findSnapPosition(boardX, boardY)
+                                val shapeCenterX = absolutePosition.x - shapeCenterOffset.x + fingerOffset.x
+                                val shapeCenterY = absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
+
+                                snapPreviewPosition = findSnapPosition(
+                                    absoluteX = shapeCenterX,
+                                    absoluteY = shapeCenterY,
+                                    boardPosition = boardPosition,
+                                    boardSize = boardSize.value,
+                                    shape = currentShape
+                                )
                             }
                         },
                         onDragEnd = { shapeIndex ->
                             val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex)
                             val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
+                            val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
 
                             val finalPosition = if (snapPreviewPosition != null) {
                                 snapPreviewPosition
-                            } else if (boardSize.value > 0 && shapeStartPosition != null) {
+                            } else if (boardSize.value > 0 && shapeStartPosition != null && currentShape != null) {
+                                val shapeCenterOffset = calculateShapeCenterOffset(currentShape)
+                                val fingerOffset = Offset(0f, -200f)
                                 val absolutePosition = shapeStartPosition + currentDragOffset
-                                val boardX = ((absolutePosition.x - boardPosition.x) / boardSize.value).toInt()
-                                val boardY = ((absolutePosition.y - boardPosition.y) / boardSize.value).toInt()
-                                findSnapPosition(boardX, boardY)
+
+                                val shapeCenterX = absolutePosition.x - shapeCenterOffset.x + fingerOffset.x
+                                val shapeCenterY = absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
+
+                                findSnapPosition(
+                                    absoluteX = shapeCenterX,
+                                    absoluteY = shapeCenterY,
+                                    boardPosition = boardPosition,
+                                    boardSize = boardSize.value,
+                                    shape = currentShape
+                                )
                             } else {
                                 null
                             }
@@ -193,10 +214,43 @@ fun GameScreen() {
 }
 
 
-private fun findSnapPosition(boardX: Int, boardY: Int): Pair<Int, Int>? {
-    val clampedX = boardX.coerceIn(0, 6)
-    val clampedY = boardY.coerceIn(0, 6)
+private fun findSnapPosition(
+    absoluteX: Float,
+    absoluteY: Float,
+    boardPosition: Offset,
+    boardSize: Float,
+    shape: Shape
+): Pair<Int, Int>? {
+    val boardRight = boardPosition.x + 8 * boardSize
+    val boardBottom = boardPosition.y + 8 * boardSize
+
+    if (absoluteX < boardPosition.x - boardSize * 2 ||
+        absoluteX > boardRight + boardSize * 2 ||
+        absoluteY < boardPosition.y - boardSize * 2 ||
+        absoluteY > boardBottom + boardSize * 2) {
+        return null
+    }
+
+    val shapeWidth = shape.blocks.maxOf { it.first } + 1
+    val shapeHeight = shape.blocks.maxOf { it.second } + 1
+
+    val relativeX = absoluteX - boardPosition.x
+    val relativeY = absoluteY - boardPosition.y
+
+    val boardX = (relativeX / boardSize).toInt()
+    val boardY = (relativeY / boardSize).toInt()
+
+    val clampedX = boardX.coerceIn(0, 8 - shapeWidth)
+    val clampedY = boardY.coerceIn(0, 8 - shapeHeight)
+
     return Pair(clampedX, clampedY)
+}
+
+private fun calculateShapeCenterOffset(shape: Shape): Offset {
+    val blocks = shape.blocks
+    val centerX = blocks.map { it.first }.average().toFloat() * 40f
+    val centerY = blocks.map { it.second }.average().toFloat() * 40f
+    return Offset(centerX, centerY)
 }
 
 @Composable
@@ -211,6 +265,14 @@ fun DraggableShape(
     onDragEnd: (Int) -> Unit,
     onPositioned: (Offset) -> Unit
 ) {
+    val shapeCenterOffset by remember(shape) {
+        derivedStateOf {
+            calculateShapeCenterOffset(shape)
+        }
+    }
+
+    val fingerOffset = remember { Offset(0f, -200f) }
+
     Box(
         modifier = Modifier
             .onGloballyPositioned { coordinates ->
@@ -221,8 +283,8 @@ fun DraggableShape(
             modifier = Modifier
                 .offset {
                     IntOffset(
-                        if (isDragging) dragOffset.x.roundToInt() else 0,
-                        if (isDragging) dragOffset.y.roundToInt() else 0
+                        if (isDragging) (dragOffset.x - shapeCenterOffset.x + fingerOffset.x).roundToInt() else 0,
+                        if (isDragging) (dragOffset.y - shapeCenterOffset.y + fingerOffset.y).roundToInt() else 0
                     )
                 }
         ) {
