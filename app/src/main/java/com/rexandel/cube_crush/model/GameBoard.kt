@@ -19,10 +19,9 @@ data class Shape(
 enum class ShapeType {
     SQUARE,
 }
-
 data class GameState(
     val board: List<List<Block>>,
-    val availableShapes: List<Shape>,
+    val availableShapes: List<Shape?>,
     val score: Int = 0,
     val highScore: Int = 0,
     val isGameOver: Boolean = false

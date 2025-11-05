@@ -11,7 +11,7 @@ class GameViewModel : ViewModel() {
 
     private val boardWidth = 8
     private val boardHeight = 8
-    private val availableShapesCount = 3
+    private val shapesPerMove = 3
     var gameState by mutableStateOf(createNewGame())
         private set
 
@@ -23,13 +23,14 @@ class GameViewModel : ViewModel() {
         }
 
         val boardWithInitialBlocks = addInitialRandomBlocks(board)
-        val initialShapes = generateRandomShapes(availableShapesCount)
+        val initialShapes = generateRandomShapes(shapesPerMove)
 
         return GameState(
             board = boardWithInitialBlocks,
             availableShapes = initialShapes,
             score = 0,
-            highScore = 0
+            highScore = 0,
+            isGameOver = false
         )
     }
 
@@ -79,14 +80,20 @@ class GameViewModel : ViewModel() {
 
         val shape = currentState.availableShapes[shapeIndex]
 
+        if (shape == null) {
+            return false
+        }
+
         if (canPlaceShape(shape, position)) {
             val newBoard = placeShapeOnBoard(shape, position)
             val (boardAfterLineClear, linesCleared) = checkAndClearLines(newBoard)
             val newScore = currentState.score + (linesCleared * 100)
 
             val newShapes = currentState.availableShapes.toMutableList().apply {
-                this[shapeIndex] = createSquareShape()
+                this[shapeIndex] = null
             }
+
+            val allShapesUsed = newShapes.all { it == null }
 
             gameState = currentState.copy(
                 board = boardAfterLineClear,
@@ -95,9 +102,23 @@ class GameViewModel : ViewModel() {
                 highScore = maxOf(currentState.highScore, newScore),
                 isGameOver = checkGameOver(boardAfterLineClear, newShapes)
             )
+
+            if (allShapesUsed) {
+                generateNewShapes()
+            }
             return true
         }
         return false
+    }
+
+    private fun generateNewShapes() {
+        val currentState = gameState
+        val newShapes = generateRandomShapes(shapesPerMove)
+
+        gameState = currentState.copy(
+            availableShapes = newShapes,
+            isGameOver = checkGameOver(currentState.board, newShapes)
+        )
     }
 
     private fun canPlaceShape(shape: Shape, position: Pair<Int, Int>): Boolean {
@@ -175,8 +196,10 @@ class GameViewModel : ViewModel() {
         return newBoard
     }
 
-    private fun checkGameOver(board: List<List<Block>>, availableShapes: List<Shape>): Boolean {
+    private fun checkGameOver(board: List<List<Block>>, availableShapes: List<Shape?>): Boolean {
         for (shape in availableShapes) {
+            if (shape == null) continue
+
             for (y in 0 until boardHeight - 1) {
                 for (x in 0 until boardWidth - 1) {
                     if (canPlaceShape(shape, Pair(x, y))) {
