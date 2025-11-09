@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -37,11 +38,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.model.Block
 import com.rexandel.cube_crush.model.BlockColor
 import com.rexandel.cube_crush.model.Shape
@@ -53,9 +57,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import com.rexandel.cube_crush.R
 
 @Composable
 fun GameScreen() {
@@ -184,100 +185,114 @@ fun GameScreen() {
             )
         }
 
-        // Suggested shapes
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .height(140.dp)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.1f))
+                .padding(vertical = 8.dp)
         ) {
-            gameState.availableShapes.forEachIndexed { index, shape ->
-                if (shape != null) {
-                    DraggableShape(
-                        shape = shape,
-                        shapeIndex = index,
-                        isDragging = draggingShapeIndex == index,
-                        isActive = draggingShapeIndex == null || draggingShapeIndex == index,
-                        dragOffset = dragOffsets.getOrNull(index) ?: Offset.Zero,
-                        onDragStart = { shapeIndex ->
-                            draggingShapeIndex = shapeIndex
-                            dragOffsets = dragOffsets.mapIndexed { i, offset ->
-                                if (i == shapeIndex) Offset.Zero else offset
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                gameState.availableShapes.forEachIndexed { index, shape ->
+                    if (shape != null) {
+                        FixedSizeDraggableShape(
+                            shape = shape,
+                            shapeIndex = index,
+                            isDragging = draggingShapeIndex == index,
+                            isActive = draggingShapeIndex == null || draggingShapeIndex == index,
+                            dragOffset = dragOffsets.getOrNull(index) ?: Offset.Zero,
+                            onDragStart = { shapeIndex ->
+                                draggingShapeIndex = shapeIndex
+                                dragOffsets = dragOffsets.mapIndexed { i, offset ->
+                                    if (i == shapeIndex) Offset.Zero else offset
+                                }
+                                snapPreviewPosition = null
+                            },
+                            onDrag = { shapeIndex, dragAmount ->
+                                dragOffsets = dragOffsets.mapIndexed { i, currentOffset ->
+                                    if (i == shapeIndex) currentOffset + dragAmount else currentOffset
+                                }
+
+                                val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex) ?: return@FixedSizeDraggableShape
+                                val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
+                                val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
+
+                                if (boardSize.value > 0 && currentShape != null) {
+                                    val shapeCenterOffset = calculateShapeCenterOffset(currentShape)
+                                    val fingerOffset = Offset(0f, -200f)
+                                    val absolutePosition = shapeStartPosition + currentDragOffset
+
+                                    val shapeCenterX = absolutePosition.x - shapeCenterOffset.x + fingerOffset.x
+                                    val shapeCenterY = absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
+
+                                    snapPreviewPosition = findSnapPosition(
+                                        absoluteX = shapeCenterX,
+                                        absoluteY = shapeCenterY,
+                                        boardPosition = boardPosition,
+                                        boardSize = boardSize.value,
+                                        shape = currentShape
+                                    )
+                                }
+                            },
+                            onDragEnd = { shapeIndex ->
+                                val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex)
+                                val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
+                                val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
+
+                                val finalPosition = if (snapPreviewPosition != null) {
+                                    snapPreviewPosition
+                                } else if (boardSize.value > 0 && shapeStartPosition != null && currentShape != null) {
+                                    val shapeCenterOffset = calculateShapeCenterOffset(currentShape)
+                                    val fingerOffset = Offset(0f, -200f)
+                                    val absolutePosition = shapeStartPosition + currentDragOffset
+
+                                    val shapeCenterX = absolutePosition.x - shapeCenterOffset.x + fingerOffset.x
+                                    val shapeCenterY = absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
+
+                                    findSnapPosition(
+                                        absoluteX = shapeCenterX,
+                                        absoluteY = shapeCenterY,
+                                        boardPosition = boardPosition,
+                                        boardSize = boardSize.value,
+                                        shape = currentShape
+                                    )
+                                } else {
+                                    null
+                                }
+
+                                if (finalPosition != null) {
+                                    gameViewModel.placeShape(shapeIndex, finalPosition)
+                                }
+
+                                draggingShapeIndex = null
+                                dragOffsets = dragOffsets.mapIndexed { i, offset ->
+                                    if (i == shapeIndex) Offset.Zero else offset
+                                }
+                                snapPreviewPosition = null
+                            },
+                            onPositioned = { position ->
+                                val newPositions = shapeStartPositions.toMutableList()
+                                if (newPositions.size <= index) {
+                                    newPositions.add(index, position)
+                                } else {
+                                    newPositions[index] = position
+                                }
+                                shapeStartPositions = newPositions
                             }
-                            snapPreviewPosition = null
-                        },
-                        onDrag = { shapeIndex, dragAmount ->
-                            dragOffsets = dragOffsets.mapIndexed { i, currentOffset ->
-                                if (i == shapeIndex) currentOffset + dragAmount else currentOffset
-                            }
-
-                            val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex) ?: return@DraggableShape
-                            val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
-                            val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
-
-                            if (boardSize.value > 0 && currentShape != null) {
-                                val shapeCenterOffset = calculateShapeCenterOffset(currentShape)
-                                val fingerOffset = Offset(0f, -200f)
-                                val absolutePosition = shapeStartPosition + currentDragOffset
-
-                                val shapeCenterX = absolutePosition.x - shapeCenterOffset.x + fingerOffset.x
-                                val shapeCenterY = absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
-
-                                snapPreviewPosition = findSnapPosition(
-                                    absoluteX = shapeCenterX,
-                                    absoluteY = shapeCenterY,
-                                    boardPosition = boardPosition,
-                                    boardSize = boardSize.value,
-                                    shape = currentShape
-                                )
-                            }
-                        },
-                        onDragEnd = { shapeIndex ->
-                            val shapeStartPosition = shapeStartPositions.getOrNull(shapeIndex)
-                            val currentDragOffset = dragOffsets.getOrNull(shapeIndex) ?: Offset.Zero
-                            val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
-
-                            val finalPosition = if (snapPreviewPosition != null) {
-                                snapPreviewPosition
-                            } else if (boardSize.value > 0 && shapeStartPosition != null && currentShape != null) {
-                                val shapeCenterOffset = calculateShapeCenterOffset(currentShape)
-                                val fingerOffset = Offset(0f, -200f)
-                                val absolutePosition = shapeStartPosition + currentDragOffset
-
-                                val shapeCenterX = absolutePosition.x - shapeCenterOffset.x + fingerOffset.x
-                                val shapeCenterY = absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
-
-                                findSnapPosition(
-                                    absoluteX = shapeCenterX,
-                                    absoluteY = shapeCenterY,
-                                    boardPosition = boardPosition,
-                                    boardSize = boardSize.value,
-                                    shape = currentShape
-                                )
-                            } else {
-                                null
-                            }
-
-                            if (finalPosition != null) {
-                                gameViewModel.placeShape(shapeIndex, finalPosition)
-                            }
-
-                            draggingShapeIndex = null
-                            dragOffsets = dragOffsets.mapIndexed { i, offset ->
-                                if (i == shapeIndex) Offset.Zero else offset
-                            }
-                            snapPreviewPosition = null
-                        },
-                        onPositioned = { position ->
-                            val newPositions = shapeStartPositions.toMutableList()
-                            if (newPositions.size <= index) {
-                                newPositions.add(index, position)
-                            } else {
-                                newPositions[index] = position
-                            }
-                            shapeStartPositions = newPositions
-                        }
-                    )
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .background(Color.Transparent)
+                        )
+                    }
                 }
             }
         }
@@ -328,7 +343,7 @@ private fun calculateShapeCenterOffset(shape: Shape): Offset {
 }
 
 @Composable
-fun DraggableShape(
+fun FixedSizeDraggableShape(
     shape: Shape,
     shapeIndex: Int,
     isDragging: Boolean,
@@ -347,30 +362,18 @@ fun DraggableShape(
 
     val fingerOffset = remember { Offset(0f, -120f) }
 
-    val dragAreaSize by remember(shape) {
-        derivedStateOf {
-            val width = shape.blocks.maxOf { it.first } + 1
-            val height = shape.blocks.maxOf { it.second } + 1
-
-            val baseSize = 90.dp
-            val extraSize = when {
-                width >= 3 || height >= 3 -> 40.dp
-                width >= 2 || height >= 2 -> 20.dp
-                else -> 0.dp
-            }
-
-            baseSize + extraSize
-        }
-    }
+    val fixedContainerSize = 100.dp
 
     Box(
         modifier = Modifier
+            .size(fixedContainerSize)
             .onGloballyPositioned { coordinates ->
                 onPositioned(coordinates.positionInRoot())
             }
     ) {
         Box(
             modifier = Modifier
+                .align(Alignment.Center)
                 .offset {
                     IntOffset(
                         if (isDragging) (dragOffset.x - shapeCenterOffset.x + fingerOffset.x).roundToInt() else 0,
@@ -393,11 +396,8 @@ fun DraggableShape(
         if (isActive) {
             Box(
                 modifier = Modifier
-                    .size(dragAreaSize)
-                    .background(
-                        if (isDragging) Color.Transparent else Color.Transparent,
-                        androidx.compose.foundation.shape.CircleShape
-                    )
+                    .size(fixedContainerSize)
+                    .background(Color.Transparent, CircleShape)
                     .pointerInput(shapeIndex) {
                         detectDragGestures(
                             onDragStart = { offset ->
@@ -415,10 +415,6 @@ fun DraggableShape(
                             }
                         )
                     }
-            )
-        } else {
-            Box(
-                modifier = Modifier.size(dragAreaSize)
             )
         }
     }
