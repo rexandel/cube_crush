@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.rexandel.cube_crush.repository.UserRepository
 import com.rexandel.cube_crush.ui.screens.GameScreen
+import com.rexandel.cube_crush.ui.screens.MenuScreen
 import com.rexandel.cube_crush.ui.screens.SplashScreen
 import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
 import com.rexandel.cube_crush.ui.screens.auth.RegisterScreen
@@ -44,7 +45,7 @@ fun AppNavigation() {
 
         val currentUser = userRepository.getCurrentUser()
         currentScreen = if (currentUser != null) {
-            AppScreen.Game
+            AppScreen.Menu
         } else {
             AppScreen.Login
         }
@@ -56,14 +57,22 @@ fun AppNavigation() {
         when (currentScreen) {
             AppScreen.Splash -> SplashScreen()
             AppScreen.Login -> LoginScreen(
-                onLoginSuccess = { currentScreen = AppScreen.Game },
+                onLoginSuccess = { currentScreen = AppScreen.Menu },
                 onNavigateToRegister = { currentScreen = AppScreen.Register }
             )
             AppScreen.Register -> RegisterScreen(
-                onRegisterSuccess = { currentScreen = AppScreen.Game },
+                onRegisterSuccess = { currentScreen = AppScreen.Menu },
                 onBackToLogin = { currentScreen = AppScreen.Login }
             )
-            AppScreen.Game -> GameScreen()
+            AppScreen.Menu -> MenuScreen(
+                onStartGame = { currentScreen = AppScreen.Game },
+                onExit = {
+                    (context as? android.app.Activity)?.finish()
+                }
+            )
+            AppScreen.Game -> GameScreen(
+                onExitToMenu = { currentScreen = AppScreen.Menu }
+            )
         }
     }
 }
@@ -72,5 +81,6 @@ sealed class AppScreen {
     object Splash : AppScreen()
     object Login : AppScreen()
     object Register : AppScreen()
+    object Menu : AppScreen()
     object Game : AppScreen()
 }

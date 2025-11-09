@@ -61,7 +61,9 @@ import com.rexandel.cube_crush.ui.components.GameOverDialog
 import com.rexandel.cube_crush.ui.components.PauseDialog
 
 @Composable
-fun GameScreen() {
+fun GameScreen(
+    onExitToMenu: () -> Unit
+) {
     val context = LocalContext.current
     val gameViewModel: GameViewModel = viewModel(factory = GameViewModelFactory(context))
     val gameState = gameViewModel.gameState
@@ -91,7 +93,7 @@ fun GameScreen() {
             },
             onExit = {
                 isPaused = false
-                // TODO: реализовать навигацию назад
+                onExitToMenu()
             }
         )
     }
