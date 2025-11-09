@@ -27,7 +27,7 @@ class GameViewModel(private val context: Context) : ViewModel() {
         }
 
         val boardWithInitialBlocks = addInitialRandomBlocks(board)
-        val initialShapes = generateRandomShapes(shapesPerMove)
+        val initialShapes = generateUniqueRandomShapes(shapesPerMove)
 
         val savedHighScore = userRepository.getHighScore()
 
@@ -59,10 +59,18 @@ class GameViewModel(private val context: Context) : ViewModel() {
         return newBoard
     }
 
-    private fun generateRandomShapes(count: Int): List<Shape> {
-        return List(count) {
-            createRandomShape()
+    private fun generateUniqueRandomShapes(count: Int): List<Shape> {
+        val shapes = mutableListOf<Shape>()
+        val usedTypes = mutableSetOf<ShapeType>()
+
+        while (shapes.size < count) {
+            val shape = createRandomShape()
+            if (shape.type !in usedTypes) {
+                shapes.add(shape)
+                usedTypes.add(shape.type)
+            }
         }
+        return shapes
     }
 
     private fun createRandomShape(): Shape {
@@ -214,7 +222,7 @@ class GameViewModel(private val context: Context) : ViewModel() {
 
     private fun generateNewShapes() {
         val currentState = gameState
-        val newShapes = generateRandomShapes(shapesPerMove)
+        val newShapes = generateUniqueRandomShapes(shapesPerMove)
 
         val isGameOverAfterNewShapes = checkGameOver(currentState.board, newShapes)
 
