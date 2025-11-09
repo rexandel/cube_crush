@@ -1,5 +1,6 @@
 package com.rexandel.cube_crush.ui.screens
 
+import GameOverDialog
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.animation.core.animateFloatAsState
@@ -23,8 +24,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -75,46 +74,10 @@ fun GameScreen() {
     var snapPreviewPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
 
     if (gameState.isGameOver) {
-        AlertDialog(
-            onDismissRequest = { },
-            title = {
-                Text(
-                    "Игра окончена!",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        "Ваш счет: ${gameState.score}",
-                        fontSize = 18.sp,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        "Рекорд: ${gameState.highScore}",
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { gameViewModel.restartGame() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(
-                        "Новая игра",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
+        GameOverDialog(
+            score = gameState.score,
+            highScore = gameState.highScore,
+            onRestart = { gameViewModel.restartGame() }
         )
     }
 
