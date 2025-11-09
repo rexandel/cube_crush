@@ -48,17 +48,21 @@ import com.rexandel.cube_crush.model.ShapeType
 import com.rexandel.cube_crush.ui.theme.DarkBlue
 import com.rexandel.cube_crush.ui.theme.DarkYellow
 import com.rexandel.cube_crush.viewmodel.GameViewModel
+import com.rexandel.cube_crush.viewmodel.GameViewModelFactory
 import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.ui.theme.Yellow
 
 @Composable
 fun GameScreen() {
-    val gameViewModel: GameViewModel = viewModel()
+    val context = LocalContext.current
+    val gameViewModel: GameViewModel = viewModel(factory = GameViewModelFactory(context))
     val gameState = gameViewModel.gameState
 
     var draggingShapeIndex by remember { mutableStateOf<Int?>(null) }
@@ -69,10 +73,42 @@ fun GameScreen() {
     var snapPreviewPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
 
     if (gameState.isGameOver) {
-        GameOverDialog(
-            score = gameState.score,
-            highScore = gameState.highScore,
-            onRestart = { gameViewModel.restartGame() }
+        AlertDialog(
+            onDismissRequest = { },
+            title = {
+                Text(
+                    "Игра окончена!",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        "Ваш счет: ${gameState.score}",
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        "Рекорд: ${gameState.highScore}",
+                        fontSize = 18.sp
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { gameViewModel.restartGame() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Yellow
+                    )
+                ) {
+                    Text(
+                        "Новая игра",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         )
     }
 

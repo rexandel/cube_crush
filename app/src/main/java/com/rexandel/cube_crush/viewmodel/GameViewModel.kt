@@ -1,14 +1,17 @@
 package com.rexandel.cube_crush.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.rexandel.cube_crush.model.*
+import com.rexandel.cube_crush.repository.UserRepository
 import kotlin.random.Random
 
-class GameViewModel : ViewModel() {
+class GameViewModel(private val context: Context) : ViewModel() {
 
+    private val userRepository = UserRepository(context)
     private val boardWidth = 8
     private val boardHeight = 8
     private val shapesPerMove = 3
@@ -26,11 +29,13 @@ class GameViewModel : ViewModel() {
         val boardWithInitialBlocks = addInitialRandomBlocks(board)
         val initialShapes = generateRandomShapes(shapesPerMove)
 
+        val savedHighScore = userRepository.getHighScore()
+
         return GameState(
             board = boardWithInitialBlocks,
             availableShapes = initialShapes,
             score = 0,
-            highScore = 0,
+            highScore = savedHighScore,
             isGameOver = false
         )
     }
@@ -158,8 +163,8 @@ class GameViewModel : ViewModel() {
             type = ShapeType.TRIANGLE_3,
             color = color,
             blocks = listOf(
-                Pair(1, 0),  // Верхний блок
-                Pair(0, 1), Pair(1, 1)  // Нижние блоки
+                Pair(1, 0),
+                Pair(0, 1), Pair(1, 1)
             )
         )
     }
@@ -187,13 +192,15 @@ class GameViewModel : ViewModel() {
 
             val allShapesUsed = newShapes.all { it == null }
 
+            val newHighScore = userRepository.updateHighScore(newScore)
+
             val isGameOverAfterMove = checkGameOver(boardAfterLineClear, newShapes)
 
             gameState = currentState.copy(
                 board = boardAfterLineClear,
                 availableShapes = newShapes,
                 score = newScore,
-                highScore = maxOf(currentState.highScore, newScore),
+                highScore = newHighScore,
                 isGameOver = isGameOverAfterMove
             )
 
