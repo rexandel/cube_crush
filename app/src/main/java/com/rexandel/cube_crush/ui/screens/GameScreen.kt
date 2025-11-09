@@ -3,6 +3,7 @@ package com.rexandel.cube_crush.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,6 +58,7 @@ import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.LaunchedEffect
 import com.rexandel.cube_crush.ui.components.GameOverDialog
 import com.rexandel.cube_crush.ui.components.PauseDialog
 
@@ -75,6 +77,21 @@ fun GameScreen(
     var boardSize by remember { mutableStateOf(0.dp) }
     var shapeStartPositions by remember { mutableStateOf<List<Offset>>(emptyList()) }
     var snapPreviewPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+
+    var animatedScore by remember { mutableStateOf(gameState.score) }
+    val animatedScoreState = animateIntAsState(
+        targetValue = animatedScore,
+        animationSpec = tween(durationMillis = 1000),
+        label = "score_animation"
+    )
+
+    LaunchedEffect(gameState.score) {
+        if (gameState.score > animatedScore) {
+            animatedScore = gameState.score
+        } else {
+            animatedScore = gameState.score
+        }
+    }
 
     if (gameState.isGameOver) {
         GameOverDialog(
@@ -142,7 +159,7 @@ fun GameScreen(
         }
 
         Text(
-            text = gameState.score.toString(),
+            text = animatedScoreState.value.toString(),
             fontSize = 48.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -409,16 +426,6 @@ fun FixedSizeDraggableShape(
 @Composable
 fun Line1x2Shape(color: BlockColor) {
     Column {
-        BlockView(color)
-        BlockView(color)
-    }
-}
-
-@Composable
-fun Line4x1Shape(color: BlockColor) {
-    Row {
-        BlockView(color)
-        BlockView(color)
         BlockView(color)
         BlockView(color)
     }
