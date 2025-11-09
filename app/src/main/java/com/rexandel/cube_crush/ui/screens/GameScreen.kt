@@ -51,11 +51,9 @@ import com.rexandel.cube_crush.viewmodel.GameViewModel
 import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
 import com.rexandel.cube_crush.R
-import com.rexandel.cube_crush.ui.theme.Brown
 import com.rexandel.cube_crush.ui.theme.Yellow
 
 @Composable

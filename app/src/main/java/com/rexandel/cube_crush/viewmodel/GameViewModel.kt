@@ -187,15 +187,17 @@ class GameViewModel : ViewModel() {
 
             val allShapesUsed = newShapes.all { it == null }
 
+            val isGameOverAfterMove = checkGameOver(boardAfterLineClear, newShapes)
+
             gameState = currentState.copy(
                 board = boardAfterLineClear,
                 availableShapes = newShapes,
                 score = newScore,
                 highScore = maxOf(currentState.highScore, newScore),
-                isGameOver = checkGameOver(boardAfterLineClear, newShapes)
+                isGameOver = isGameOverAfterMove
             )
 
-            if (allShapesUsed) {
+            if (allShapesUsed && !isGameOverAfterMove) {
                 generateNewShapes()
             }
             return true
@@ -207,9 +209,11 @@ class GameViewModel : ViewModel() {
         val currentState = gameState
         val newShapes = generateRandomShapes(shapesPerMove)
 
+        val isGameOverAfterNewShapes = checkGameOver(currentState.board, newShapes)
+
         gameState = currentState.copy(
             availableShapes = newShapes,
-            isGameOver = checkGameOver(currentState.board, newShapes)
+            isGameOver = isGameOverAfterNewShapes
         )
     }
 
@@ -289,15 +293,39 @@ class GameViewModel : ViewModel() {
     }
 
     private fun checkGameOver(board: List<List<Block>>, availableShapes: List<Shape?>): Boolean {
+        if (availableShapes.all { it == null }) {
+            return false
+        }
+
         for (shape in availableShapes) {
             if (shape == null) continue
 
             for (y in 0 until boardHeight) {
                 for (x in 0 until boardWidth) {
-                    if (canPlaceShape(shape, Pair(x, y))) {
+                    if (canPlaceShapeAtPosition(board, shape, Pair(x, y))) {
                         return false
                     }
                 }
+            }
+        }
+
+        return true
+    }
+
+    private fun canPlaceShapeAtPosition(board: List<List<Block>>, shape: Shape, position: Pair<Int, Int>): Boolean {
+        val (startX, startY) = position
+
+        for (block in shape.blocks) {
+            val (dx, dy) = block
+            val x = startX + dx
+            val y = startY + dy
+
+            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
+                return false
+            }
+
+            if (board[y][x].color != null) {
+                return false
             }
         }
         return true
