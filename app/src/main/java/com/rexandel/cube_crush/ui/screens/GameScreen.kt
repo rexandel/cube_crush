@@ -2,6 +2,8 @@ package com.rexandel.cube_crush.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -33,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -364,6 +367,12 @@ fun FixedSizeDraggableShape(
 
     val fixedContainerSize = 100.dp
 
+    val scale by animateFloatAsState(
+        targetValue = if (isDragging) 1f else 0.75f,
+        animationSpec = tween(durationMillis = 200),
+        label = "shape_scale_animation"
+    )
+
     Box(
         modifier = Modifier
             .size(fixedContainerSize)
@@ -374,6 +383,7 @@ fun FixedSizeDraggableShape(
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
+                .scale(scale)
                 .offset {
                     IntOffset(
                         if (isDragging) (dragOffset.x - shapeCenterOffset.x + fingerOffset.x).roundToInt() else 0,
