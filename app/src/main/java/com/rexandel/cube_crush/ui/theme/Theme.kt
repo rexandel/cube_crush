@@ -1,28 +1,55 @@
 package com.rexandel.cube_crush.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Yellow,
-    secondary = DarkYellow,
-    tertiary = Brown
+    primary = DarkYellow,
+    secondary = Brown,
+    tertiary = Yellow,
+    background = DarkBlue,
+    surface = DarkBlue,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = White,
+    onSurface = White,
+
+    primaryContainer = Purple,
+    secondaryContainer = Cyan,
+    error = Red
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Yellow,
-    secondary = DarkYellow,
-    tertiary = Brown
+    secondary = LightBlue,
+    tertiary = Orange,
+    background = White,
+    surface = White,
+    onPrimary = Black,
+    onSecondary = Black,
+    onBackground = Black,
+    onSurface = Black,
+
+    primaryContainer = Pink,
+    secondaryContainer = Teal,
+    error = Red
 )
 
 @Composable
 fun CubeCrushTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    val colorScheme = when {
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
     MaterialTheme(
-        colorScheme = LightColorScheme,
+        colorScheme = colorScheme,
         typography = CustomTypography,
         content = content
     )

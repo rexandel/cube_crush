@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -45,8 +46,6 @@ import com.rexandel.cube_crush.model.Block
 import com.rexandel.cube_crush.model.BlockColor
 import com.rexandel.cube_crush.model.Shape
 import com.rexandel.cube_crush.model.ShapeType
-import com.rexandel.cube_crush.ui.theme.DarkBlue
-import com.rexandel.cube_crush.ui.theme.DarkYellow
 import com.rexandel.cube_crush.viewmodel.GameViewModel
 import com.rexandel.cube_crush.viewmodel.GameViewModelFactory
 import kotlin.math.roundToInt
@@ -57,7 +56,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.rexandel.cube_crush.R
-import com.rexandel.cube_crush.ui.theme.Yellow
 
 @Composable
 fun GameScreen() {
@@ -79,7 +77,8 @@ fun GameScreen() {
                 Text(
                     "Игра окончена!",
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             },
             text = {
@@ -87,11 +86,13 @@ fun GameScreen() {
                     Text(
                         "Ваш счет: ${gameState.score}",
                         fontSize = 18.sp,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         "Рекорд: ${gameState.highScore}",
-                        fontSize = 18.sp
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             },
@@ -99,13 +100,14 @@ fun GameScreen() {
                 Button(
                     onClick = { gameViewModel.restartGame() },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Yellow
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Text(
                         "Новая игра",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -115,7 +117,7 @@ fun GameScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBlue)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Row(
             modifier = Modifier
@@ -137,7 +139,7 @@ fun GameScreen() {
                     text = "${gameState.highScore}",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -145,11 +147,12 @@ fun GameScreen() {
                 onClick = { /* TODO: Реализовать паузу */ },
                 modifier = Modifier
                     .size(32.dp)
-                    .background(Yellow, CircleShape)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Pause,
-                    contentDescription = "Пауза"
+                    contentDescription = "Пауза",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -159,14 +162,14 @@ fun GameScreen() {
             fontSize = 48.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .background(DarkBlue)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
                 .onGloballyPositioned { coordinates ->
                     boardPosition = coordinates.positionInRoot()
@@ -420,6 +423,7 @@ fun DraggableShape(
         }
     }
 }
+
 @Composable
 fun Line1x4Shape(color: BlockColor) {
     Column {
@@ -514,7 +518,7 @@ fun BlockView(color: BlockColor) {
             )
             .border(
                 width = 1.dp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
             )
     )
@@ -597,13 +601,15 @@ fun BoardBlockView(
     isHighlighted: Boolean = false,
     isValidPosition: Boolean = true
 ) {
-    val blockColor = block.color?.colorValue ?: Color.White
+    val colorScheme = MaterialTheme.colorScheme
+    val blockColor = block.color?.colorValue ?: colorScheme.surface
 
     val backgroundColor by remember(blockColor, isHighlighted, isValidPosition) {
         derivedStateOf {
             when {
                 !isHighlighted -> blockColor
-                else -> DarkYellow
+                isValidPosition -> colorScheme.tertiary.copy(alpha = 0.5f)
+                else -> colorScheme.error.copy(alpha = 0.3f)
             }
         }
     }
@@ -612,7 +618,8 @@ fun BoardBlockView(
         derivedStateOf {
             when {
                 !isHighlighted -> Color.Gray
-                else -> DarkYellow
+                isValidPosition -> colorScheme.tertiary
+                else -> colorScheme.error
             }
         }
     }
@@ -632,27 +639,5 @@ fun BoardBlockView(
                 color = borderColor,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
             )
-    )
-}
-@Composable
-fun GameOverDialog(
-    score: Int,
-    highScore: Int,
-    onRestart: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { },
-        title = { Text("Игра окончена!") },
-        text = {
-            Column {
-                Text("Ваш счет: $score")
-                Text("Рекорд: $highScore")
-            }
-        },
-        confirmButton = {
-            Button(onClick = onRestart) {
-                Text("Новая игра")
-            }
-        }
     )
 }
