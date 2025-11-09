@@ -1,6 +1,5 @@
 package com.rexandel.cube_crush.ui.screens
 
-import GameOverDialog
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.animation.core.animateFloatAsState
@@ -57,14 +56,16 @@ import com.rexandel.cube_crush.viewmodel.GameViewModelFactory
 import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
+import com.rexandel.cube_crush.ui.components.GameOverDialog
+import com.rexandel.cube_crush.ui.components.PauseDialog
 
 @Composable
 fun GameScreen() {
     val context = LocalContext.current
     val gameViewModel: GameViewModel = viewModel(factory = GameViewModelFactory(context))
     val gameState = gameViewModel.gameState
+    var isPaused by remember { mutableStateOf(false) }
 
     var draggingShapeIndex by remember { mutableStateOf<Int?>(null) }
     var dragOffsets by remember { mutableStateOf(List(3) { Offset.Zero }) }
@@ -78,6 +79,20 @@ fun GameScreen() {
             score = gameState.score,
             highScore = gameState.highScore,
             onRestart = { gameViewModel.restartGame() }
+        )
+    }
+
+    if (isPaused) {
+        PauseDialog(
+            onResume = { isPaused = false },
+            onRestart = {
+                isPaused = false
+                gameViewModel.restartGame()
+            },
+            onExit = {
+                isPaused = false
+                // TODO: реализовать навигацию назад
+            }
         )
     }
 
@@ -111,7 +126,7 @@ fun GameScreen() {
             }
 
             IconButton(
-                onClick = { /* TODO: Реализовать паузу */ },
+                onClick = { isPaused = true },
                 modifier = Modifier
                     .size(32.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)

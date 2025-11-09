@@ -1,3 +1,5 @@
+package com.rexandel.cube_crush.ui.components
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -19,7 +21,7 @@ fun GameOverDialog(
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
-        onDismissRequest = { /* Нельзя закрыть просто так */ },
+        onDismissRequest = { },
         title = {
             Text(
                 "Игра окончена!",
