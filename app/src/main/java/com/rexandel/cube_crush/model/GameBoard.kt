@@ -20,11 +20,7 @@ data class Shape(
 
 enum class ShapeType {
     SQUARE,
-    LINE_1x4,
-    LINE_1x3,
     LINE_1x2,
-    LINE_4x1,
-    LINE_3x1,
     LINE_2x1,
     TRIANGLE_3
 }

@@ -79,11 +79,7 @@ class GameViewModel(private val context: Context) : ViewModel() {
 
         return when (shapeType) {
             ShapeType.SQUARE -> createSquareShape(color)
-            ShapeType.LINE_1x4 -> createLine1x4Shape(color)
-            ShapeType.LINE_1x3 -> createLine1x3Shape(color)
             ShapeType.LINE_1x2 -> createLine1x2Shape(color)
-            ShapeType.LINE_4x1 -> createLine4x1Shape(color)
-            ShapeType.LINE_3x1 -> createLine3x1Shape(color)
             ShapeType.LINE_2x1 -> createLine2x1Shape(color)
             ShapeType.TRIANGLE_3 -> createTriangle3Shape(color)
         }
@@ -100,31 +96,6 @@ class GameViewModel(private val context: Context) : ViewModel() {
         )
     }
 
-    private fun createLine1x4Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.LINE_1x4,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0),
-                Pair(0, 1),
-                Pair(0, 2),
-                Pair(0, 3)
-            )
-        )
-    }
-
-    private fun createLine1x3Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.LINE_1x3,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0),
-                Pair(0, 1),
-                Pair(0, 2)
-            )
-        )
-    }
-
     private fun createLine1x2Shape(color: BlockColor): Shape {
         return Shape(
             type = ShapeType.LINE_1x2,
@@ -132,26 +103,6 @@ class GameViewModel(private val context: Context) : ViewModel() {
             blocks = listOf(
                 Pair(0, 0),
                 Pair(0, 1)
-            )
-        )
-    }
-
-    private fun createLine4x1Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.LINE_4x1,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0), Pair(1, 0), Pair(2, 0), Pair(3, 0)
-            )
-        )
-    }
-
-    private fun createLine3x1Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.LINE_3x1,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0), Pair(1, 0), Pair(2, 0)
             )
         )
     }

@@ -393,11 +393,7 @@ fun FixedSizeDraggableShape(
         ) {
             when (shape.type) {
                 ShapeType.SQUARE -> SquareShape(shape.color)
-                ShapeType.LINE_1x4 -> Line1x4Shape(shape.color)
-                ShapeType.LINE_1x3 -> Line1x3Shape(shape.color)
                 ShapeType.LINE_1x2 -> Line1x2Shape(shape.color)
-                ShapeType.LINE_4x1 -> Line4x1Shape(shape.color)
-                ShapeType.LINE_3x1 -> Line3x1Shape(shape.color)
                 ShapeType.LINE_2x1 -> Line2x1Shape(shape.color)
                 ShapeType.TRIANGLE_3 -> Triangle3Shape(shape.color)
             }
@@ -431,25 +427,6 @@ fun FixedSizeDraggableShape(
 }
 
 @Composable
-fun Line1x4Shape(color: BlockColor) {
-    Column {
-        BlockView(color)
-        BlockView(color)
-        BlockView(color)
-        BlockView(color)
-    }
-}
-
-@Composable
-fun Line1x3Shape(color: BlockColor) {
-    Column {
-        BlockView(color)
-        BlockView(color)
-        BlockView(color)
-    }
-}
-
-@Composable
 fun Line1x2Shape(color: BlockColor) {
     Column {
         BlockView(color)
@@ -461,15 +438,6 @@ fun Line1x2Shape(color: BlockColor) {
 fun Line4x1Shape(color: BlockColor) {
     Row {
         BlockView(color)
-        BlockView(color)
-        BlockView(color)
-        BlockView(color)
-    }
-}
-
-@Composable
-fun Line3x1Shape(color: BlockColor) {
-    Row {
         BlockView(color)
         BlockView(color)
         BlockView(color)
