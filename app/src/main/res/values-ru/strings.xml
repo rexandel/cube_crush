@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cube Crush</string>
+    <string name="high_score">%d</string>
+    <string name="pause">Пауза</string>
+    <string name="game_over">Игра окончена!</string>
+    <string name="score">%d</string>
+    <string name="restart">Заново</string>
+    <string name="exit_to_menu">Выйти в меню</string>
+    <string name="resume">Продолжить</string>
+    <string name="crown_icon">Рекорд</string>
+    <string name="pause_icon">Пауза</string>
+    <string name="game_paused">Игра приостановлена</string>
+    <string name="new_game">Новая игра</string>
+    <string name="share">Поделиться</string>
+    <string name="share_icon">Поделиться</string>
+    <string name="your_score">Ваш счет: %d</string>
+    <string name="record">Рекорд: %d</string>
+    <string name="share_text_new_record">Я установил новый рекорд в Cube Crush: %d очков! Сможешь побить?</string>
+    <string name="share_text_regular">Я набрал %d очков в Cube Crush! Мой рекорд: %d очков. Попробуй победить!</string>
+    <string name="share_dialog_title">Поделиться рекордом</string>
+    <string name="game_logo">Логотип игры</string>
+    <string name="game_description">Собери линии и побей рекорд!</string>
+    <string name="start_game">Начать игру</string>
+    <string name="exit">Выйти</string>
+    <string name="login">Вход</string>
+    <string name="register">Регистрация</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="register_button">Зарегистрироваться</string>
+    <string name="no_account">Нет аккаунта? Зарегистрируйтесь</string>
+    <string name="have_account">Уже есть аккаунт? Войдите</string>
+    <string name="fill_all_fields">Заполните все поля</string>
+    <string name="invalid_email_password">Неверный email или пароль</string>
+    <string name="password_too_short">Пароль должен быть не менее 6 символов</string>
+    <string name="passwords_dont_match">Пароли не совпадают</string>
+    <string name="user_exists">Пользователь с таким email уже существует</string>
+</resources>

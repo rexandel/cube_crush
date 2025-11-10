@@ -61,6 +61,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import com.rexandel.cube_crush.ui.components.GameOverDialog
 import com.rexandel.cube_crush.ui.components.PauseDialog
+import com.rexandel.cube_crush.ui.theme.StringResources
 
 @Composable
 fun GameScreen(
@@ -132,12 +133,12 @@ fun GameScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.crown),
-                    contentDescription = "Рекорд",
+                    contentDescription = StringResources.crownIcon,
                     modifier = Modifier.size(32.dp)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${gameState.highScore}",
+                    text = StringResources.highScore(gameState.highScore),
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.onBackground
@@ -152,14 +153,14 @@ fun GameScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Pause,
-                    contentDescription = "Пауза",
+                    contentDescription = StringResources.pauseIcon,
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
 
         Text(
-            text = animatedScoreState.value.toString(),
+            text = StringResources.score(animatedScoreState.value),
             fontSize = 48.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier.align(Alignment.CenterHorizontally),

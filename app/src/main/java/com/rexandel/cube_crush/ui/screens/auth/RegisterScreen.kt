@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.rexandel.cube_crush.repository.UserRepository
+import com.rexandel.cube_crush.ui.theme.StringResources
 
 @Composable
 fun RegisterScreen(
@@ -32,7 +33,7 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Регистрация",
+            text = StringResources.register,
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -44,7 +45,7 @@ fun RegisterScreen(
             onValueChange = { email = it },
             label = {
                 Text(
-                    "Email",
+                    StringResources.email,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -67,7 +68,7 @@ fun RegisterScreen(
             onValueChange = { password = it },
             label = {
                 Text(
-                    "Пароль",
+                    StringResources.password,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -90,7 +91,7 @@ fun RegisterScreen(
             onValueChange = { confirmPassword = it },
             label = {
                 Text(
-                    "Подтвердите пароль",
+                    StringResources.confirmPassword,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -120,18 +121,18 @@ fun RegisterScreen(
             onClick = {
                 when {
                     email.isEmpty() || password.isEmpty() ->
-                        errorMessage = "Заполните все поля"
+                        errorMessage = StringResources.fillAllFields(context)
                     password.length < 6 ->
-                        errorMessage = "Пароль должен быть не менее 6 символов"
+                        errorMessage = StringResources.passwordTooShort(context)
                     password != confirmPassword ->
-                        errorMessage = "Пароли не совпадают"
+                        errorMessage = StringResources.passwordsDontMatch(context)
                     else -> {
                         if (userRepository.registerUser(email, password)) {
                             userRepository.setCurrentUser(email)
                             errorMessage = ""
                             onRegisterSuccess()
                         } else {
-                            errorMessage = "Пользователь с таким email уже существует"
+                            errorMessage = StringResources.userExists(context)
                         }
                     }
                 }
@@ -144,7 +145,7 @@ fun RegisterScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
-            Text("Зарегистрироваться")
+            Text(StringResources.registerButton)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +156,7 @@ fun RegisterScreen(
                 contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text("Уже есть аккаунт? Войдите")
+            Text(StringResources.haveAccount)
         }
     }
 }

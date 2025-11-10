@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.rexandel.cube_crush.repository.UserRepository
+import com.rexandel.cube_crush.ui.theme.StringResources
 
 @Composable
 fun LoginScreen(
@@ -31,7 +32,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Вход",
+            text = StringResources.login,
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -43,7 +44,7 @@ fun LoginScreen(
             onValueChange = { email = it },
             label = {
                 Text(
-                    "Email",
+                    StringResources.email,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -66,7 +67,7 @@ fun LoginScreen(
             onValueChange = { password = it },
             label = {
                 Text(
-                    "Пароль",
+                    StringResources.password,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -95,14 +96,14 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isEmpty() || password.isEmpty()) {
-                    errorMessage = "Заполните все поля"
+                    errorMessage = StringResources.fillAllFields(context)
                 } else {
                     if (userRepository.loginUser(email, password)) {
                         userRepository.setCurrentUser(email)
                         errorMessage = ""
                         onLoginSuccess()
                     } else {
-                        errorMessage = "Неверный email или пароль"
+                        errorMessage = StringResources.invalidEmailPassword(context)
                     }
                 }
             },
@@ -114,7 +115,7 @@ fun LoginScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
-            Text("Войти")
+            Text(StringResources.loginButton)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -125,7 +126,7 @@ fun LoginScreen(
                 contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text("Нет аккаунта? Зарегистрируйтесь")
+            Text(StringResources.noAccount)
         }
     }
 }

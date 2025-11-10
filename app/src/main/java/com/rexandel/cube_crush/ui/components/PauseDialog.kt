@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rexandel.cube_crush.ui.theme.StringResources
 
 @Composable
 fun PauseDialog(
@@ -25,7 +26,7 @@ fun PauseDialog(
         onDismissRequest = onResume,
         title = {
             Text(
-                "Пауза",
+                StringResources.pause,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -33,7 +34,7 @@ fun PauseDialog(
         },
         text = {
             Text(
-                "Игра приостановлена",
+                StringResources.gamePaused,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -47,7 +48,7 @@ fun PauseDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "Продолжить",
+                    StringResources.resume,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onPrimary
@@ -67,7 +68,7 @@ fun PauseDialog(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        "Заново",
+                        StringResources.restart,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSecondary
@@ -82,7 +83,7 @@ fun PauseDialog(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        "Выйти",
+                        StringResources.exitToMenu,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onError

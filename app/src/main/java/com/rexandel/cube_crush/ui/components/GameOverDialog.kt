@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rexandel.cube_crush.ui.theme.StringResources
 
 @Composable
 fun GameOverDialog(
@@ -33,7 +34,7 @@ fun GameOverDialog(
         onDismissRequest = { },
         title = {
             Text(
-                "Игра окончена!",
+                StringResources.gameOver,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -42,13 +43,13 @@ fun GameOverDialog(
         text = {
             Column {
                 Text(
-                    "Ваш счет: $score",
+                    StringResources.yourScore(score),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    "Рекорд: $highScore",
+                    StringResources.record(highScore),
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -63,7 +64,7 @@ fun GameOverDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "Новая игра",
+                    StringResources.newGame,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onPrimary
@@ -82,11 +83,11 @@ fun GameOverDialog(
             ) {
                 Icon(
                     imageVector = Icons.Default.Share,
-                    contentDescription = "Поделиться",
+                    contentDescription = StringResources.shareIcon,
                     modifier = Modifier.padding(end = 8.dp)
                 )
                 Text(
-                    "Поделиться",
+                    StringResources.share,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSecondary
@@ -98,9 +99,9 @@ fun GameOverDialog(
 
 private fun shareScore(context: Context, score: Int, highScore: Int) {
     val shareText = if (score == highScore) {
-        "Я установил новый рекорд в Cube Crush: $score очков! Сможешь побить?"
+        StringResources.shareTextNewRecord(context, score)
     } else {
-        "Я набрал $score очков в Cube Crush! Мой рекорд: $highScore очков. Попробуй победить!"
+        StringResources.shareTextRegular(context, score, highScore)
     }
 
     val intent = Intent().apply {
@@ -109,6 +110,6 @@ private fun shareScore(context: Context, score: Int, highScore: Int) {
         type = "text/plain"
     }
 
-    val shareIntent = Intent.createChooser(intent, "Поделиться рекордом")
+    val shareIntent = Intent.createChooser(intent, StringResources.shareDialogTitle(context))
     context.startActivity(shareIntent)
 }
