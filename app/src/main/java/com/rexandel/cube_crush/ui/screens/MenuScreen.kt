@@ -28,6 +28,7 @@ import com.rexandel.cube_crush.ui.theme.StringResources
 @Composable
 fun MenuScreen(
     onStartGame: () -> Unit,
+    onProfile: () -> Unit,
     onExit: () -> Unit
 ) {
     Box(
@@ -48,15 +49,6 @@ fun MenuScreen(
                 modifier = Modifier.size(350.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = StringResources.gameDescription,
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                modifier = Modifier.padding(bottom = 48.dp)
-            )
-
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
@@ -73,6 +65,25 @@ fun MenuScreen(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onProfile,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Text(
+                    "Профиль",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
             }
 

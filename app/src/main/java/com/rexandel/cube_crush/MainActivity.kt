@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.rexandel.cube_crush.repository.UserRepository
 import com.rexandel.cube_crush.ui.screens.GameScreen
 import com.rexandel.cube_crush.ui.screens.MenuScreen
+import com.rexandel.cube_crush.ui.screens.ProfileScreen
 import com.rexandel.cube_crush.ui.screens.SplashScreen
 import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
 import com.rexandel.cube_crush.ui.screens.auth.RegisterScreen
@@ -66,12 +67,16 @@ fun AppNavigation() {
             )
             AppScreen.Menu -> MenuScreen(
                 onStartGame = { currentScreen = AppScreen.Game },
+                onProfile = { currentScreen = AppScreen.Profile },
                 onExit = {
                     (context as? android.app.Activity)?.finish()
                 }
             )
             AppScreen.Game -> GameScreen(
                 onExitToMenu = { currentScreen = AppScreen.Menu }
+            )
+            AppScreen.Profile -> ProfileScreen(
+                onBackToMenu = { currentScreen = AppScreen.Menu }
             )
         }
     }
@@ -83,4 +88,5 @@ sealed class AppScreen {
     object Register : AppScreen()
     object Menu : AppScreen()
     object Game : AppScreen()
+    object Profile : AppScreen()
 }
