@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import android.util.Log
 
 class GameViewModel(
     private val userRepository: UserRepository
@@ -65,7 +66,7 @@ class GameViewModel(
                 )
             }
             is com.rexandel.cube_crush.model.PlaceShapeResult.Failure -> {
-                // TODO: Добавить обработку ошибок для UI
+                Log.e("GameViewModel", "Failed to place shape: ${result.message}. Shape: $shapeIndex, Position: $position")
             }
         }
     }
