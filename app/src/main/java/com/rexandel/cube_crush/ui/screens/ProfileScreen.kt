@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,17 +38,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.rexandel.cube_crush.repository.UserRepository
 
 @Composable
 fun ProfileScreen(
-    onBackToMenu: () -> Unit
+    onBackToMenu: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val context = LocalContext.current
     val userRepository = remember { UserRepository(context) }
 
     var currentUser by remember { mutableStateOf<String?>(null) }
     var highScore by remember { mutableStateOf(0) }
+    var showChangeEmailDialog by remember { mutableStateOf(false) }
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         currentUser = userRepository.getCurrentUser()
@@ -135,7 +144,9 @@ fun ProfileScreen(
                 ) {
                     ProfileInfoItem(
                         label = "Почта",
-                        value = currentUser ?: "Не доступна"
+                        value = currentUser ?: "Не доступна",
+                        showEditIcon = true,
+                        onEditClick = { showChangeEmailDialog = true }
                     )
 
                     ProfileInfoItem(
@@ -144,27 +155,404 @@ fun ProfileScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                onClick = { showChangePasswordDialog = true }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Сменить пароль",
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Сменить пароль",
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                onClick = { showLogoutDialog = true }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Выйти",
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Выйти из аккаунта",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
+    }
+
+    if (showChangeEmailDialog) {
+        ChangeEmailDialog(
+            currentEmail = currentUser ?: "",
+            onDismiss = { showChangeEmailDialog = false },
+            onEmailChanged = { newEmail ->
+                userRepository.updateUserEmail(newEmail)
+                currentUser = newEmail
+                showChangeEmailDialog = false
+            },
+            userRepository = userRepository
+        )
+    }
+
+    if (showChangePasswordDialog) {
+        ChangePasswordDialog(
+            onDismiss = { showChangePasswordDialog = false },
+            onPasswordChanged = {
+                showChangePasswordDialog = false
+            },
+            userRepository = userRepository
+        )
+    }
+
+    if (showLogoutDialog) {
+        LogoutConfirmationDialog(
+            onDismiss = { showLogoutDialog = false },
+            onConfirm = {
+                userRepository.logout()
+                onLogout()
+            }
+        )
     }
 }
 
 @Composable
 private fun ProfileInfoItem(
     label: String,
-    value: String
+    value: String,
+    showEditIcon: Boolean = false,
+    onEditClick: (() -> Unit)? = null
 ) {
     Column {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            fontWeight = FontWeight.Medium
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (showEditIcon && onEditClick != null) {
+                IconButton(
+                    onClick = onEditClick,
+                    modifier = Modifier.size(20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Изменить",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
         Text(
             text = value,
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+private fun ChangeEmailDialog(
+    currentEmail: String,
+    onDismiss: () -> Unit,
+    onEmailChanged: (String) -> Unit,
+    userRepository: UserRepository
+) {
+    var newEmail by remember { mutableStateOf(currentEmail) }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Изменение почты",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                androidx.compose.material3.OutlinedTextField(
+                    value = newEmail,
+                    onValueChange = { newEmail = it },
+                    label = { Text("Новая почта") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                androidx.compose.material3.OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Пароль для подтверждения") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                )
+
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text("Отмена")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            if (newEmail.isEmpty() || password.isEmpty()) {
+                                errorMessage = "Заполните все поля"
+                                return@Button
+                            }
+
+                            if (!userRepository.verifyPassword(password)) {
+                                errorMessage = "Неверный пароль"
+                                return@Button
+                            }
+
+                            if (userRepository.isEmailExists(newEmail) && newEmail != currentEmail) {
+                                errorMessage = "Эта почта уже используется"
+                                return@Button
+                            }
+
+                            onEmailChanged(newEmail)
+                        }
+                    ) {
+                        Text("Сохранить")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChangePasswordDialog(
+    onDismiss: () -> Unit,
+    onPasswordChanged: () -> Unit,
+    userRepository: UserRepository
+) {
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Смена пароля",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                androidx.compose.material3.OutlinedTextField(
+                    value = currentPassword,
+                    onValueChange = { currentPassword = it },
+                    label = { Text("Текущий пароль") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                )
+
+                androidx.compose.material3.OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text("Новый пароль") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                )
+
+                androidx.compose.material3.OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text("Подтвердите новый пароль") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                )
+
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text("Отмена")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            when {
+                                currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
+                                    errorMessage = "Заполните все поля"
+                                    return@Button
+                                }
+                                !userRepository.verifyPassword(currentPassword) -> {
+                                    errorMessage = "Неверный текущий пароль"
+                                    return@Button
+                                }
+                                newPassword.length < 6 -> {
+                                    errorMessage = "Новый пароль должен содержать минимум 6 символов"
+                                    return@Button
+                                }
+                                newPassword != confirmPassword -> {
+                                    errorMessage = "Пароли не совпадают"
+                                    return@Button
+                                }
+                                else -> {
+                                    if (userRepository.updatePassword(newPassword)) {
+                                        onPasswordChanged()
+                                    } else {
+                                        errorMessage = "Ошибка при смене пароля"
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Сменить пароль")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LogoutConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Выход из аккаунта",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    text = "Вы уверены, что хотите выйти из аккаунта?",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text("Отмена")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    androidx.compose.material3.Button(
+                        onClick = onConfirm,
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Выйти")
+                    }
+                }
+            }
+        }
     }
 }

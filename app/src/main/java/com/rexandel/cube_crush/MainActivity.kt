@@ -76,7 +76,10 @@ fun AppNavigation() {
                 onExitToMenu = { currentScreen = AppScreen.Menu }
             )
             AppScreen.Profile -> ProfileScreen(
-                onBackToMenu = { currentScreen = AppScreen.Menu }
+                onBackToMenu = { currentScreen = AppScreen.Menu },
+                onLogout = {
+                    currentScreen = AppScreen.Login
+                }
             )
         }
     }

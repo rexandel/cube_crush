@@ -48,4 +48,47 @@ class UserRepository(context: Context) {
         }
         return currentHighScore
     }
+
+    fun logout() {
+        sharedPref.edit().remove("current_user").apply()
+    }
+
+    fun updateUserEmail(newEmail: String) {
+        val currentUser = getCurrentUser()
+        if (currentUser != null) {
+            val currentPassword = sharedPref.getString("password_$currentUser", "")
+
+            sharedPref.edit().apply {
+                remove("email_$currentUser")
+                remove("password_$currentUser")
+
+                putString("email_$newEmail", newEmail)
+                putString("password_$newEmail", currentPassword)
+                putString("current_user", newEmail)
+                apply()
+            }
+        }
+    }
+
+    fun verifyPassword(password: String): Boolean {
+        val currentUser = getCurrentUser()
+        if (currentUser != null) {
+            val savedPassword = sharedPref.getString("password_$currentUser", "")
+            return savedPassword == password
+        }
+        return false
+    }
+
+    fun updatePassword(newPassword: String): Boolean {
+        val currentUser = getCurrentUser()
+        if (currentUser != null) {
+            sharedPref.edit().putString("password_$currentUser", newPassword).apply()
+            return true
+        }
+        return false
+    }
+
+    fun isEmailExists(email: String): Boolean {
+        return sharedPref.getString("email_$email", null) != null
+    }
 }
