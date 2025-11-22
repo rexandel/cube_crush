@@ -1,303 +1,139 @@
 package com.rexandel.cube_crush.viewmodel
 
-import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.rexandel.cube_crush.model.*
+import androidx.lifecycle.viewModelScope
+import com.rexandel.cube_crush.model.GameModel
+import com.rexandel.cube_crush.model.GameState
+import com.rexandel.cube_crush.model.Shape
 import com.rexandel.cube_crush.repository.UserRepository
-import kotlin.random.Random
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class GameViewModel(private val context: Context) : ViewModel() {
+class GameViewModel(
+    private val userRepository: UserRepository
+) : ViewModel() {
 
-    private val userRepository = UserRepository(context)
-    private val boardWidth = 8
-    private val boardHeight = 8
-    private val shapesPerMove = 3
+    private val gameModel = GameModel()
 
-    var gameState by mutableStateOf(createNewGame())
-        private set
-
-    private fun createNewGame(): GameState {
-        val board = List(boardHeight) { y ->
-            List(boardWidth) { x ->
-                Block(x, y)
-            }
-        }
-
-        val boardWithInitialBlocks = addInitialRandomBlocks(board)
-        val initialShapes = generateUniqueRandomShapes(shapesPerMove)
-
-        val savedHighScore = userRepository.getHighScore()
-
-        return GameState(
-            board = boardWithInitialBlocks,
-            availableShapes = initialShapes,
-            score = 0,
-            highScore = savedHighScore,
-            isGameOver = false
+    private val _uiState = MutableStateFlow(
+        GameUiState(
+            gameState = gameModel.getCurrentState(),
+            dragState = DragState(),
+            uiEffects = UiEffects()
         )
+    )
+    val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
+
+    init {
+        updateHighScoreFromRepository()
     }
 
-    private fun addInitialRandomBlocks(board: List<List<Block>>): List<List<Block>> {
-        val newBoard = board.map { it.toMutableList() }.toMutableList()
-
-        val initialBlockCount = Random.nextInt(10, 16)
-        repeat(initialBlockCount) {
-            var placed = false
-            while (!placed) {
-                val x = Random.nextInt(boardWidth)
-                val y = Random.nextInt(boardHeight)
-                if (newBoard[y][x].color == null) {
-                    val randomColor = BlockColor.values().random()
-                    newBoard[y][x] = newBoard[y][x].copy(color = randomColor)
-                    placed = true
-                }
-            }
-        }
-        return newBoard
-    }
-
-    private fun generateUniqueRandomShapes(count: Int): List<Shape> {
-        val shapes = mutableListOf<Shape>()
-        val usedTypes = mutableSetOf<ShapeType>()
-
-        while (shapes.size < count) {
-            val shape = createRandomShape()
-            if (shape.type !in usedTypes) {
-                shapes.add(shape)
-                usedTypes.add(shape.type)
-            }
-        }
-        return shapes
-    }
-
-    private fun createRandomShape(): Shape {
-        val color = BlockColor.values().random()
-        val shapeType = ShapeType.values().random()
-
-        return when (shapeType) {
-            ShapeType.SQUARE -> createSquareShape(color)
-            ShapeType.LINE_1x2 -> createLine1x2Shape(color)
-            ShapeType.LINE_2x1 -> createLine2x1Shape(color)
-            ShapeType.TRIANGLE_3 -> createTriangle3Shape(color)
-        }
-    }
-
-    private fun createSquareShape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.SQUARE,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0), Pair(1, 0),
-                Pair(0, 1), Pair(1, 1)
+    fun startDrag(shapeIndex: Int) {
+        _uiState.value = _uiState.value.copy(
+            dragState = _uiState.value.dragState.copy(
+                draggingShapeIndex = shapeIndex
             )
         )
     }
 
-    private fun createLine1x2Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.LINE_1x2,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0),
-                Pair(0, 1)
+    fun updateDragPosition(snapPreviewPosition: Pair<Int, Int>?, canPlace: Boolean) {
+        _uiState.value = _uiState.value.copy(
+            dragState = _uiState.value.dragState.copy(
+                snapPreviewPosition = snapPreviewPosition,
+                canPlaceAtPreview = canPlace
             )
         )
     }
 
-    private fun createLine2x1Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.LINE_2x1,
-            color = color,
-            blocks = listOf(
-                Pair(0, 0), Pair(1, 0)
-            )
+    fun placeShape(shapeIndex: Int, position: Pair<Int, Int>) {
+        val result = gameModel.placeShape(shapeIndex, position)
+
+        when (result) {
+            is com.rexandel.cube_crush.model.PlaceShapeResult.Success -> {
+                updateUiStateFromModel()
+                updateHighScore()
+
+                _uiState.value = _uiState.value.copy(
+                    uiEffects = _uiState.value.uiEffects.copy(
+                        shouldAnimateScore = true,
+                        linesCleared = result.linesCleared
+                    )
+                )
+            }
+            is com.rexandel.cube_crush.model.PlaceShapeResult.Failure -> {
+            }
+        }
+    }
+
+    fun endDrag() {
+        _uiState.value = _uiState.value.copy(
+            dragState = DragState()
         )
     }
 
-    private fun createTriangle3Shape(color: BlockColor): Shape {
-        return Shape(
-            type = ShapeType.TRIANGLE_3,
-            color = color,
-            blocks = listOf(
-                Pair(1, 0),
-                Pair(0, 1), Pair(1, 1)
-            )
-        )
-    }
-
-    fun placeShape(shapeIndex: Int, position: Pair<Int, Int>): Boolean {
-        val currentState = gameState
-
-        if (shapeIndex !in currentState.availableShapes.indices) {
-            return false
-        }
-
-        val shape = currentState.availableShapes[shapeIndex]
-        if (shape == null) {
-            return false
-        }
-
-        if (canPlaceShape(shape, position)) {
-            val newBoard = placeShapeOnBoard(shape, position)
-            val (boardAfterLineClear, linesCleared) = checkAndClearLines(newBoard)
-            val newScore = currentState.score + (linesCleared * 100)
-
-            val newShapes = currentState.availableShapes.toMutableList().apply {
-                this[shapeIndex] = null
-            }
-
-            val allShapesUsed = newShapes.all { it == null }
-
-            val newHighScore = userRepository.updateHighScore(newScore)
-
-            val isGameOverAfterMove = checkGameOver(boardAfterLineClear, newShapes)
-
-            gameState = currentState.copy(
-                board = boardAfterLineClear,
-                availableShapes = newShapes,
-                score = newScore,
-                highScore = newHighScore,
-                isGameOver = isGameOverAfterMove
-            )
-
-            if (allShapesUsed && !isGameOverAfterMove) {
-                generateNewShapes()
-            }
-            return true
-        }
-        return false
-    }
-
-    private fun generateNewShapes() {
-        val currentState = gameState
-        val newShapes = generateUniqueRandomShapes(shapesPerMove)
-
-        val isGameOverAfterNewShapes = checkGameOver(currentState.board, newShapes)
-
-        gameState = currentState.copy(
-            availableShapes = newShapes,
-            isGameOver = isGameOverAfterNewShapes
-        )
-    }
-
-    private fun canPlaceShape(shape: Shape, position: Pair<Int, Int>): Boolean {
-        val (startX, startY) = position
-
-        for (block in shape.blocks) {
-            val (dx, dy) = block
-            val x = startX + dx
-            val y = startY + dy
-
-            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
-                return false
-            }
-
-            if (gameState.board[y][x].color != null) {
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun placeShapeOnBoard(shape: Shape, position: Pair<Int, Int>): List<List<Block>> {
-        val newBoard = gameState.board.map { it.toMutableList() }.toMutableList()
-        val (startX, startY) = position
-
-        for (block in shape.blocks) {
-            val (dx, dy) = block
-            val x = startX + dx
-            val y = startY + dy
-
-            newBoard[y][x] = newBoard[y][x].copy(color = shape.color)
-        }
-        return newBoard
-    }
-
-    private fun checkAndClearLines(board: List<List<Block>>): Pair<List<List<Block>>, Int> {
-        var linesCleared = 0
-        var newBoard = board
-
-        for (y in 0 until boardHeight) {
-            if (isLineFull(board[y])) {
-                newBoard = clearLine(newBoard, y)
-                linesCleared++
-            }
-        }
-
-        for (x in 0 until boardWidth) {
-            val column = List(boardHeight) { y -> board[y][x] }
-            if (isLineFull(column)) {
-                newBoard = clearColumn(newBoard, x)
-                linesCleared++
-            }
-        }
-
-        return Pair(newBoard, linesCleared)
-    }
-
-    private fun isLineFull(line: List<Block>): Boolean {
-        return line.all { it.color != null }
-    }
-
-    private fun clearLine(board: List<List<Block>>, lineIndex: Int): List<List<Block>> {
-        val newBoard = board.map { it.toMutableList() }.toMutableList()
-        for (x in 0 until boardWidth) {
-            newBoard[lineIndex][x] = newBoard[lineIndex][x].copy(color = null)
-        }
-        return newBoard
-    }
-
-    private fun clearColumn(board: List<List<Block>>, columnIndex: Int): List<List<Block>> {
-        val newBoard = board.map { it.toMutableList() }.toMutableList()
-        for (y in 0 until boardHeight) {
-            newBoard[y][columnIndex] = newBoard[y][columnIndex].copy(color = null)
-        }
-        return newBoard
-    }
-
-    private fun checkGameOver(board: List<List<Block>>, availableShapes: List<Shape?>): Boolean {
-        if (availableShapes.all { it == null }) {
-            return false
-        }
-
-        for (shape in availableShapes) {
-            if (shape == null) continue
-
-            for (y in 0 until boardHeight) {
-                for (x in 0 until boardWidth) {
-                    if (canPlaceShapeAtPosition(board, shape, Pair(x, y))) {
-                        return false
-                    }
-                }
-            }
-        }
-
-        return true
-    }
-
-    private fun canPlaceShapeAtPosition(board: List<List<Block>>, shape: Shape, position: Pair<Int, Int>): Boolean {
-        val (startX, startY) = position
-
-        for (block in shape.blocks) {
-            val (dx, dy) = block
-            val x = startX + dx
-            val y = startY + dy
-
-            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
-                return false
-            }
-
-            if (board[y][x].color != null) {
-                return false
-            }
-        }
-        return true
+    fun canPlaceShape(shape: Shape, position: Pair<Int, Int>): Boolean {
+        return gameModel.canPlaceShape(shape, position)
     }
 
     fun restartGame() {
-        gameState = createNewGame()
+        gameModel.restartGame()
+        updateUiStateFromModel()
+        updateHighScoreFromRepository()
+        _uiState.value = _uiState.value.copy(
+            uiEffects = UiEffects()
+        )
+    }
+
+    fun scoreAnimationCompleted() {
+        _uiState.value = _uiState.value.copy(
+            uiEffects = _uiState.value.uiEffects.copy(
+                shouldAnimateScore = false
+            )
+        )
+    }
+
+    private fun updateUiStateFromModel() {
+        _uiState.value = _uiState.value.copy(
+            gameState = gameModel.getCurrentState()
+        )
+    }
+
+    private fun updateHighScore() {
+        viewModelScope.launch {
+            val newHighScore = userRepository.updateHighScore(_uiState.value.gameState.score)
+            if (newHighScore > _uiState.value.gameState.highScore) {
+                gameModel.updateHighScore(newHighScore)
+                updateUiStateFromModel()
+            }
+        }
+    }
+
+    private fun updateHighScoreFromRepository() {
+        viewModelScope.launch {
+            val savedHighScore = userRepository.getHighScore()
+            if (savedHighScore > _uiState.value.gameState.highScore) {
+                gameModel.updateHighScore(savedHighScore)
+                updateUiStateFromModel()
+            }
+        }
     }
 }
+
+data class GameUiState(
+    val gameState: GameState,
+    val dragState: DragState,
+    val uiEffects: UiEffects
+)
+
+data class DragState(
+    val draggingShapeIndex: Int? = null,
+    val snapPreviewPosition: Pair<Int, Int>? = null,
+    val canPlaceAtPreview: Boolean = false
+)
+
+data class UiEffects(
+    val shouldAnimateScore: Boolean = false,
+    val linesCleared: Int = 0
+)
