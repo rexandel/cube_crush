@@ -2,6 +2,7 @@ package com.rexandel.cube_crush.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.rexandel.cube_crush.ui.theme.AppTheme
 
 class UserRepository(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
@@ -90,5 +91,18 @@ class UserRepository(context: Context) {
 
     fun isEmailExists(email: String): Boolean {
         return sharedPref.getString("email_$email", null) != null
+    }
+
+    fun saveTheme(theme: AppTheme) {
+        sharedPref.edit().putString("app_theme", theme.name).apply()
+    }
+
+    fun getSavedTheme(): AppTheme {
+        val themeName = sharedPref.getString("app_theme", AppTheme.SYSTEM.name)
+        return try {
+            AppTheme.valueOf(themeName ?: AppTheme.SYSTEM.name)
+        } catch (e: IllegalArgumentException) {
+            AppTheme.SYSTEM
+        }
     }
 }

@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -42,11 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.rexandel.cube_crush.repository.UserRepository
+import com.rexandel.cube_crush.ui.theme.AppTheme
+import com.rexandel.cube_crush.ui.theme.ThemeManager
 
 @Composable
 fun SettingsScreen(
     onBackToMenu: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    themeManager: ThemeManager
 ) {
     val context = LocalContext.current
     val userRepository = remember { UserRepository(context) }
@@ -327,9 +332,15 @@ fun SettingsScreen(
         ThemeSelectionDialog(
             onDismiss = { showThemeDialog = false },
             onThemeSelected = { theme ->
-                // TODO: Implement theme change logic
+                val appTheme = when (theme) {
+                    "dark" -> AppTheme.DARK
+                    "light" -> AppTheme.LIGHT
+                    else -> AppTheme.SYSTEM
+                }
+                themeManager.setTheme(appTheme)
                 showThemeDialog = false
-            }
+            },
+            currentTheme = themeManager.currentTheme
         )
     }
 
@@ -388,7 +399,8 @@ private fun SettingsInfoItem(
 @Composable
 private fun ThemeSelectionDialog(
     onDismiss: () -> Unit,
-    onThemeSelected: (String) -> Unit
+    onThemeSelected: (String) -> Unit,
+    currentTheme: AppTheme
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -411,11 +423,16 @@ private fun ThemeSelectionDialog(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
+                val isDarkSelected = currentTheme == AppTheme.DARK
+                val isLightSelected = currentTheme == AppTheme.LIGHT
+                val isSystemSelected = currentTheme == AppTheme.SYSTEM
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = if (isDarkSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.primaryContainer
                     ),
                     onClick = { onThemeSelected("dark") }
                 ) {
@@ -428,14 +445,25 @@ private fun ThemeSelectionDialog(
                         Icon(
                             imageVector = Icons.Default.DarkMode,
                             contentDescription = "Темная тема",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            tint = if (isDarkSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = "Темная тема",
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = if (isDarkSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Medium
                         )
+                        if (isDarkSelected) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Выбрано",
+                                tint = if (isDarkSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
 
@@ -443,7 +471,8 @@ private fun ThemeSelectionDialog(
                     modifier = Modifier
                         .fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = if (isLightSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondaryContainer
                     ),
                     onClick = { onThemeSelected("light") }
                 ) {
@@ -456,14 +485,65 @@ private fun ThemeSelectionDialog(
                         Icon(
                             imageVector = Icons.Default.LightMode,
                             contentDescription = "Светлая тема",
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            tint = if (isLightSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSecondaryContainer
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = "Светлая тема",
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            color = if (isLightSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSecondaryContainer,
                             fontWeight = FontWeight.Medium
                         )
+                        if (isLightSelected) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Выбрано",
+                                tint = if (isLightSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
+                }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSystemSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    onClick = { onThemeSelected("system") }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Системная тема",
+                            tint = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Системная тема",
+                            color = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (isSystemSelected) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Выбрано",
+                                tint = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 

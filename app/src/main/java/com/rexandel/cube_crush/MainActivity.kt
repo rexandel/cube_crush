@@ -14,6 +14,7 @@ import com.rexandel.cube_crush.ui.screens.SplashScreen
 import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
 import com.rexandel.cube_crush.ui.screens.auth.RegisterScreen
 import com.rexandel.cube_crush.ui.theme.CubeCrushTheme
+import com.rexandel.cube_crush.ui.theme.rememberThemeManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,11 +22,13 @@ class MainActivity : ComponentActivity() {
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
         setContent {
-            CubeCrushTheme {
+            val themeManager = rememberThemeManager()
+
+            CubeCrushTheme(appTheme = themeManager.currentTheme) {
                 androidx.compose.material3.Surface(
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    AppNavigation(themeManager)
                 }
             }
         }
@@ -33,7 +36,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(themeManager: com.rexandel.cube_crush.ui.theme.ThemeManager) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }
 
@@ -79,7 +82,8 @@ fun AppNavigation() {
                 onBackToMenu = { currentScreen = AppScreen.Menu },
                 onLogout = {
                     currentScreen = AppScreen.Login
-                }
+                },
+                themeManager = themeManager
             )
         }
     }

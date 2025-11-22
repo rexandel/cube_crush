@@ -40,9 +40,15 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun CubeCrushTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    appTheme: AppTheme = AppTheme.SYSTEM,
     content: @Composable () -> Unit
 ) {
+    val darkTheme = when (appTheme) {
+        AppTheme.LIGHT -> false
+        AppTheme.DARK -> true
+        AppTheme.SYSTEM -> isSystemInDarkTheme()
+    }
+
     val colorScheme = when {
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
