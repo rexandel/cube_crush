@@ -506,25 +506,25 @@ fun GameBoard(
     canPlaceHere: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val flattenedBlocks by remember(board) {
-        derivedStateOf { board.flatten() }
-    }
-
-    Box(modifier = modifier){
+    Box(modifier = modifier) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
             modifier = Modifier
         ) {
             items(
-                items = flattenedBlocks,
-                key = { block -> "block_${block.x}_${block.y}" }
-            ) { block ->
-                val isHighlighted by remember(snapPreviewPosition, block, draggingShape) {
+                items = List(64) { index -> index },
+                key = { index -> "cell_$index" }
+            ) { index ->
+                val x = index % 8
+                val y = index / 8
+                val block = board[y][x]
+
+                val isHighlighted by remember(snapPreviewPosition, draggingShape, x, y) {
                     derivedStateOf {
                         snapPreviewPosition?.let { (snapX, snapY) ->
                             draggingShape?.let { shape ->
                                 shape.blocks.any { (dx, dy) ->
-                                    block.x == snapX + dx && block.y == snapY + dy
+                                    x == snapX + dx && y == snapY + dy
                                 }
                             } ?: false
                         } ?: false
