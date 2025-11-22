@@ -28,7 +28,7 @@ import com.rexandel.cube_crush.ui.theme.StringResources
 @Composable
 fun MenuScreen(
     onStartGame: () -> Unit,
-    onProfile: () -> Unit,
+    onSettings: () -> Unit,
     onExit: () -> Unit
 ) {
     Box(
@@ -71,7 +71,7 @@ fun MenuScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = onProfile,
+                onClick = onSettings,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -80,7 +80,7 @@ fun MenuScreen(
                 )
             ) {
                 Text(
-                    "Профиль",
+                    "Настройки",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSecondary
