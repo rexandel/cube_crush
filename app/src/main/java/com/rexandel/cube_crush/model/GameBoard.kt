@@ -19,8 +19,22 @@ enum class BlockColor {
 data class Shape(
     val type: ShapeType,
     val color: BlockColor,
+    val matrix: List<List<Boolean>>
+) {
+    val width: Int get() = matrix.firstOrNull()?.size ?: 0
+    val height: Int get() = matrix.size
+
     val blocks: List<Pair<Int, Int>>
-)
+        get() = buildList {
+            for (y in matrix.indices) {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        add(Pair(x, y))
+                    }
+                }
+            }
+        }
+}
 
 enum class ShapeType {
     SQUARE,
@@ -108,17 +122,20 @@ class GameModel(
     internal fun canPlaceShape(shape: Shape, position: Pair<Int, Int>): Boolean {
         val (startX, startY) = position
 
-        for (block in shape.blocks) {
-            val (dx, dy) = block
-            val x = startX + dx
-            val y = startY + dy
+        for (y in 0 until shape.height) {
+            for (x in 0 until shape.width) {
+                if (shape.matrix[y][x]) {
+                    val boardX = startX + x
+                    val boardY = startY + y
 
-            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
-                return false
-            }
+                    if (boardX < 0 || boardX >= boardWidth || boardY < 0 || boardY >= boardHeight) {
+                        return false
+                    }
 
-            if (_currentState.board[y][x].color != null) {
-                return false
+                    if (_currentState.board[boardY][boardX].color != null) {
+                        return false
+                    }
+                }
             }
         }
         return true
@@ -194,45 +211,49 @@ class GameModel(
     }
 
     private fun createSquareShape(color: BlockColor): Shape {
+        val matrix = listOf(
+            listOf(true, true),
+            listOf(true, true)
+        )
         return Shape(
             type = ShapeType.SQUARE,
             color = color,
-            blocks = listOf(
-                Pair(0, 0), Pair(1, 0),
-                Pair(0, 1), Pair(1, 1)
-            )
+            matrix = matrix
         )
     }
 
     private fun createLine1x2Shape(color: BlockColor): Shape {
+        val matrix = listOf(
+            listOf(true),
+            listOf(true)
+        )
         return Shape(
             type = ShapeType.LINE_1x2,
             color = color,
-            blocks = listOf(
-                Pair(0, 0),
-                Pair(0, 1)
-            )
+            matrix = matrix
         )
     }
 
     private fun createLine2x1Shape(color: BlockColor): Shape {
+        val matrix = listOf(
+            listOf(true, true)
+        )
         return Shape(
             type = ShapeType.LINE_2x1,
             color = color,
-            blocks = listOf(
-                Pair(0, 0), Pair(1, 0)
-            )
+            matrix = matrix
         )
     }
 
     private fun createTriangle3Shape(color: BlockColor): Shape {
+        val matrix = listOf(
+            listOf(false, true),
+            listOf(true, true)
+        )
         return Shape(
             type = ShapeType.TRIANGLE_3,
             color = color,
-            blocks = listOf(
-                Pair(1, 0),
-                Pair(0, 1), Pair(1, 1)
-            )
+            matrix = matrix
         )
     }
 
@@ -240,13 +261,16 @@ class GameModel(
         val newBoard = _currentState.board.map { it.toMutableList() }.toMutableList()
         val (startX, startY) = position
 
-        for (block in shape.blocks) {
-            val (dx, dy) = block
-            val x = startX + dx
-            val y = startY + dy
+        for (y in 0 until shape.height) {
+            for (x in 0 until shape.width) {
+                if (shape.matrix[y][x]) {
+                    val boardX = startX + x
+                    val boardY = startY + y
 
-            if (x in 0 until boardWidth && y in 0 until boardHeight) {
-                newBoard[y][x] = newBoard[y][x].copy(color = shape.color)
+                    if (boardX in 0 until boardWidth && boardY in 0 until boardHeight) {
+                        newBoard[boardY][boardX] = newBoard[boardY][boardX].copy(color = shape.color)
+                    }
+                }
             }
         }
         return newBoard
@@ -315,17 +339,20 @@ class GameModel(
     private fun canPlaceShapeAtPosition(board: List<List<Block>>, shape: Shape, position: Pair<Int, Int>): Boolean {
         val (startX, startY) = position
 
-        for (block in shape.blocks) {
-            val (dx, dy) = block
-            val x = startX + dx
-            val y = startY + dy
+        for (y in 0 until shape.height) {
+            for (x in 0 until shape.width) {
+                if (shape.matrix[y][x]) {
+                    val boardX = startX + x
+                    val boardY = startY + y
 
-            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
-                return false
-            }
+                    if (boardX < 0 || boardX >= boardWidth || boardY < 0 || boardY >= boardHeight) {
+                        return false
+                    }
 
-            if (board[y][x].color != null) {
-                return false
+                    if (board[boardY][boardX].color != null) {
+                        return false
+                    }
+                }
             }
         }
         return true

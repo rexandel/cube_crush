@@ -324,8 +324,8 @@ private fun findSnapPosition(
         return null
     }
 
-    val shapeWidth = shape.blocks.maxOf { it.first } + 1
-    val shapeHeight = shape.blocks.maxOf { it.second } + 1
+    val shapeWidth = shape.width
+    val shapeHeight = shape.height
 
     val relativeX = absoluteX - boardPosition.x
     val relativeY = absoluteY - boardPosition.y
@@ -340,10 +340,25 @@ private fun findSnapPosition(
 }
 
 private fun calculateShapeCenterOffset(shape: Shape): Offset {
-    val blocks = shape.blocks
+    val matrix = shape.matrix
+    var totalX = 0f
+    var totalY = 0f
+    var blockCount = 0
 
-    val centerX = blocks.map { it.first + 0.5f }.average().toFloat()
-    val centerY = blocks.map { it.second + 0.5f }.average().toFloat()
+    for (y in matrix.indices) {
+        for (x in matrix[y].indices) {
+            if (matrix[y][x]) {
+                totalX += x + 0.5f
+                totalY += y + 0.5f
+                blockCount++
+            }
+        }
+    }
+
+    if (blockCount == 0) return Offset.Zero
+
+    val centerX = totalX / blockCount
+    val centerY = totalY / blockCount
 
     return Offset(centerX * 40f, centerY * 40f)
 }
@@ -394,10 +409,10 @@ fun FixedSizeDraggableShape(
                 }
         ) {
             when (shape.type) {
-                ShapeType.SQUARE -> SquareShape(shape.color)
-                ShapeType.LINE_1x2 -> Line1x2Shape(shape.color)
-                ShapeType.LINE_2x1 -> Line2x1Shape(shape.color)
-                ShapeType.TRIANGLE_3 -> Triangle3Shape(shape.color)
+                ShapeType.SQUARE -> SquareShape(shape.color, shape.matrix)
+                ShapeType.LINE_1x2 -> Line1x2Shape(shape.color, shape.matrix)
+                ShapeType.LINE_2x1 -> Line2x1Shape(shape.color, shape.matrix)
+                ShapeType.TRIANGLE_3 -> Triangle3Shape(shape.color, shape.matrix)
             }
         }
 
@@ -429,45 +444,69 @@ fun FixedSizeDraggableShape(
 }
 
 @Composable
-fun Line1x2Shape(color: BlockColor) {
+fun Line1x2Shape(color: BlockColor, matrix: List<List<Boolean>>) {
     Column {
-        BlockView(color)
-        BlockView(color)
-    }
-}
-
-@Composable
-fun Line2x1Shape(color: BlockColor) {
-    Row {
-        BlockView(color)
-        BlockView(color)
-    }
-}
-
-@Composable
-fun Triangle3Shape(color: BlockColor) {
-    Column {
-        Row {
-            Box(modifier = Modifier.size(40.dp))
-            BlockView(color)
-        }
-        Row {
-            BlockView(color)
-            BlockView(color)
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun SquareShape(color: BlockColor) {
+fun Line2x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
     Column {
-        Row {
-            BlockView(color)
-            BlockView(color)
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
         }
-        Row {
-            BlockView(color)
-            BlockView(color)
+    }
+}
+
+@Composable
+fun Triangle3Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SquareShape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -519,21 +558,28 @@ fun GameBoard(
                 val y = index / 8
                 val block = board[y][x]
 
-                val isHighlighted by remember(snapPreviewPosition, draggingShape, x, y) {
+                val isHighlighted by remember(snapPreviewPosition, draggingShape, x, y, canPlaceHere) {
                     derivedStateOf {
-                        snapPreviewPosition?.let { (snapX, snapY) ->
-                            draggingShape?.let { shape ->
-                                shape.blocks.any { (dx, dy) ->
-                                    x == snapX + dx && y == snapY + dy
-                                }
+                        if (!canPlaceHere) false else {
+                            snapPreviewPosition?.let { (snapX, snapY) ->
+                                draggingShape?.let { shape ->
+                                    shape.matrix.forEachIndexed { dy, row ->
+                                        row.forEachIndexed { dx, hasBlock ->
+                                            if (hasBlock && x == snapX + dx && y == snapY + dy) {
+                                                return@derivedStateOf true
+                                            }
+                                        }
+                                    }
+                                    false
+                                } ?: false
                             } ?: false
-                        } ?: false
+                        }
                     }
                 }
 
                 BoardBlockView(
                     block = block,
-                    isHighlighted = isHighlighted && canPlaceHere,
+                    isHighlighted = isHighlighted,
                     isValidPosition = canPlaceHere
                 )
             }
