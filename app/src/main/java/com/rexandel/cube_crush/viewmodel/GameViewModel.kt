@@ -33,7 +33,9 @@ class GameViewModel(
     fun startDrag(shapeIndex: Int) {
         _uiState.value = _uiState.value.copy(
             dragState = _uiState.value.dragState.copy(
-                draggingShapeIndex = shapeIndex
+                draggingShapeIndex = shapeIndex,
+                snapPreviewPosition = null,
+                canPlaceAtPreview = false
             )
         )
     }
@@ -63,6 +65,7 @@ class GameViewModel(
                 )
             }
             is com.rexandel.cube_crush.model.PlaceShapeResult.Failure -> {
+                // TODO: Добавить обработку ошибок для UI
             }
         }
     }
@@ -82,6 +85,7 @@ class GameViewModel(
         updateUiStateFromModel()
         updateHighScoreFromRepository()
         _uiState.value = _uiState.value.copy(
+            dragState = DragState(),
             uiEffects = UiEffects()
         )
     }

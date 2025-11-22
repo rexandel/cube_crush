@@ -80,6 +80,7 @@ fun GameScreen(
     var boardPosition by remember { mutableStateOf(Offset.Zero) }
     var boardSize by remember { mutableStateOf(0.dp) }
     var shapeStartPositions by remember { mutableStateOf<List<Offset>>(emptyList()) }
+
     var dragOffsets by remember { mutableStateOf(List(3) { Offset.Zero }) }
 
     var animatedScore by remember { mutableStateOf(gameState.score) }
@@ -94,7 +95,6 @@ fun GameScreen(
             animatedScore = gameState.score
             gameViewModel.scoreAnimationCompleted()
         } else if (gameState.score != animatedScore) {
-            // Плавное обновление счета при обычных изменениях
             animatedScore = gameState.score
         }
     }
