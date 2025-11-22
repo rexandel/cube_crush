@@ -104,4 +104,88 @@ object StringResources {
     fun passwordTooShort(context: Context): String = context.getString(R.string.password_too_short)
     fun passwordsDontMatch(context: Context): String = context.getString(R.string.passwords_dont_match)
     fun userExists(context: Context): String = context.getString(R.string.user_exists)
+
+    val settings: String
+        @Composable get() = stringResource(R.string.settings)
+
+    val back: String
+        @Composable get() = stringResource(R.string.back)
+
+    val profile: String
+        @Composable get() = stringResource(R.string.profile)
+
+    val notAvailable: String
+        @Composable get() = stringResource(R.string.not_available)
+
+    val theme: String
+        @Composable get() = stringResource(R.string.theme)
+
+    val changeTheme: String
+        @Composable get() = stringResource(R.string.change_theme)
+
+    val language: String
+        @Composable get() = stringResource(R.string.language)
+
+    val changeLanguage: String
+        @Composable get() = stringResource(R.string.change_language)
+
+    val changePassword: String
+        @Composable get() = stringResource(R.string.change_password)
+
+    val logout: String
+        @Composable get() = stringResource(R.string.logout)
+
+    val selectTheme: String
+        @Composable get() = stringResource(R.string.select_theme)
+
+    val darkTheme: String
+        @Composable get() = stringResource(R.string.dark_theme)
+
+    val lightTheme: String
+        @Composable get() = stringResource(R.string.light_theme)
+
+    val systemTheme: String
+        @Composable get() = stringResource(R.string.system_theme)
+
+    val selected: String
+        @Composable get() = stringResource(R.string.selected)
+
+    val cancel: String
+        @Composable get() = stringResource(R.string.cancel)
+
+    val selectLanguage: String
+        @Composable get() = stringResource(R.string.select_language)
+
+    val systemLanguage: String
+        @Composable get() = stringResource(R.string.system_language)
+
+    val edit: String
+        @Composable get() = stringResource(R.string.edit)
+
+    val changeEmail: String
+        @Composable get() = stringResource(R.string.change_email)
+
+    val newEmail: String
+        @Composable get() = stringResource(R.string.new_email)
+
+    val passwordForConfirmation: String
+        @Composable get() = stringResource(R.string.password_for_confirmation)
+
+    val save: String
+        @Composable get() = stringResource(R.string.save)
+
+    fun invalidPassword(context: Context): String = context.getString(R.string.invalid_password)
+    fun emailAlreadyUsed(context: Context): String = context.getString(R.string.email_already_used)
+    val currentPassword: String
+        @Composable get() = stringResource(R.string.current_password)
+    val newPassword: String
+        @Composable get() = stringResource(R.string.new_password)
+    val confirmNewPassword: String
+        @Composable get() = stringResource(R.string.confirm_new_password)
+    fun invalidCurrentPassword(context: Context): String = context.getString(R.string.invalid_current_password)
+    fun passwordMinLength(context: Context): String = context.getString(R.string.password_min_length)
+    fun passwordChangeError(context: Context): String = context.getString(R.string.password_change_error)
+    fun logoutConfirmation(context: Context): String = context.getString(R.string.logout_confirmation)
+    val highScoreLabel: String
+        @Composable get() = stringResource(R.string.high_score_title)
 }

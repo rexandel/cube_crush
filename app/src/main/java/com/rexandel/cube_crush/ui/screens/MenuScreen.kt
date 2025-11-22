@@ -80,7 +80,7 @@ fun MenuScreen(
                 )
             ) {
                 Text(
-                    "Настройки",
+                    StringResources.settings,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSecondary

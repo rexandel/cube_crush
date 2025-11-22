@@ -15,28 +15,82 @@ import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
 import com.rexandel.cube_crush.ui.screens.auth.RegisterScreen
 import com.rexandel.cube_crush.ui.theme.CubeCrushTheme
 import com.rexandel.cube_crush.ui.theme.rememberThemeManager
+import com.rexandel.cube_crush.ui.locale.rememberLocaleManager
+import java.util.Locale
+import android.content.res.Configuration
+import android.content.res.Resources
+import androidx.compose.ui.platform.LocalConfiguration
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
+        applySavedLocale()
+
         setContent {
             val themeManager = rememberThemeManager()
+            val localeManager = rememberLocaleManager()
 
-            CubeCrushTheme(appTheme = themeManager.currentTheme) {
-                androidx.compose.material3.Surface(
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigation(themeManager)
+            val currentLocale = localeManager.getCurrentLocale()
+            val configuration = LocalConfiguration.current
+
+            LaunchedEffect(currentLocale, configuration) {
+                updateAppLocale(localeManager)
+            }
+
+            CompositionLocalProvider(
+                LocalContext provides LocalContext.current
+            ) {
+                CubeCrushTheme(appTheme = themeManager.currentTheme) {
+                    androidx.compose.material3.Surface(
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavigation(themeManager, localeManager)
+                    }
                 }
             }
+        }
+    }
+
+    private fun applySavedLocale() {
+        val userRepository = UserRepository(this)
+        val savedLocale = userRepository.getSavedLocale()
+
+        val locale = when (savedLocale) {
+            com.rexandel.cube_crush.ui.locale.AppLocale.RUSSIAN -> Locale("ru")
+            com.rexandel.cube_crush.ui.locale.AppLocale.ENGLISH -> Locale.ENGLISH
+            else -> Locale.getDefault()
+        }
+
+        updateAppLocale(locale)
+    }
+
+    private fun updateAppLocale(localeManager: com.rexandel.cube_crush.ui.locale.LocaleManager) {
+        val locale = localeManager.getCurrentLocale()
+        updateAppLocale(locale)
+    }
+
+    private fun updateAppLocale(locale: Locale) {
+        val resources: Resources = resources
+        val configuration: Configuration = resources.configuration
+
+        if (configuration.locale != locale) {
+            configuration.setLocale(locale)
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+
+            val context = createConfigurationContext(configuration)
+            resources.updateConfiguration(configuration, resources.displayMetrics)
         }
     }
 }
 
 @Composable
-fun AppNavigation(themeManager: com.rexandel.cube_crush.ui.theme.ThemeManager) {
+fun AppNavigation(
+    themeManager: com.rexandel.cube_crush.ui.theme.ThemeManager,
+    localeManager: com.rexandel.cube_crush.ui.locale.LocaleManager
+) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }
 
@@ -83,7 +137,8 @@ fun AppNavigation(themeManager: com.rexandel.cube_crush.ui.theme.ThemeManager) {
                 onLogout = {
                     currentScreen = AppScreen.Login
                 },
-                themeManager = themeManager
+                themeManager = themeManager,
+                localeManager = localeManager
             )
         }
     }

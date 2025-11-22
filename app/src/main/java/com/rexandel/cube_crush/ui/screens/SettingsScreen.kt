@@ -23,12 +23,16 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,18 +44,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.rexandel.cube_crush.repository.UserRepository
 import com.rexandel.cube_crush.ui.theme.AppTheme
 import com.rexandel.cube_crush.ui.theme.ThemeManager
+import com.rexandel.cube_crush.ui.theme.StringResources
+import com.rexandel.cube_crush.ui.locale.LocaleManager
+import com.rexandel.cube_crush.ui.locale.AppLocale
 
 @Composable
 fun SettingsScreen(
     onBackToMenu: () -> Unit,
     onLogout: () -> Unit,
-    themeManager: ThemeManager
+    themeManager: ThemeManager,
+    localeManager: LocaleManager
 ) {
     val context = LocalContext.current
     val userRepository = remember { UserRepository(context) }
@@ -92,7 +101,7 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back to menu",
+                        contentDescription = StringResources.back,
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -100,7 +109,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Text(
-                    text = "Настройки",
+                    text = StringResources.settings,
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
@@ -129,7 +138,7 @@ fun SettingsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = "Профиль",
+                    contentDescription = StringResources.profile,
                     modifier = Modifier.size(60.dp),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -152,14 +161,14 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SettingsInfoItem(
-                        label = "Почта",
-                        value = currentUser ?: "Не доступна",
+                        label = StringResources.email,
+                        value = currentUser ?: StringResources.notAvailable,
                         showEditIcon = true,
                         onEditClick = { showChangeEmailDialog = true }
                     )
 
                     SettingsInfoItem(
-                        label = "Рекорд",
+                        label = StringResources.highScoreLabel,
                         value = highScore.toString()
                     )
                 }
@@ -185,12 +194,12 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.DarkMode,
-                        contentDescription = "Тема",
+                        contentDescription = StringResources.theme,
                         tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Смена темы",
+                        text = StringResources.changeTheme,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         fontWeight = FontWeight.Bold
                     )
@@ -217,12 +226,12 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Language,
-                        contentDescription = "Язык",
+                        contentDescription = StringResources.language,
                         tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Смена языка",
+                        text = StringResources.changeLanguage,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         fontWeight = FontWeight.Bold
                     )
@@ -249,12 +258,12 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = "Сменить пароль",
+                        contentDescription = StringResources.changePassword,
                         tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Сменить пароль",
+                        text = StringResources.changePassword,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         fontWeight = FontWeight.Bold
                     )
@@ -281,12 +290,12 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Выйти",
+                        contentDescription = StringResources.logout,
                         tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Выйти из аккаунта",
+                        text = StringResources.logout,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         fontWeight = FontWeight.Bold
                     )
@@ -348,9 +357,19 @@ fun SettingsScreen(
         LanguageSelectionDialog(
             onDismiss = { showLanguageDialog = false },
             onLanguageSelected = { language ->
-                // TODO: Implement language change logic
+                val appLocale = when (language) {
+                    "ru" -> AppLocale.RUSSIAN
+                    "en" -> AppLocale.ENGLISH
+                    else -> AppLocale.SYSTEM
+                }
+                localeManager.setLocale(appLocale)
                 showLanguageDialog = false
-            }
+
+                (context as? android.app.Activity)?.let { activity ->
+                    activity.recreate()
+                }
+            },
+            currentLocale = localeManager.currentLocale
         )
     }
 }
@@ -381,7 +400,7 @@ private fun SettingsInfoItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Изменить",
+                        contentDescription = StringResources.edit,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -418,7 +437,7 @@ private fun ThemeSelectionDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Выбор темы",
+                    text = StringResources.selectTheme,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -444,13 +463,13 @@ private fun ThemeSelectionDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.DarkMode,
-                            contentDescription = "Темная тема",
+                            contentDescription = StringResources.darkTheme,
                             tint = if (isDarkSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Темная тема",
+                            text = StringResources.darkTheme,
                             color = if (isDarkSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Medium
@@ -459,7 +478,7 @@ private fun ThemeSelectionDialog(
                             Spacer(modifier = Modifier.weight(1f))
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Выбрано",
+                                contentDescription = StringResources.selected,
                                 tint = if (isDarkSelected) MaterialTheme.colorScheme.onPrimary
                                 else MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -484,13 +503,13 @@ private fun ThemeSelectionDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.LightMode,
-                            contentDescription = "Светлая тема",
+                            contentDescription = StringResources.lightTheme,
                             tint = if (isLightSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSecondaryContainer
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Светлая тема",
+                            text = StringResources.lightTheme,
                             color = if (isLightSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSecondaryContainer,
                             fontWeight = FontWeight.Medium
@@ -499,7 +518,7 @@ private fun ThemeSelectionDialog(
                             Spacer(modifier = Modifier.weight(1f))
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Выбрано",
+                                contentDescription = StringResources.selected,
                                 tint = if (isLightSelected) MaterialTheme.colorScheme.onPrimary
                                 else MaterialTheme.colorScheme.onSecondaryContainer
                             )
@@ -524,13 +543,13 @@ private fun ThemeSelectionDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Системная тема",
+                            contentDescription = StringResources.systemTheme,
                             tint = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Системная тема",
+                            text = StringResources.systemTheme,
                             color = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Medium
@@ -539,7 +558,7 @@ private fun ThemeSelectionDialog(
                             Spacer(modifier = Modifier.weight(1f))
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Выбрано",
+                                contentDescription = StringResources.selected,
                                 tint = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
                                 else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -552,10 +571,10 @@ private fun ThemeSelectionDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = onDismiss
                     ) {
-                        Text("Отмена")
+                        Text(StringResources.cancel)
                     }
                 }
             }
@@ -566,7 +585,8 @@ private fun ThemeSelectionDialog(
 @Composable
 private fun LanguageSelectionDialog(
     onDismiss: () -> Unit,
-    onLanguageSelected: (String) -> Unit
+    onLanguageSelected: (String) -> Unit,
+    currentLocale: AppLocale
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -584,16 +604,21 @@ private fun LanguageSelectionDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Выбор языка",
+                    text = StringResources.selectLanguage,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
+                val isRussianSelected = currentLocale == AppLocale.RUSSIAN
+                val isEnglishSelected = currentLocale == AppLocale.ENGLISH
+                val isSystemSelected = currentLocale == AppLocale.SYSTEM
 
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = if (isRussianSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.primaryContainer
                     ),
                     onClick = { onLanguageSelected("ru") }
                 ) {
@@ -605,9 +630,18 @@ private fun LanguageSelectionDialog(
                     ) {
                         Text(
                             text = "Русский",
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = if (isRussianSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Medium
                         )
+                        if (isRussianSelected) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = StringResources.selected,
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 }
 
@@ -615,7 +649,8 @@ private fun LanguageSelectionDialog(
                     modifier = Modifier
                         .fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = if (isEnglishSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondaryContainer
                     ),
                     onClick = { onLanguageSelected("en") }
                 ) {
@@ -627,9 +662,50 @@ private fun LanguageSelectionDialog(
                     ) {
                         Text(
                             text = "English",
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            color = if (isEnglishSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSecondaryContainer,
                             fontWeight = FontWeight.Medium
                         )
+                        if (isEnglishSelected) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = StringResources.selected,
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSystemSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    onClick = { onLanguageSelected("system") }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = StringResources.systemLanguage,
+                            color = if (isSystemSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (isSystemSelected) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = StringResources.selected,
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 }
 
@@ -638,10 +714,10 @@ private fun LanguageSelectionDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = onDismiss
                     ) {
-                        Text("Отмена")
+                        Text(StringResources.cancel)
                     }
                 }
             }
@@ -656,6 +732,7 @@ private fun ChangeEmailDialog(
     onEmailChanged: (String) -> Unit,
     userRepository: UserRepository
 ) {
+    val context = LocalContext.current
     var newEmail by remember { mutableStateOf(currentEmail) }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -676,24 +753,24 @@ private fun ChangeEmailDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Изменение почты",
+                    text = StringResources.changeEmail,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = newEmail,
                     onValueChange = { newEmail = it },
-                    label = { Text("Новая почта") },
+                    label = { Text(StringResources.newEmail) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Пароль для подтверждения") },
+                    label = { Text(StringResources.passwordForConfirmation) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation()
                 )
 
                 if (errorMessage.isNotEmpty()) {
@@ -708,33 +785,33 @@ private fun ChangeEmailDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = onDismiss
                     ) {
-                        Text("Отмена")
+                        Text(StringResources.cancel)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    androidx.compose.material3.Button(
+                    Button(
                         onClick = {
                             if (newEmail.isEmpty() || password.isEmpty()) {
-                                errorMessage = "Заполните все поля"
+                                errorMessage = StringResources.fillAllFields(context)
                                 return@Button
                             }
 
                             if (!userRepository.verifyPassword(password)) {
-                                errorMessage = "Неверный пароль"
+                                errorMessage = StringResources.invalidPassword(context)
                                 return@Button
                             }
 
                             if (userRepository.isEmailExists(newEmail) && newEmail != currentEmail) {
-                                errorMessage = "Эта почта уже используется"
+                                errorMessage = StringResources.emailAlreadyUsed(context)
                                 return@Button
                             }
 
                             onEmailChanged(newEmail)
                         }
                     ) {
-                        Text("Сохранить")
+                        Text(StringResources.save)
                     }
                 }
             }
@@ -748,6 +825,7 @@ private fun ChangePasswordDialog(
     onPasswordChanged: () -> Unit,
     userRepository: UserRepository
 ) {
+    val context = LocalContext.current
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -769,33 +847,33 @@ private fun ChangePasswordDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Смена пароля",
+                    text = StringResources.changePassword,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = currentPassword,
                     onValueChange = { currentPassword = it },
-                    label = { Text("Текущий пароль") },
+                    label = { Text(StringResources.currentPassword) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation()
                 )
 
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = newPassword,
                     onValueChange = { newPassword = it },
-                    label = { Text("Новый пароль") },
+                    label = { Text(StringResources.newPassword) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation()
                 )
 
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Подтвердите новый пароль") },
+                    label = { Text(StringResources.confirmNewPassword) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation()
                 )
 
                 if (errorMessage.isNotEmpty()) {
@@ -810,42 +888,42 @@ private fun ChangePasswordDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = onDismiss
                     ) {
-                        Text("Отмена")
+                        Text(StringResources.cancel)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    androidx.compose.material3.Button(
+                    Button(
                         onClick = {
                             when {
                                 currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
-                                    errorMessage = "Заполните все поля"
+                                    errorMessage = StringResources.fillAllFields(context)
                                     return@Button
                                 }
                                 !userRepository.verifyPassword(currentPassword) -> {
-                                    errorMessage = "Неверный текущий пароль"
+                                    errorMessage = StringResources.invalidCurrentPassword(context)
                                     return@Button
                                 }
                                 newPassword.length < 6 -> {
-                                    errorMessage = "Новый пароль должен содержать минимум 6 символов"
+                                    errorMessage = StringResources.passwordMinLength(context)
                                     return@Button
                                 }
                                 newPassword != confirmPassword -> {
-                                    errorMessage = "Пароли не совпадают"
+                                    errorMessage = StringResources.passwordsDontMatch(context)
                                     return@Button
                                 }
                                 else -> {
                                     if (userRepository.updatePassword(newPassword)) {
                                         onPasswordChanged()
                                     } else {
-                                        errorMessage = "Ошибка при смене пароля"
+                                        errorMessage = StringResources.passwordChangeError(context)
                                     }
                                 }
                             }
                         }
                     ) {
-                        Text("Сменить пароль")
+                        Text(StringResources.changePassword)
                     }
                 }
             }
@@ -874,13 +952,13 @@ private fun LogoutConfirmationDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Выход из аккаунта",
+                    text = StringResources.logout,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
-                    text = "Вы уверены, что хотите выйти из аккаунта?",
+                    text = StringResources.logoutConfirmation(LocalContext.current),
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -889,19 +967,19 @@ private fun LogoutConfirmationDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = onDismiss
                     ) {
-                        Text("Отмена")
+                        Text(StringResources.cancel)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    androidx.compose.material3.Button(
+                    Button(
                         onClick = onConfirm,
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Выйти")
+                        Text(StringResources.logout)
                     }
                 }
             }
