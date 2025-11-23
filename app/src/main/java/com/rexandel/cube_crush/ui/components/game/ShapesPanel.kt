@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,17 +43,19 @@ fun ShapesPanel(
             verticalAlignment = Alignment.CenterVertically
         ) {
             availableShapes.forEachIndexed { index, shape ->
-                DraggableShape(
-                    shape = shape,
-                    shapeIndex = index,
-                    isDragging = draggingShapeIndex == index,
-                    isActive = draggingShapeIndex == null || draggingShapeIndex == index,
-                    dragOffset = dragOffsets.getOrNull(index) ?: Offset.Zero,
-                    onDragStart = onDragStart,
-                    onDrag = onDrag,
-                    onDragEnd = onDragEnd,
-                    onPositioned = { position -> onShapePositioned(index, position) }
-                )
+                key("${shape.type}_${shape.blocks.hashCode()}_$index") {
+                    DraggableShape(
+                        shape = shape,
+                        shapeIndex = index,
+                        isDragging = draggingShapeIndex == index,
+                        isActive = draggingShapeIndex == null || draggingShapeIndex == index,
+                        dragOffset = dragOffsets.getOrNull(index) ?: Offset.Zero,
+                        onDragStart = onDragStart,
+                        onDrag = onDrag,
+                        onDragEnd = onDragEnd,
+                        onPositioned = { position -> onShapePositioned(index, position) }
+                    )
+                }
             }
         }
     }
