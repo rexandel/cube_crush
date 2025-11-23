@@ -1,4 +1,4 @@
-package com.rexandel.cube_crush.ui.components
+package com.rexandel.cube_crush.ui.components.game
 
 import android.content.Context
 import android.content.Intent

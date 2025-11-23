@@ -1,4 +1,4 @@
-package com.rexandel.cube_crush.ui.components
+package com.rexandel.cube_crush.ui.components.game
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

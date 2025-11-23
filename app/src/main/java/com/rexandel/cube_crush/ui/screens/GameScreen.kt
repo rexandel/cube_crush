@@ -60,8 +60,8 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import com.rexandel.cube_crush.ui.components.GameOverDialog
-import com.rexandel.cube_crush.ui.components.PauseDialog
+import com.rexandel.cube_crush.ui.components.game.GameOverDialog
+import com.rexandel.cube_crush.ui.components.game.PauseDialog
 import com.rexandel.cube_crush.ui.theme.StringResources
 
 @Composable
