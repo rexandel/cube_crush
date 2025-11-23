@@ -1,6 +1,6 @@
 package com.rexandel.cube_crush.viewmodel
 
-import com.rexandel.cube_crush.model.GameState
+import com.rexandel.cube_crush.domain.entities.GameState
 
 data class GameUiState(
     val gameState: GameState,

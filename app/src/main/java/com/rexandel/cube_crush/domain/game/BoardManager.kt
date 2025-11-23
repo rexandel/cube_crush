@@ -1,5 +1,8 @@
-package com.rexandel.cube_crush.model
+package com.rexandel.cube_crush.domain.game
 
+import com.rexandel.cube_crush.domain.entities.Block
+import com.rexandel.cube_crush.domain.entities.BlockColor
+import com.rexandel.cube_crush.domain.entities.Shape
 import kotlin.random.Random
 
 class BoardManager(

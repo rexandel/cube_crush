@@ -16,9 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.rexandel.cube_crush.model.Block
-import com.rexandel.cube_crush.model.BlockColor
-import com.rexandel.cube_crush.model.Shape
+import com.rexandel.cube_crush.domain.entities.Block
+import com.rexandel.cube_crush.domain.entities.BlockColor
+import com.rexandel.cube_crush.domain.entities.Shape
 
 @Composable
 fun GameBoard(

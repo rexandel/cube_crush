@@ -2,8 +2,8 @@ package com.rexandel.cube_crush.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rexandel.cube_crush.model.GameModel
-import com.rexandel.cube_crush.repository.UserRepository
+import com.rexandel.cube_crush.domain.game.GameModel
+import com.rexandel.cube_crush.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

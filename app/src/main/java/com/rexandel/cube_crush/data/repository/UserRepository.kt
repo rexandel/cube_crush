@@ -1,9 +1,9 @@
-package com.rexandel.cube_crush.repository
+package com.rexandel.cube_crush.data.repository
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.rexandel.cube_crush.ui.locale.AppLocale
-import com.rexandel.cube_crush.ui.theme.AppTheme
+import com.rexandel.cube_crush.data.managers.AppLocale
+import com.rexandel.cube_crush.data.managers.AppTheme
 
 class UserRepository(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)

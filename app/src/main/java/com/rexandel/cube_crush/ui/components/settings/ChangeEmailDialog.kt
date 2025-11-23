@@ -25,8 +25,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.rexandel.cube_crush.repository.UserRepository
-import com.rexandel.cube_crush.ui.theme.StringResources
+import com.rexandel.cube_crush.data.repository.UserRepository
+import com.rexandel.cube_crush.data.managers.StringResources
 
 @Composable
 fun ChangeEmailDialog(

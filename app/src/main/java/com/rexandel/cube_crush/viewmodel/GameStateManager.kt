@@ -1,7 +1,7 @@
 package com.rexandel.cube_crush.viewmodel
 
-import com.rexandel.cube_crush.model.GameModel
-import com.rexandel.cube_crush.model.GameState
+import com.rexandel.cube_crush.domain.game.GameModel
+import com.rexandel.cube_crush.domain.entities.GameState
 import android.util.Log
 
 class GameStateManager(private val gameModel: GameModel) {
@@ -14,10 +14,10 @@ class GameStateManager(private val gameModel: GameModel) {
         val result = gameModel.placeShape(shapeIndex, position)
 
         return when (result) {
-            is com.rexandel.cube_crush.model.PlaceShapeResult.Success -> {
+            is com.rexandel.cube_crush.domain.entities.PlaceShapeResult.Success -> {
                 PlaceShapeResult.Success(result.linesCleared)
             }
-            is com.rexandel.cube_crush.model.PlaceShapeResult.Failure -> {
+            is com.rexandel.cube_crush.domain.entities.PlaceShapeResult.Failure -> {
                 Log.e("GameStateManager", "Failed to place shape: ${result.message}. Shape: $shapeIndex, Position: $position")
                 PlaceShapeResult.Failure(result.message)
             }

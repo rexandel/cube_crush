@@ -1,4 +1,8 @@
-package com.rexandel.cube_crush.model
+package com.rexandel.cube_crush.domain.game
+
+import com.rexandel.cube_crush.domain.entities.BlockColor
+import com.rexandel.cube_crush.domain.entities.Shape
+import com.rexandel.cube_crush.domain.entities.ShapeType
 
 object ShapeFactory {
     fun generateUniqueRandomShapes(count: Int): List<Shape> {

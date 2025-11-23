@@ -1,7 +1,7 @@
 package com.rexandel.cube_crush.ui.components.game
 
 import androidx.compose.ui.geometry.Offset
-import com.rexandel.cube_crush.model.Shape
+import com.rexandel.cube_crush.domain.entities.Shape
 import kotlin.math.roundToInt
 
 object DragUtils {

@@ -1,4 +1,4 @@
-package com.rexandel.cube_crush.ui.locale
+package com.rexandel.cube_crush.data.managers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.rexandel.cube_crush.repository.UserRepository
+import com.rexandel.cube_crush.data.repository.UserRepository
 import java.util.Locale
 
 @Stable

@@ -1,4 +1,4 @@
-package com.rexandel.cube_crush.model
+package com.rexandel.cube_crush.domain.entities
 
 data class Shape(
     val type: ShapeType,

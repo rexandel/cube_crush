@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.rexandel.cube_crush.repository.UserRepository
+import com.rexandel.cube_crush.data.repository.UserRepository
 import com.rexandel.cube_crush.ui.screens.GameScreen
 import com.rexandel.cube_crush.ui.screens.MenuScreen
 import com.rexandel.cube_crush.ui.screens.SettingsScreen
@@ -14,12 +14,15 @@ import com.rexandel.cube_crush.ui.screens.SplashScreen
 import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
 import com.rexandel.cube_crush.ui.screens.auth.RegisterScreen
 import com.rexandel.cube_crush.ui.theme.CubeCrushTheme
-import com.rexandel.cube_crush.ui.theme.rememberThemeManager
-import com.rexandel.cube_crush.ui.locale.rememberLocaleManager
+import com.rexandel.cube_crush.data.managers.rememberThemeManager
+import com.rexandel.cube_crush.data.managers.rememberLocaleManager
 import java.util.Locale
 import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.compose.ui.platform.LocalConfiguration
+import com.rexandel.cube_crush.data.managers.AppLocale
+import com.rexandel.cube_crush.data.managers.LocaleManager
+import com.rexandel.cube_crush.data.managers.ThemeManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,15 +61,15 @@ class MainActivity : ComponentActivity() {
         val savedLocale = userRepository.getSavedLocale()
 
         val locale = when (savedLocale) {
-            com.rexandel.cube_crush.ui.locale.AppLocale.RUSSIAN -> Locale("ru")
-            com.rexandel.cube_crush.ui.locale.AppLocale.ENGLISH -> Locale.ENGLISH
+            AppLocale.RUSSIAN -> Locale("ru")
+            AppLocale.ENGLISH -> Locale.ENGLISH
             else -> Locale.getDefault()
         }
 
         updateAppLocale(locale)
     }
 
-    private fun updateAppLocale(localeManager: com.rexandel.cube_crush.ui.locale.LocaleManager) {
+    private fun updateAppLocale(localeManager: LocaleManager) {
         val locale = localeManager.getCurrentLocale()
         updateAppLocale(locale)
     }
@@ -88,8 +91,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(
-    themeManager: com.rexandel.cube_crush.ui.theme.ThemeManager,
-    localeManager: com.rexandel.cube_crush.ui.locale.LocaleManager
+    themeManager: ThemeManager,
+    localeManager: LocaleManager
 ) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }

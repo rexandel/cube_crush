@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import com.rexandel.cube_crush.data.managers.AppTheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkYellow,

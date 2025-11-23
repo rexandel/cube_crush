@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rexandel.cube_crush.R
-import com.rexandel.cube_crush.ui.theme.StringResources
+import com.rexandel.cube_crush.data.managers.StringResources
 
 @Composable
 fun GameHeader(

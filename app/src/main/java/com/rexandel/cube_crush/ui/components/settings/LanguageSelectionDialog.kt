@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.rexandel.cube_crush.ui.locale.AppLocale
-import com.rexandel.cube_crush.ui.theme.StringResources
+import com.rexandel.cube_crush.data.managers.AppLocale
+import com.rexandel.cube_crush.data.managers.StringResources
 
 @Composable
 fun LanguageSelectionDialog(

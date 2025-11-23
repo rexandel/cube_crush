@@ -1,4 +1,4 @@
-package com.rexandel.cube_crush.ui.theme
+package com.rexandel.cube_crush.data.managers
 
 import android.content.Context
 import androidx.compose.runtime.Composable

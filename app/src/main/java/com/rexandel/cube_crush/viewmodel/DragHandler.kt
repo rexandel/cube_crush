@@ -1,6 +1,6 @@
 package com.rexandel.cube_crush.viewmodel
 
-import com.rexandel.cube_crush.model.GameModel
+import com.rexandel.cube_crush.domain.game.GameModel
 
 class DragHandler(private val gameModel: GameModel) {
 

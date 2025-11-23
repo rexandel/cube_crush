@@ -27,9 +27,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.rexandel.cube_crush.model.BlockColor
-import com.rexandel.cube_crush.model.Shape
-import com.rexandel.cube_crush.model.ShapeType
+import com.rexandel.cube_crush.domain.entities.BlockColor
+import com.rexandel.cube_crush.domain.entities.Shape
+import com.rexandel.cube_crush.domain.entities.ShapeType
 import kotlin.math.roundToInt
 
 @Composable
