@@ -22,8 +22,31 @@ data class Shape(
 }
 
 enum class ShapeType {
-    SQUARE,
-    LINE_1x2,
-    LINE_2x1,
-    TRIANGLE_3
+    BLOCK_1x1,
+
+    RECT_1x2,
+    RECT_2x1,
+    RECT_1x3,
+    RECT_3x1,
+    RECT_1x4,
+    RECT_4x1,
+    RECT_1x5,
+    RECT_5x1,
+
+    SQUARE_2x2,
+    SQUARE_3x3,
+
+    L_SHAPE_2x2_TOP_LEFT,
+    L_SHAPE_2x2_TOP_RIGHT,
+    L_SHAPE_2x3_TOP_LEFT,
+    L_SHAPE_2x3_TOP_RIGHT,
+    L_SHAPE_3x3_TOP_LEFT,
+    L_SHAPE_3x3_TOP_RIGHT,
+
+    LINE_3_HORIZONTAL,
+    LINE_4_HORIZONTAL,
+    LINE_5_HORIZONTAL,
+    LINE_3_VERTICAL,
+    LINE_4_VERTICAL,
+    LINE_5_VERTICAL
 }

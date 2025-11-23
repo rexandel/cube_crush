@@ -33,7 +33,7 @@ import com.rexandel.cube_crush.domain.entities.ShapeType
 import kotlin.math.roundToInt
 
 @Composable
-fun SquareShape(color: BlockColor, matrix: List<List<Boolean>>) {
+fun Block1x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
     Column {
         for (y in matrix.indices) {
             Row {
@@ -50,7 +50,7 @@ fun SquareShape(color: BlockColor, matrix: List<List<Boolean>>) {
 }
 
 @Composable
-fun Line1x2Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+fun Rect1x2Shape(color: BlockColor, matrix: List<List<Boolean>>) {
     Column {
         for (y in matrix.indices) {
             Row {
@@ -67,7 +67,7 @@ fun Line1x2Shape(color: BlockColor, matrix: List<List<Boolean>>) {
 }
 
 @Composable
-fun Line2x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+fun Rect2x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
     Column {
         for (y in matrix.indices) {
             Row {
@@ -84,7 +84,330 @@ fun Line2x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
 }
 
 @Composable
-fun Triangle3Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+fun Rect1x3Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Rect3x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Rect1x4Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Rect4x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Rect1x5Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Rect5x1Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Square2x2Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Square3x3Shape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LShape2x2TopLeft(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LShape2x2TopRight(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LShape2x3TopLeft(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LShape2x3TopRight(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LShape3x3TopLeft(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LShape3x3TopRight(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Line3HorizontalShape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Line4HorizontalShape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Line5HorizontalShape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Line3VerticalShape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Line4VerticalShape(color: BlockColor, matrix: List<List<Boolean>>) {
+    Column {
+        for (y in matrix.indices) {
+            Row {
+                for (x in matrix[y].indices) {
+                    if (matrix[y][x]) {
+                        BlockView(color)
+                    } else {
+                        Box(modifier = Modifier.size(40.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Line5VerticalShape(color: BlockColor, matrix: List<List<Boolean>>) {
     Column {
         for (y in matrix.indices) {
             Row {
@@ -177,10 +500,33 @@ fun DraggableShape(
                 .offset { IntOffset(offsetX, offsetY) }
         ) {
             when (shape.type) {
-                ShapeType.SQUARE -> SquareShape(shape.color, shape.matrix)
-                ShapeType.LINE_1x2 -> Line1x2Shape(shape.color, shape.matrix)
-                ShapeType.LINE_2x1 -> Line2x1Shape(shape.color, shape.matrix)
-                ShapeType.TRIANGLE_3 -> Triangle3Shape(shape.color, shape.matrix)
+                ShapeType.BLOCK_1x1 -> Block1x1Shape(shape.color, shape.matrix)
+
+                ShapeType.RECT_1x2 -> Rect1x2Shape(shape.color, shape.matrix)
+                ShapeType.RECT_2x1 -> Rect2x1Shape(shape.color, shape.matrix)
+                ShapeType.RECT_1x3 -> Rect1x3Shape(shape.color, shape.matrix)
+                ShapeType.RECT_3x1 -> Rect3x1Shape(shape.color, shape.matrix)
+                ShapeType.RECT_1x4 -> Rect1x4Shape(shape.color, shape.matrix)
+                ShapeType.RECT_4x1 -> Rect4x1Shape(shape.color, shape.matrix)
+                ShapeType.RECT_1x5 -> Rect1x5Shape(shape.color, shape.matrix)
+                ShapeType.RECT_5x1 -> Rect5x1Shape(shape.color, shape.matrix)
+
+                ShapeType.SQUARE_2x2 -> Square2x2Shape(shape.color, shape.matrix)
+                ShapeType.SQUARE_3x3 -> Square3x3Shape(shape.color, shape.matrix)
+
+                ShapeType.L_SHAPE_2x2_TOP_LEFT -> LShape2x2TopLeft(shape.color, shape.matrix)
+                ShapeType.L_SHAPE_2x2_TOP_RIGHT -> LShape2x2TopRight(shape.color, shape.matrix)
+                ShapeType.L_SHAPE_2x3_TOP_LEFT -> LShape2x3TopLeft(shape.color, shape.matrix)
+                ShapeType.L_SHAPE_2x3_TOP_RIGHT -> LShape2x3TopRight(shape.color, shape.matrix)
+                ShapeType.L_SHAPE_3x3_TOP_LEFT -> LShape3x3TopLeft(shape.color, shape.matrix)
+                ShapeType.L_SHAPE_3x3_TOP_RIGHT -> LShape3x3TopRight(shape.color, shape.matrix)
+
+                ShapeType.LINE_3_HORIZONTAL -> Line3HorizontalShape(shape.color, shape.matrix)
+                ShapeType.LINE_4_HORIZONTAL -> Line4HorizontalShape(shape.color, shape.matrix)
+                ShapeType.LINE_5_HORIZONTAL -> Line5HorizontalShape(shape.color, shape.matrix)
+                ShapeType.LINE_3_VERTICAL -> Line3VerticalShape(shape.color, shape.matrix)
+                ShapeType.LINE_4_VERTICAL -> Line4VerticalShape(shape.color, shape.matrix)
+                ShapeType.LINE_5_VERTICAL -> Line5VerticalShape(shape.color, shape.matrix)
             }
         }
 
