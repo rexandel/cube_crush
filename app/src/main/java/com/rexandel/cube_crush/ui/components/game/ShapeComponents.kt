@@ -138,10 +138,8 @@ fun DraggableShape(
     onDragEnd: (Int) -> Unit,
     onPositioned: (Offset) -> Unit
 ) {
-    val shapeCenterOffset by remember(shape) {
-        derivedStateOf {
-            calculateShapeCenterOffset(shape)
-        }
+    val shapeCenterOffset = remember(shape) {
+        calculateShapeCenterOffset(shape)
     }
 
     val fingerOffset = remember { Offset(0f, -120f) }
@@ -152,6 +150,18 @@ fun DraggableShape(
         animationSpec = tween(durationMillis = 200),
         label = "shape_scale_animation"
     )
+
+    val offsetX by remember(dragOffset, isDragging, shapeCenterOffset) {
+        derivedStateOf {
+            if (isDragging) (dragOffset.x - shapeCenterOffset.x + fingerOffset.x).roundToInt() else 0
+        }
+    }
+
+    val offsetY by remember(dragOffset, isDragging, shapeCenterOffset) {
+        derivedStateOf {
+            if (isDragging) (dragOffset.y - shapeCenterOffset.y + fingerOffset.y).roundToInt() else 0
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -164,12 +174,7 @@ fun DraggableShape(
             modifier = Modifier
                 .align(Alignment.Center)
                 .scale(scale)
-                .offset {
-                    IntOffset(
-                        if (isDragging) (dragOffset.x - shapeCenterOffset.x + fingerOffset.x).roundToInt() else 0,
-                        if (isDragging) (dragOffset.y - shapeCenterOffset.y + fingerOffset.y).roundToInt() else 0
-                    )
-                }
+                .offset { IntOffset(offsetX, offsetY) }
         ) {
             when (shape.type) {
                 ShapeType.SQUARE -> SquareShape(shape.color, shape.matrix)
@@ -213,8 +218,9 @@ private fun calculateShapeCenterOffset(shape: Shape): Offset {
     var blockCount = 0
 
     for (y in matrix.indices) {
-        for (x in matrix[y].indices) {
-            if (matrix[y][x]) {
+        val row = matrix[y]
+        for (x in row.indices) {
+            if (row[x]) {
                 totalX += x + 0.5f
                 totalY += y + 0.5f
                 blockCount++
@@ -222,10 +228,12 @@ private fun calculateShapeCenterOffset(shape: Shape): Offset {
         }
     }
 
-    if (blockCount == 0) return Offset.Zero
-
-    val centerX = totalX / blockCount
-    val centerY = totalY / blockCount
-
-    return Offset(centerX * 40f, centerY * 40f)
+    return if (blockCount == 0) {
+        Offset.Zero
+    } else {
+        Offset(
+            (totalX / blockCount) * 40f,
+            (totalY / blockCount) * 40f
+        )
+    }
 }
