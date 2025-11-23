@@ -151,7 +151,7 @@ fun GameScreen(
                     )
 
                     val canPlace = snapPosition?.let { position ->
-                        gameViewModel.canPlaceShape(currentShape, position)
+                        gameViewModel.canPlaceShape(shapeIndex, position)
                     } ?: false
 
                     gameViewModel.updateDragPosition(snapPosition, canPlace)
@@ -184,7 +184,7 @@ fun GameScreen(
                 }
 
                 if (finalPosition != null && currentShape != null &&
-                    gameViewModel.canPlaceShape(currentShape, finalPosition)) {
+                    gameViewModel.canPlaceShape(shapeIndex, finalPosition)) {
                     gameViewModel.placeShape(shapeIndex, finalPosition)
                 }
 
