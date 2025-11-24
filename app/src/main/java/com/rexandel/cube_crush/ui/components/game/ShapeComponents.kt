@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.rexandel.cube_crush.domain.entities.BlockColor
 import com.rexandel.cube_crush.domain.entities.Shape
-import com.rexandel.cube_crush.domain.entities.ShapeType
 import kotlin.math.roundToInt
 
 @Composable
@@ -45,7 +44,7 @@ fun GenericShape(
                     if (matrix[y][x]) {
                         BlockView(color)
                     } else {
-                        Box(modifier = Modifier.size(40.dp))
+                        Box(modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -65,16 +64,16 @@ fun BlockView(color: BlockColor) {
 
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .padding(2.dp)
+            .size(20.dp)
+            .padding(0.8.dp)
             .background(
                 color = colorValue,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(3.dp)
             )
             .border(
-                width = 1.dp,
+                width = 0.8.dp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(3.dp)
             )
     )
 }
@@ -95,8 +94,8 @@ fun DraggableShape(
         calculateShapeCenterOffset(shape)
     }
 
-    val fingerOffset = remember { Offset(0f, -120f) }
-    val fixedContainerSize = 100.dp
+    val fingerOffset = remember { Offset(0f, -80f) }
+    val fixedContainerSize = 110.dp
 
     val scale by animateFloatAsState(
         targetValue = if (isDragging) 1f else 0.75f,
@@ -180,8 +179,8 @@ private fun calculateShapeCenterOffset(shape: Shape): Offset {
         Offset.Zero
     } else {
         Offset(
-            (totalX / blockCount) * 40f,
-            (totalY / blockCount) * 40f
+            (totalX / blockCount) * 22f,
+            (totalY / blockCount) * 22f
         )
     }
 }

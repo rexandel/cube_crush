@@ -31,14 +31,14 @@ fun ShapesPanel(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(140.dp)
+            .height(160.dp)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.1f))
-            .padding(vertical = 8.dp)
+            .padding(vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
