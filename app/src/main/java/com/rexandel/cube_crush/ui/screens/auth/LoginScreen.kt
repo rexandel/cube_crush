@@ -14,14 +14,13 @@ import com.rexandel.cube_crush.data.managers.StringResources
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    userRepository: UserRepository
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-
     val context = LocalContext.current
-    val userRepository = remember { UserRepository(context) }
 
     Column(
         modifier = Modifier

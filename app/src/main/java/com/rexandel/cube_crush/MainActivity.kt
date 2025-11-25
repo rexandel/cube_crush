@@ -9,13 +9,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.data.managers.AppLocale
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.data.managers.ThemeManager
 import com.rexandel.cube_crush.data.managers.rememberLocaleManager
 import com.rexandel.cube_crush.data.managers.rememberThemeManager
 import com.rexandel.cube_crush.data.repositories.SettingsRepository
-import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.ui.screens.GameScreen
 import com.rexandel.cube_crush.ui.screens.MenuScreen
 import com.rexandel.cube_crush.ui.screens.SettingsScreen
@@ -26,9 +26,13 @@ import com.rexandel.cube_crush.ui.theme.CubeCrushTheme
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+    private lateinit var userRepository: UserRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setBackgroundDrawableResource(android.R.color.transparent)
+
+        userRepository = UserRepository.getInstance(this)
 
         applySavedLocale()
 
@@ -50,7 +54,7 @@ class MainActivity : ComponentActivity() {
                     androidx.compose.material3.Surface(
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        AppNavigation(themeManager, localeManager)
+                        AppNavigation(themeManager, localeManager, userRepository)
                     }
                 }
             }
@@ -93,13 +97,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation(
     themeManager: ThemeManager,
-    localeManager: LocaleManager
+    localeManager: LocaleManager,
+    userRepository: UserRepository
 ) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }
-
-    val context = LocalContext.current
-    val userRepository = remember { UserRepository(context) }
 
     LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(3000)
@@ -120,18 +122,17 @@ fun AppNavigation(
             AppScreen.Splash -> SplashScreen()
             AppScreen.Login -> LoginScreen(
                 onLoginSuccess = { currentScreen = AppScreen.Menu },
-                onNavigateToRegister = { currentScreen = AppScreen.Register }
+                onNavigateToRegister = { currentScreen = AppScreen.Register },
+                userRepository = userRepository
             )
             AppScreen.Register -> RegisterScreen(
                 onRegisterSuccess = { currentScreen = AppScreen.Menu },
-                onBackToLogin = { currentScreen = AppScreen.Login }
+                onBackToLogin = { currentScreen = AppScreen.Login },
+                userRepository = userRepository
             )
             AppScreen.Menu -> MenuScreen(
                 onStartGame = { currentScreen = AppScreen.Game },
-                onSettings = { currentScreen = AppScreen.Settings },
-                onExit = {
-                    (context as? android.app.Activity)?.finish()
-                }
+                onSettings = { currentScreen = AppScreen.Settings }
             )
             AppScreen.Game -> GameScreen(
                 onExitToMenu = { currentScreen = AppScreen.Menu }
@@ -142,7 +143,8 @@ fun AppNavigation(
                     currentScreen = AppScreen.Login
                 },
                 themeManager = themeManager,
-                localeManager = localeManager
+                localeManager = localeManager,
+                userRepository = userRepository
             )
         }
     }

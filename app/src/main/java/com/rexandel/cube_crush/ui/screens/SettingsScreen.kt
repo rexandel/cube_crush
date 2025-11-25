@@ -39,12 +39,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.data.managers.AppTheme
 import com.rexandel.cube_crush.data.managers.ThemeManager
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.data.managers.AppLocale
+import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.ui.components.settings.SettingsInfoItem
 import com.rexandel.cube_crush.ui.components.settings.ThemeSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
@@ -57,10 +57,10 @@ fun SettingsScreen(
     onBackToMenu: () -> Unit,
     onLogout: () -> Unit,
     themeManager: ThemeManager,
-    localeManager: LocaleManager
+    localeManager: LocaleManager,
+    userRepository: UserRepository
 ) {
     val context = LocalContext.current
-    val userRepository = remember { UserRepository(context) }
 
     var currentUser by remember { mutableStateOf<String?>(null) }
     var highScore by remember { mutableStateOf(0) }

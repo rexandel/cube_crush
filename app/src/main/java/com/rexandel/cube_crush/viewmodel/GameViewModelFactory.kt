@@ -9,7 +9,7 @@ class GameViewModelFactory(private val context: Context) : ViewModelProvider.Fac
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
-            val userRepository = UserRepository(context)
+            val userRepository = UserRepository.getInstance(context)
             return GameViewModel(userRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

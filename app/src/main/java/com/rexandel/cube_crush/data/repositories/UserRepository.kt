@@ -3,8 +3,19 @@ package com.rexandel.cube_crush.data.repositories
 import android.content.Context
 import android.content.SharedPreferences
 
-class UserRepository(context: Context) {
+class UserRepository private constructor(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
+    companion object {
+        @Volatile
+        private var INSTANCE: UserRepository? = null
+
+        fun getInstance(context: Context): UserRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: UserRepository(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
 
     fun registerUser(email: String, password: String): Boolean {
         if (sharedPref.getString("email_$email", null) != null) {
