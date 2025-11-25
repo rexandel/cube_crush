@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.rexandel.cube_crush.R
+import com.rexandel.cube_crush.data.managers.StringResources
 
 @Composable
 fun SplashScreen() {
@@ -27,7 +28,7 @@ fun SplashScreen() {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "App Logo",
+                contentDescription = StringResources.gameLogo,
                 modifier = Modifier.size(400.dp)
             )
         }

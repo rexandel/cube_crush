@@ -63,9 +63,6 @@ object StringResources {
     val gameLogo: String
         @Composable get() = stringResource(R.string.game_logo)
 
-    val gameDescription: String
-        @Composable get() = stringResource(R.string.game_description)
-
     val startGame: String
         @Composable get() = stringResource(R.string.start_game)
 
