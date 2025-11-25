@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class UserRepository private constructor(context: Context) {
-    private val sharedPref: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    private val sharedPref: SharedPreferences = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
 
     companion object {
         @Volatile

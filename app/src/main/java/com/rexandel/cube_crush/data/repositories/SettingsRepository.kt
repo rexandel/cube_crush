@@ -6,7 +6,7 @@ import com.rexandel.cube_crush.data.managers.AppLocale
 import com.rexandel.cube_crush.data.managers.AppTheme
 
 class SettingsRepository private constructor(context: Context) {
-    private val sharedPref: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    private val sharedPref: SharedPreferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
 
     companion object {
         @Volatile
