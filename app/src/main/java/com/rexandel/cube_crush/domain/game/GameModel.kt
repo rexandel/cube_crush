@@ -20,7 +20,7 @@ class GameModel(
 
     internal val currentState: GameState get() = _currentState
 
-    fun createNewGame(): GameState {
+    fun createNewGame(highScore: Int = 0): GameState {
         val board = boardManager.createEmptyBoard()
         val boardWithInitialBlocks = boardManager.addInitialRandomBlocks(board)
         val initialShapes = shapeFactory.generateUniqueRandomShapes(shapesPerMove)
@@ -29,7 +29,7 @@ class GameModel(
             board = boardWithInitialBlocks,
             availableShapes = initialShapes,
             score = 0,
-            highScore = 0,
+            highScore = highScore,
             isGameOver = false
         )
     }
@@ -52,6 +52,8 @@ class GameModel(
         val (boardAfterLineClear, linesCleared) = boardManager.checkAndClearLines(newBoard)
         val newScore = currentState.score + (linesCleared * 100)
 
+        val newHighScore = maxOf(currentState.highScore, newScore)
+
         val newShapes = currentState.availableShapes.mapIndexed { index, existingShape ->
             if (index == shapeIndex) null else existingShape
         }.filterNotNull()
@@ -64,6 +66,7 @@ class GameModel(
             board = boardAfterLineClear,
             availableShapes = newShapes,
             score = newScore,
+            highScore = newHighScore,
             isGameOver = isGameOverAfterMove
         )
 
@@ -101,7 +104,8 @@ class GameModel(
     }
 
     internal fun restartGame() {
-        _currentState = createNewGame()
+        val currentHighScore = _currentState.highScore
+        _currentState = createNewGame(highScore = currentHighScore)
     }
 
     internal fun updateHighScore(newHighScore: Int) {

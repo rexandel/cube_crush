@@ -45,8 +45,13 @@ class GameViewModel(
         val result = gameStateManager.placeShape(shapeIndex, position)
 
         if (result is PlaceShapeResult.Success) {
-            updateHighScore()
             uiEffectsManager.showScoreAnimation(result.linesCleared)
+
+            // Проверяем, нужно ли сохранять новый рекорд
+            val currentState = gameStateManager.getCurrentState()
+            if (currentState.score == currentState.highScore) {
+                updateHighScore() // Сохраняем в репозиторий только если это новый рекорд
+            }
         }
 
         updateUiState()
@@ -84,21 +89,16 @@ class GameViewModel(
 
     private fun updateHighScore() {
         viewModelScope.launch {
-            val newHighScore = userRepository.updateHighScore(_uiState.value.gameState.score)
-            if (newHighScore > _uiState.value.gameState.highScore) {
-                gameStateManager.updateHighScore(newHighScore)
-                updateUiState()
-            }
+            val currentScore = _uiState.value.gameState.score
+            userRepository.updateHighScore(currentScore)
         }
     }
 
     private fun updateHighScoreFromRepository() {
         viewModelScope.launch {
             val savedHighScore = userRepository.getHighScore()
-            if (savedHighScore > _uiState.value.gameState.highScore) {
-                gameStateManager.updateHighScore(savedHighScore)
-                updateUiState()
-            }
+            gameStateManager.updateHighScore(savedHighScore)
+            updateUiState()
         }
     }
 }
