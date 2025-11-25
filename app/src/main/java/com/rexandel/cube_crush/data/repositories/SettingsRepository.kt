@@ -5,8 +5,19 @@ import android.content.SharedPreferences
 import com.rexandel.cube_crush.data.managers.AppLocale
 import com.rexandel.cube_crush.data.managers.AppTheme
 
-class SettingsRepository(context: Context) {
+class SettingsRepository private constructor(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
+    companion object {
+        @Volatile
+        private var INSTANCE: SettingsRepository? = null
+
+        fun getInstance(context: Context): SettingsRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SettingsRepository(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
 
     fun saveTheme(theme: AppTheme) {
         sharedPref.edit().putString("app_theme", theme.name).apply()

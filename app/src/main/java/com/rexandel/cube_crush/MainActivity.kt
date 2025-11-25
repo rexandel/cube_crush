@@ -10,12 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.data.repositories.SettingsRepository
 import com.rexandel.cube_crush.data.managers.AppLocale
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.data.managers.ThemeManager
 import com.rexandel.cube_crush.data.managers.rememberLocaleManager
 import com.rexandel.cube_crush.data.managers.rememberThemeManager
-import com.rexandel.cube_crush.data.repositories.SettingsRepository
 import com.rexandel.cube_crush.ui.screens.GameScreen
 import com.rexandel.cube_crush.ui.screens.MenuScreen
 import com.rexandel.cube_crush.ui.screens.SettingsScreen
@@ -27,18 +27,20 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private lateinit var userRepository: UserRepository
+    private lateinit var settingsRepository: SettingsRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
         userRepository = UserRepository.getInstance(this)
+        settingsRepository = SettingsRepository.getInstance(this)
 
         applySavedLocale()
 
         setContent {
-            val themeManager = rememberThemeManager()
-            val localeManager = rememberLocaleManager()
+            val themeManager = rememberThemeManager(settingsRepository)
+            val localeManager = rememberLocaleManager(settingsRepository)
 
             val currentLocale = localeManager.getCurrentLocale()
             val configuration = LocalConfiguration.current
@@ -62,7 +64,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun applySavedLocale() {
-        val settingsRepository = SettingsRepository(this)
         val savedLocale = settingsRepository.getSavedLocale()
 
         val locale = when (savedLocale) {

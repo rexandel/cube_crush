@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import com.rexandel.cube_crush.data.repositories.SettingsRepository
 
 @Stable
@@ -34,8 +33,6 @@ enum class AppTheme {
 }
 
 @Composable
-fun rememberThemeManager(): ThemeManager {
-    val context = LocalContext.current
-    val settingsRepository = remember { SettingsRepository(context) }
+fun rememberThemeManager(settingsRepository: SettingsRepository): ThemeManager {
     return remember { ThemeManager(settingsRepository) }
 }

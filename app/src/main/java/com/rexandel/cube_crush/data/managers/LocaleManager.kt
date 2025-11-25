@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import com.rexandel.cube_crush.data.repositories.SettingsRepository
 import java.util.Locale
 
@@ -43,8 +42,6 @@ enum class AppLocale {
 }
 
 @Composable
-fun rememberLocaleManager(): LocaleManager {
-    val context = LocalContext.current
-    val settingsRepository = remember { SettingsRepository(context) }
+fun rememberLocaleManager(settingsRepository: SettingsRepository): LocaleManager {
     return remember { LocaleManager(settingsRepository) }
 }
