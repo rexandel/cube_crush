@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.rexandel.cube_crush.data.repository.UserRepository
+import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.data.managers.StringResources
 
 @Composable

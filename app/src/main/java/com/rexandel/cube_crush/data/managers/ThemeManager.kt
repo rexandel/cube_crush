@@ -7,10 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.rexandel.cube_crush.data.repository.UserRepository
+import com.rexandel.cube_crush.data.repositories.SettingsRepository
 
 @Stable
-class ThemeManager(private val userRepository: UserRepository) {
+class ThemeManager(private val settingsRepository: SettingsRepository) {
     var currentTheme by mutableStateOf<AppTheme>(AppTheme.SYSTEM)
         private set
 
@@ -19,13 +19,13 @@ class ThemeManager(private val userRepository: UserRepository) {
     }
 
     private fun loadSavedTheme() {
-        val savedTheme = userRepository.getSavedTheme()
+        val savedTheme = settingsRepository.getSavedTheme()
         currentTheme = savedTheme
     }
 
     fun setTheme(theme: AppTheme) {
         currentTheme = theme
-        userRepository.saveTheme(theme)
+        settingsRepository.saveTheme(theme)
     }
 }
 
@@ -36,6 +36,6 @@ enum class AppTheme {
 @Composable
 fun rememberThemeManager(): ThemeManager {
     val context = LocalContext.current
-    val userRepository = remember { UserRepository(context) }
-    return remember { ThemeManager(userRepository) }
+    val settingsRepository = remember { SettingsRepository(context) }
+    return remember { ThemeManager(settingsRepository) }
 }

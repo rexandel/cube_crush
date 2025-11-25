@@ -1,12 +1,21 @@
 package com.rexandel.cube_crush
 
 import android.os.Bundle
+import android.content.res.Configuration
+import android.content.res.Resources
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.rexandel.cube_crush.data.repository.UserRepository
+import androidx.compose.ui.platform.LocalConfiguration
+import com.rexandel.cube_crush.data.managers.AppLocale
+import com.rexandel.cube_crush.data.managers.LocaleManager
+import com.rexandel.cube_crush.data.managers.ThemeManager
+import com.rexandel.cube_crush.data.managers.rememberLocaleManager
+import com.rexandel.cube_crush.data.managers.rememberThemeManager
+import com.rexandel.cube_crush.data.repositories.SettingsRepository
+import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.ui.screens.GameScreen
 import com.rexandel.cube_crush.ui.screens.MenuScreen
 import com.rexandel.cube_crush.ui.screens.SettingsScreen
@@ -14,15 +23,7 @@ import com.rexandel.cube_crush.ui.screens.SplashScreen
 import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
 import com.rexandel.cube_crush.ui.screens.auth.RegisterScreen
 import com.rexandel.cube_crush.ui.theme.CubeCrushTheme
-import com.rexandel.cube_crush.data.managers.rememberThemeManager
-import com.rexandel.cube_crush.data.managers.rememberLocaleManager
 import java.util.Locale
-import android.content.res.Configuration
-import android.content.res.Resources
-import androidx.compose.ui.platform.LocalConfiguration
-import com.rexandel.cube_crush.data.managers.AppLocale
-import com.rexandel.cube_crush.data.managers.LocaleManager
-import com.rexandel.cube_crush.data.managers.ThemeManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,8 +58,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun applySavedLocale() {
-        val userRepository = UserRepository(this)
-        val savedLocale = userRepository.getSavedLocale()
+        val settingsRepository = SettingsRepository(this)
+        val savedLocale = settingsRepository.getSavedLocale()
 
         val locale = when (savedLocale) {
             AppLocale.RUSSIAN -> Locale("ru")

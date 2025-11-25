@@ -7,11 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.rexandel.cube_crush.data.repository.UserRepository
+import com.rexandel.cube_crush.data.repositories.SettingsRepository
 import java.util.Locale
 
 @Stable
-class LocaleManager(private val userRepository: UserRepository) {
+class LocaleManager(private val settingsRepository: SettingsRepository) {
     var currentLocale by mutableStateOf<AppLocale>(AppLocale.SYSTEM)
         private set
 
@@ -20,13 +20,13 @@ class LocaleManager(private val userRepository: UserRepository) {
     }
 
     private fun loadSavedLocale() {
-        val savedLocale = userRepository.getSavedLocale()
+        val savedLocale = settingsRepository.getSavedLocale()
         currentLocale = savedLocale
     }
 
     fun setLocale(locale: AppLocale) {
         currentLocale = locale
-        userRepository.saveLocale(locale)
+        settingsRepository.saveLocale(locale)
     }
 
     fun getCurrentLocale(): Locale {
@@ -45,6 +45,6 @@ enum class AppLocale {
 @Composable
 fun rememberLocaleManager(): LocaleManager {
     val context = LocalContext.current
-    val userRepository = remember { UserRepository(context) }
-    return remember { LocaleManager(userRepository) }
+    val settingsRepository = remember { SettingsRepository(context) }
+    return remember { LocaleManager(settingsRepository) }
 }
