@@ -94,7 +94,7 @@ fun DraggableShape(
         calculateShapeCenterOffset(shape)
     }
 
-    val fingerOffset = remember { Offset(0f, -80f) }
+    val fingerOffset = remember { Offset(0f, -150f) }
     val fixedContainerSize = 110.dp
 
     val scale by animateFloatAsState(
