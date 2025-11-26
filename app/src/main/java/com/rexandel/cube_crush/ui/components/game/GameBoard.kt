@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -106,7 +105,6 @@ fun BoardBlockView(
     Box(
         modifier = Modifier
             .size(40.dp)
-            .padding(2.dp)
             .border(
                 width = borderWidth,
                 color = borderColor
