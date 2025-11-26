@@ -9,85 +9,28 @@ import androidx.compose.ui.unit.sp
 import com.rexandel.cube_crush.R
 
 val CustomFontFamily = FontFamily(
-    Font(R.font.inter_semi_bold, FontWeight.Normal),
-    Font(R.font.inter_bold, FontWeight.Bold),
-    Font(R.font.inter_black, FontWeight.Black)
+    Font(R.font.press_start, FontWeight.Normal)
+)
+
+private val baseTextStyle = TextStyle(
+    fontFamily = CustomFontFamily,
+    fontWeight = FontWeight.Normal
 )
 
 val CustomTypography = Typography(
-    displayLarge = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 57.sp
-    ),
-    displayMedium = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 45.sp
-    ),
-    displaySmall = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 36.sp
-    ),
-    headlineLarge = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 32.sp
-    ),
-    headlineMedium = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 28.sp
-    ),
-    headlineSmall = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 24.sp
-    ),
-    titleLarge = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 22.sp
-    ),
-    titleMedium = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp
-    ),
-    titleSmall = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp
-    ),
-    bodyLarge = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
-    ),
-    bodyMedium = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
-    ),
-    bodySmall = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
-    ),
-    labelLarge = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp
-    ),
-    labelMedium = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = CustomFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp
-    )
+    displayLarge = baseTextStyle.copy(fontSize = 57.sp),
+    displayMedium = baseTextStyle.copy(fontSize = 45.sp),
+    displaySmall = baseTextStyle.copy(fontSize = 36.sp),
+    headlineLarge = baseTextStyle.copy(fontSize = 32.sp),
+    headlineMedium = baseTextStyle.copy(fontSize = 28.sp),
+    headlineSmall = baseTextStyle.copy(fontSize = 24.sp),
+    titleLarge = baseTextStyle.copy(fontSize = 22.sp),
+    titleMedium = baseTextStyle.copy(fontSize = 16.sp),
+    titleSmall = baseTextStyle.copy(fontSize = 14.sp),
+    bodyLarge = baseTextStyle.copy(fontSize = 16.sp),
+    bodyMedium = baseTextStyle.copy(fontSize = 14.sp),
+    bodySmall = baseTextStyle.copy(fontSize = 12.sp),
+    labelLarge = baseTextStyle.copy(fontSize = 14.sp),
+    labelMedium = baseTextStyle.copy(fontSize = 12.sp),
+    labelSmall = baseTextStyle.copy(fontSize = 11.sp)
 )
