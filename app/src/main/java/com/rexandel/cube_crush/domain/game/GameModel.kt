@@ -22,8 +22,8 @@ class GameModel(
 
     fun createNewGame(highScore: Int = 0): GameState {
         val board = boardManager.createEmptyBoard()
-        val boardWithInitialBlocks = boardManager.addInitialRandomBlocks(board)
-        val initialShapes = shapeFactory.generateUniqueRandomShapes(shapesPerMove)
+        val initialShapes = shapeFactory.generateSmartShapes(board, shapesPerMove)
+        val boardWithInitialBlocks = boardManager.addInitialRandomBlocks(board, initialShapes)
 
         return GameState(
             board = boardWithInitialBlocks,
@@ -71,7 +71,7 @@ class GameModel(
         )
 
         if (allShapesUsed && !isGameOverAfterMove) {
-            generateNewShapes()
+            generateNewSmartShapes()
         }
 
         return PlaceShapeResult.Success(linesCleared)
@@ -114,8 +114,8 @@ class GameModel(
 
     fun getCurrentState(): GameState = _currentState
 
-    private fun generateNewShapes() {
-        val newShapes = shapeFactory.generateUniqueRandomShapes(shapesPerMove)
+    private fun generateNewSmartShapes() {
+        val newShapes = shapeFactory.generateSmartShapes(_currentState.board, shapesPerMove)
         val isGameOverAfterNewShapes = checkGameOver(_currentState.board, newShapes)
 
         _currentState = _currentState.copy(
