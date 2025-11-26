@@ -1,5 +1,6 @@
 package com.rexandel.cube_crush.ui.components.game
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -15,7 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.domain.entities.Block
 import com.rexandel.cube_crush.domain.entities.BlockColor
 import com.rexandel.cube_crush.domain.entities.Shape
@@ -77,23 +80,14 @@ fun BoardBlockView(
     isValidPosition: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val blockColor = block.color?.let { color ->
-        when (color) {
-            BlockColor.YELLOW -> Color.Yellow
-            BlockColor.RED -> Color.Red
-            BlockColor.BLUE -> Color.Blue
-            BlockColor.GREEN -> Color.Green
-            BlockColor.PURPLE -> Color.Magenta
-        }
-    } ?: colorScheme.surface
 
-    val backgroundColor by remember(blockColor, isHighlighted, isValidPosition) {
-        derivedStateOf {
-            when {
-                !isHighlighted -> blockColor
-                isValidPosition -> colorScheme.tertiary.copy(alpha = 0.5f)
-                else -> colorScheme.error.copy(alpha = 0.3f)
-            }
+    val drawableResId = block.color?.let { color ->
+        when (color) {
+            BlockColor.YELLOW -> R.drawable.block_yellow
+            BlockColor.RED -> R.drawable.block_red
+            BlockColor.BLUE -> R.drawable.block_blue
+            BlockColor.GREEN -> R.drawable.block_green
+            BlockColor.PURPLE -> R.drawable.block_purple
         }
     }
 
@@ -113,14 +107,25 @@ fun BoardBlockView(
         modifier = Modifier
             .size(40.dp)
             .padding(2.dp)
-            .background(
-                color = backgroundColor,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
-            )
             .border(
                 width = borderWidth,
-                color = borderColor,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                color = borderColor
             )
-    )
+    ) {
+        if (drawableResId != null) {
+            Image(
+                painter = painterResource(id = drawableResId),
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        color = colorScheme.surface
+                    )
+            )
+        }
+    }
 }

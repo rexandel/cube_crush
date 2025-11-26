@@ -2,6 +2,7 @@ package com.rexandel.cube_crush.ui.components.game
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -25,8 +26,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.domain.entities.BlockColor
 import com.rexandel.cube_crush.domain.entities.Shape
 import kotlin.math.roundToInt
@@ -54,28 +57,25 @@ fun GenericShape(
 
 @Composable
 fun BlockView(color: BlockColor) {
-    val colorValue = when (color) {
-        BlockColor.YELLOW -> Color.Yellow
-        BlockColor.RED -> Color.Red
-        BlockColor.BLUE -> Color.Blue
-        BlockColor.GREEN -> Color.Green
-        BlockColor.PURPLE -> Color.Magenta
+    val drawableResId = when (color) {
+        BlockColor.YELLOW -> R.drawable.block_yellow
+        BlockColor.RED -> R.drawable.block_red
+        BlockColor.BLUE -> R.drawable.block_blue
+        BlockColor.GREEN -> R.drawable.block_green
+        BlockColor.PURPLE -> R.drawable.block_purple
     }
 
     Box(
         modifier = Modifier
             .size(20.dp)
             .padding(0.8.dp)
-            .background(
-                color = colorValue,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(3.dp)
-            )
-            .border(
-                width = 0.8.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(3.dp)
-            )
-    )
+    ) {
+        Image(
+            painter = painterResource(id = drawableResId),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp)
+        )
+    }
 }
 
 @Composable
