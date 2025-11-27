@@ -1,5 +1,10 @@
 package com.rexandel.cube_crush.ui.components.game
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,18 +15,25 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.domain.entities.Block
 import com.rexandel.cube_crush.domain.entities.BlockColor
 import com.rexandel.cube_crush.domain.entities.Shape
+import kotlinx.coroutines.launch
 
 data class PreviewBlock(
     val color: BlockColor
@@ -33,6 +45,8 @@ fun GameBoard(
     snapPreviewPosition: Pair<Int, Int>?,
     draggingShape: Shape?,
     canPlaceHere: Boolean,
+    linesToClear: Set<Int>,
+    isHorizontalLine: (Int) -> Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
@@ -68,10 +82,23 @@ fun GameBoard(
                     }
                 }
 
+                val isInLineToClear by remember(linesToClear, x, y) {
+                    derivedStateOf {
+                        linesToClear.any { lineIndex ->
+                            if (isHorizontalLine(lineIndex)) {
+                                y == lineIndex
+                            } else {
+                                x == lineIndex - 8
+                            }
+                        }
+                    }
+                }
+
                 BoardBlockView(
                     block = block,
                     previewBlock = previewBlock,
-                    isValidPosition = canPlaceHere
+                    isValidPosition = canPlaceHere,
+                    isInLineToClear = isInLineToClear
                 )
             }
         }
@@ -82,7 +109,8 @@ fun GameBoard(
 fun BoardBlockView(
     block: Block,
     previewBlock: PreviewBlock? = null,
-    isValidPosition: Boolean = true
+    isValidPosition: Boolean = true,
+    isInLineToClear: Boolean = false
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -114,6 +142,24 @@ fun BoardBlockView(
 
     val borderWidth = if (previewBlock != null) 2.dp else 1.dp
 
+    val glowAlpha = remember { Animatable(0.3f) }
+
+    LaunchedEffect(isInLineToClear) {
+        if (isInLineToClear) {
+            launch {
+                glowAlpha.animateTo(
+                    targetValue = 0.8f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 800, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    )
+                )
+            }
+        } else {
+            glowAlpha.snapTo(0.3f)
+        }
+    }
+
     Box(
         modifier = Modifier
             .size(40.dp)
@@ -122,23 +168,7 @@ fun BoardBlockView(
                 color = borderColor
             )
     ) {
-        if (mainDrawableResId != null) {
-            Image(
-                painter = painterResource(id = mainDrawableResId),
-                contentDescription = null,
-                modifier = Modifier.size(40.dp)
-            )
-        }
-        else if (previewDrawableResId != null) {
-            Image(
-                painter = painterResource(id = previewDrawableResId),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .alpha(0.6f)
-            )
-        }
-        else {
+        if (mainDrawableResId == null) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -147,5 +177,60 @@ fun BoardBlockView(
                     )
             )
         }
+
+        if (mainDrawableResId != null) {
+            Image(
+                painter = painterResource(id = mainDrawableResId),
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )
+        }
+
+        if (previewDrawableResId != null && isValidPosition) {
+            Image(
+                painter = painterResource(id = previewDrawableResId),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .alpha(0.6f)
+            )
+        }
+
+        if (isInLineToClear) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .graphicsLayer {
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }
+                    .drawWithCache {
+                        val centerX = size.width / 2
+                        val centerY = size.height / 2
+                        val radius = size.minDimension / 2
+
+                        val glowBrush = Brush.radialGradient(
+                            colors = listOf(
+                                Color.Yellow.copy(alpha = glowAlpha.value),
+                                Color.Yellow.copy(alpha = 0.2f),
+                                Color.Transparent
+                            ),
+                            center = androidx.compose.ui.geometry.Offset(centerX, centerY),
+                            radius = radius
+                        )
+
+                        onDrawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = glowBrush,
+                                blendMode = BlendMode.Plus
+                            )
+                        }
+                    }
+            )
+        }
     }
+}
+
+fun isHorizontalLine(lineIndex: Int): Boolean {
+    return lineIndex < 8
 }

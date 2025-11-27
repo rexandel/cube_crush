@@ -110,13 +110,15 @@ fun GameScreen(
                 }
         ) {
             GameBoard(
-                board = gameState.board,
-                snapPreviewPosition = dragState.snapPreviewPosition,
-                draggingShape = dragState.draggingShapeIndex?.let { index ->
-                    if (index in gameState.availableShapes.indices) gameState.availableShapes[index] else null
+                board = uiState.gameState.board,
+                snapPreviewPosition = uiState.dragState.snapPreviewPosition,
+                draggingShape = uiState.dragState.draggingShapeIndex?.let { index ->
+                    uiState.gameState.availableShapes.getOrNull(index)
                 },
-                canPlaceHere = dragState.canPlaceAtPreview,
-                modifier = Modifier.align(Alignment.Center)
+                canPlaceHere = uiState.dragState.canPlaceAtPreview,
+                linesToClear = uiState.linesToClear,
+                isHorizontalLine = { lineIndex -> uiState.isHorizontalLine(lineIndex) },
+                modifier = Modifier.fillMaxSize()
             )
         }
 

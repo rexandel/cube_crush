@@ -5,8 +5,13 @@ import com.rexandel.cube_crush.domain.entities.GameState
 data class GameUiState(
     val gameState: GameState,
     val dragState: DragState,
-    val uiEffects: UiEffects
-)
+    val uiEffects: UiEffects,
+    val linesToClear: Set<Int> = emptySet()
+) {
+    fun isHorizontalLine(lineIndex: Int): Boolean {
+        return lineIndex < 8
+    }
+}
 
 data class DragState(
     val draggingShapeIndex: Int? = null,

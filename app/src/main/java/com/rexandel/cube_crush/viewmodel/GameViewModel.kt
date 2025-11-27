@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rexandel.cube_crush.domain.game.GameModel
 import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.domain.entities.Shape
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +23,8 @@ class GameViewModel(
         GameUiState(
             gameState = gameStateManager.getCurrentState(),
             dragState = dragHandler.getCurrentDragState(),
-            uiEffects = uiEffectsManager.getCurrentEffects()
+            uiEffects = uiEffectsManager.getCurrentEffects(),
+            linesToClear = emptySet()
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -38,7 +40,17 @@ class GameViewModel(
 
     fun updateDragPosition(snapPreviewPosition: Pair<Int, Int>?, canPlace: Boolean) {
         dragHandler.updateDragPosition(snapPreviewPosition, canPlace)
-        updateUiState()
+
+        val linesToClear = if (canPlace && snapPreviewPosition != null) {
+            calculateLinesToClear(snapPreviewPosition)
+        } else {
+            emptySet()
+        }
+
+        _uiState.value = _uiState.value.copy(
+            dragState = dragHandler.getCurrentDragState(),
+            linesToClear = linesToClear
+        )
     }
 
     fun placeShape(shapeIndex: Int, position: Pair<Int, Int>) {
@@ -47,19 +59,24 @@ class GameViewModel(
         if (result is PlaceShapeResult.Success) {
             uiEffectsManager.showScoreAnimation(result.linesCleared)
 
-            // Проверяем, нужно ли сохранять новый рекорд
             val currentState = gameStateManager.getCurrentState()
             if (currentState.score == currentState.highScore) {
-                updateHighScore() // Сохраняем в репозиторий только если это новый рекорд
+                updateHighScore()
             }
         }
 
+        _uiState.value = _uiState.value.copy(
+            linesToClear = emptySet()
+        )
         updateUiState()
     }
 
     fun endDrag() {
         dragHandler.endDrag()
-        updateUiState()
+        _uiState.value = _uiState.value.copy(
+            dragState = dragHandler.getCurrentDragState(),
+            linesToClear = emptySet()
+        )
     }
 
     fun canPlaceShape(shapeIndex: Int, position: Pair<Int, Int>): Boolean {
@@ -83,7 +100,8 @@ class GameViewModel(
         _uiState.value = GameUiState(
             gameState = gameStateManager.getCurrentState(),
             dragState = dragHandler.getCurrentDragState(),
-            uiEffects = uiEffectsManager.getCurrentEffects()
+            uiEffects = uiEffectsManager.getCurrentEffects(),
+            linesToClear = _uiState.value.linesToClear
         )
     }
 
@@ -100,5 +118,62 @@ class GameViewModel(
             gameStateManager.updateHighScore(savedHighScore)
             updateUiState()
         }
+    }
+
+    private fun calculateLinesToClear(position: Pair<Int, Int>): Set<Int> {
+        val dragState = dragHandler.getCurrentDragState()
+        val shapeIndex = dragState.draggingShapeIndex ?: return emptySet()
+
+        val shape = gameStateManager.getCurrentState().availableShapes.getOrNull(shapeIndex) ?: return emptySet()
+        val (startX, startY) = position
+
+        val tempBoard = createTempBoardWithShape(shape, position)
+
+        val linesToClear = mutableSetOf<Int>()
+
+        for (y in 0 until 8) {
+            if (isLineFull(tempBoard[y])) {
+                linesToClear.add(y)
+            }
+        }
+
+        for (x in 0 until 8) {
+            val column = List(8) { y -> tempBoard[y][x] }
+            if (isLineFull(column)) {
+                linesToClear.add(x + 8)
+            }
+        }
+
+        return linesToClear
+    }
+
+    private fun createTempBoardWithShape(shape: Shape, position: Pair<Int, Int>): List<List<com.rexandel.cube_crush.domain.entities.Block>> {
+        val currentBoard = gameStateManager.getCurrentState().board
+        val tempBoard = currentBoard.map { row ->
+            row.map { block ->
+                block.copy()
+            }.toMutableList()
+        }.toMutableList()
+
+        val (startX, startY) = position
+
+        for (y in 0 until shape.height) {
+            for (x in 0 until shape.width) {
+                if (shape.matrix[y][x]) {
+                    val boardX = startX + x
+                    val boardY = startY + y
+
+                    if (boardX in 0 until 8 && boardY in 0 until 8) {
+                        tempBoard[boardY][boardX] = tempBoard[boardY][boardX].copy(color = shape.color)
+                    }
+                }
+            }
+        }
+
+        return tempBoard
+    }
+
+    private fun isLineFull(line: List<com.rexandel.cube_crush.domain.entities.Block>): Boolean {
+        return line.all { it.color != null }
     }
 }
