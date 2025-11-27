@@ -14,6 +14,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,10 @@ import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.domain.entities.Block
 import com.rexandel.cube_crush.domain.entities.BlockColor
 import com.rexandel.cube_crush.domain.entities.Shape
+
+data class PreviewBlock(
+    val color: BlockColor
+)
 
 @Composable
 fun GameBoard(
@@ -43,28 +48,29 @@ fun GameBoard(
                 val y = index / 8
                 val block = board[y][x]
 
-                val isHighlighted by remember(snapPreviewPosition, draggingShape, x, y, canPlaceHere) {
+                val previewBlock by remember(snapPreviewPosition, draggingShape, x, y, canPlaceHere) {
                     derivedStateOf {
-                        if (!canPlaceHere) false else {
-                            snapPreviewPosition?.let { (snapX, snapY) ->
-                                draggingShape?.let { shape ->
-                                    shape.matrix.forEachIndexed { dy, row ->
-                                        row.forEachIndexed { dx, hasBlock ->
-                                            if (hasBlock && x == snapX + dx && y == snapY + dy) {
-                                                return@derivedStateOf true
-                                            }
-                                        }
-                                    }
-                                    false
-                                } ?: false
-                            } ?: false
+                        if (!canPlaceHere || snapPreviewPosition == null || draggingShape == null) {
+                            null
+                        } else {
+                            val (snapX, snapY) = snapPreviewPosition
+                            val localX = x - snapX
+                            val localY = y - snapY
+
+                            if (localY in draggingShape.matrix.indices &&
+                                localX in draggingShape.matrix[localY].indices &&
+                                draggingShape.matrix[localY][localX]) {
+                                PreviewBlock(color = draggingShape.color)
+                            } else {
+                                null
+                            }
                         }
                     }
                 }
 
                 BoardBlockView(
                     block = block,
-                    isHighlighted = isHighlighted,
+                    previewBlock = previewBlock,
                     isValidPosition = canPlaceHere
                 )
             }
@@ -75,12 +81,12 @@ fun GameBoard(
 @Composable
 fun BoardBlockView(
     block: Block,
-    isHighlighted: Boolean = false,
+    previewBlock: PreviewBlock? = null,
     isValidPosition: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    val drawableResId = block.color?.let { color ->
+    val mainDrawableResId = block.color?.let { color ->
         when (color) {
             BlockColor.YELLOW -> R.drawable.block_yellow
             BlockColor.RED -> R.drawable.block_red
@@ -90,17 +96,23 @@ fun BoardBlockView(
         }
     }
 
-    val borderColor by remember(isHighlighted, isValidPosition) {
-        derivedStateOf {
-            when {
-                !isHighlighted -> Color.Gray
-                isValidPosition -> colorScheme.tertiary
-                else -> colorScheme.error
-            }
+    val previewDrawableResId = previewBlock?.color?.let { color ->
+        when (color) {
+            BlockColor.YELLOW -> R.drawable.block_yellow
+            BlockColor.RED -> R.drawable.block_red
+            BlockColor.BLUE -> R.drawable.block_blue
+            BlockColor.GREEN -> R.drawable.block_green
+            BlockColor.PURPLE -> R.drawable.block_purple
         }
     }
 
-    val borderWidth = if (isHighlighted) 2.dp else 1.dp
+    val borderColor = if (previewBlock != null) {
+        if (isValidPosition) colorScheme.tertiary else colorScheme.error
+    } else {
+        Color.Gray
+    }
+
+    val borderWidth = if (previewBlock != null) 2.dp else 1.dp
 
     Box(
         modifier = Modifier
@@ -110,13 +122,23 @@ fun BoardBlockView(
                 color = borderColor
             )
     ) {
-        if (drawableResId != null) {
+        if (mainDrawableResId != null) {
             Image(
-                painter = painterResource(id = drawableResId),
+                painter = painterResource(id = mainDrawableResId),
                 contentDescription = null,
                 modifier = Modifier.size(40.dp)
             )
-        } else {
+        }
+        else if (previewDrawableResId != null) {
+            Image(
+                painter = painterResource(id = previewDrawableResId),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .alpha(0.6f)
+            )
+        }
+        else {
             Box(
                 modifier = Modifier
                     .size(40.dp)
