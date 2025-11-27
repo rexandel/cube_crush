@@ -7,26 +7,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.unit.sp
 import com.rexandel.cube_crush.data.repositories.UserRepository
 import com.rexandel.cube_crush.data.managers.StringResources
+import com.rexandel.cube_crush.ui.components.common.ButtonColor
+import com.rexandel.cube_crush.ui.components.common.PixelButton
 
 @Composable
 fun ChangePasswordDialog(
@@ -40,33 +40,30 @@ fun ChangePasswordDialog(
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = StringResources.changePassword,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
-        ) {
+        },
+        text = {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = StringResources.changePassword,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
                 OutlinedTextField(
                     value = currentPassword,
                     onValueChange = { currentPassword = it },
                     label = { Text(StringResources.currentPassword) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -74,7 +71,8 @@ fun ChangePasswordDialog(
                     onValueChange = { newPassword = it },
                     label = { Text(StringResources.newPassword) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -82,60 +80,67 @@ fun ChangePasswordDialog(
                     onValueChange = { confirmPassword = it },
                     label = { Text(StringResources.confirmNewPassword) },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
                 )
 
                 if (errorMessage.isNotEmpty()) {
                     Text(
                         text = errorMessage,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        onClick = onDismiss
-                    ) {
-                        Text(StringResources.cancel)
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            when {
-                                currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
-                                    errorMessage = StringResources.fillAllFields(context)
-                                    return@Button
-                                }
-                                !userRepository.verifyPassword(currentPassword) -> {
-                                    errorMessage = StringResources.invalidCurrentPassword(context)
-                                    return@Button
-                                }
-                                newPassword.length < 6 -> {
-                                    errorMessage = StringResources.passwordMinLength(context)
-                                    return@Button
-                                }
-                                newPassword != confirmPassword -> {
-                                    errorMessage = StringResources.passwordsDontMatch(context)
-                                    return@Button
-                                }
-                                else -> {
-                                    if (userRepository.updatePassword(newPassword)) {
-                                        onPasswordChanged()
-                                    } else {
-                                        errorMessage = StringResources.passwordChangeError(context)
-                                    }
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                PixelButton(
+                    text = StringResources.cancel,
+                    onClick = onDismiss,
+                    buttonColor = ButtonColor.GREEN,
+                    modifier = Modifier,
+                    width = 120.dp
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                PixelButton(
+                    text = StringResources.save,
+                    onClick = {
+                        when {
+                            currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
+                                errorMessage = StringResources.fillAllFields(context)
+                                return@PixelButton
+                            }
+                            !userRepository.verifyPassword(currentPassword) -> {
+                                errorMessage = StringResources.invalidCurrentPassword(context)
+                                return@PixelButton
+                            }
+                            newPassword.length < 6 -> {
+                                errorMessage = StringResources.passwordMinLength(context)
+                                return@PixelButton
+                            }
+                            newPassword != confirmPassword -> {
+                                errorMessage = StringResources.passwordsDontMatch(context)
+                                return@PixelButton
+                            }
+                            else -> {
+                                if (userRepository.updatePassword(newPassword)) {
+                                    onPasswordChanged()
+                                } else {
+                                    errorMessage = StringResources.passwordChangeError(context)
                                 }
                             }
                         }
-                    ) {
-                        Text(StringResources.changePassword)
-                    }
-                }
+                    },
+                    buttonColor = ButtonColor.BLUE,
+                    modifier = Modifier,
+                    width = 120.dp
+                )
             }
-        }
-    }
+        },
+        dismissButton = {}
+    )
 }

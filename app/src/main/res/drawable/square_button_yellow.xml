@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Основной квадрат с увеличенными скосами -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M8,0 L40,0 L48,8 L48,40 L40,48 L8,48 L0,40 L0,8 Z" />
+
+    <!-- Верхняя грань (самый светлый) -->
+    <path
+        android:fillColor="#FFFF8C"
+        android:pathData="M8,0 L40,0 L36,4 L12,4 Z" />
+
+    <!-- Левая грань (светлый) -->
+    <path
+        android:fillColor="#FFEE58"
+        android:pathData="M0,8 L4,12 L4,36 L0,40 Z" />
+
+    <!-- Верхняя левая грань (светлый) -->
+    <path
+        android:fillColor="#FFEE58"
+        android:pathData="M8,0 L0,8 L4,12 L12,4 Z" />
+
+    <!-- Верхняя правая грань (светлый) -->
+    <path
+        android:fillColor="#FFEE58"
+        android:pathData="M40,0 L48,8 L44,12 L36,4 Z" />
+
+    <!-- Правая грань (темный) -->
+    <path
+        android:fillColor="#B8860B"
+        android:pathData="M48,8 L44,12 L44,36 L48,40 Z" />
+
+    <!-- Нижняя правая грань (темный) -->
+    <path
+        android:fillColor="#8B6914"
+        android:pathData="M40,48 L48,40 L44,36 L36,44 Z" />
+
+    <!-- Нижняя левая грань (темный) -->
+    <path
+        android:fillColor="#B8860B"
+        android:pathData="M8,48 L0,40 L4,36 L12,44 Z" />
+
+    <!-- Нижняя центральная грань (самый темный) -->
+    <path
+        android:fillColor="#8B6914"
+        android:pathData="M8,48 L40,48 L36,44 L12,44 Z" />
+</vector>

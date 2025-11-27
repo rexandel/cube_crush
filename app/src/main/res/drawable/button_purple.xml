@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="48dp"
+    android:viewportWidth="160"
+    android:viewportHeight="48">
+
+    <!-- Основной восьмиугольник -->
+    <path
+        android:fillColor="#9370DB"
+        android:pathData="M8,0 L152,0 L160,8 L160,40 L152,48 L8,48 L0,40 L0,8 Z" />
+
+    <!-- Верхняя грань -->
+    <path
+        android:fillColor="#D8BFD8"
+        android:pathData="M8,0 L152,0 L146,6 L14,6 Z" />
+
+    <!-- Левая грань -->
+    <path
+        android:fillColor="#DDA0DD"
+        android:pathData="M0,8 L6,14 L6,34 L0,40 Z" />
+
+    <!-- Верхняя левая грань -->
+    <path
+        android:fillColor="#DDA0DD"
+        android:pathData="M8,0 L0,8 L6,14 L14,6 Z" />
+
+    <!-- Верхняя правая грань -->
+    <path
+        android:fillColor="#DDA0DD"
+        android:pathData="M152,0 L160,8 L154,14 L146,6 Z" />
+
+    <!-- Правая грань -->
+    <path
+        android:fillColor="#4B0082"
+        android:pathData="M160,8 L154,14 L154,34 L160,40 Z" />
+
+    <!-- Нижняя правая грань -->
+    <path
+        android:fillColor="#2E004F"
+        android:pathData="M152,48 L160,40 L154,34 L146,42 Z" />
+
+    <!-- Нижняя левая грань -->
+    <path
+        android:fillColor="#4B0082"
+        android:pathData="M8,48 L0,40 L6,34 L14,42 Z" />
+
+    <!-- Нижняя центральная грань -->
+    <path
+        android:fillColor="#2E004F"
+        android:pathData="M8,48 L152,48 L146,42 L14,42 Z" />
+</vector>

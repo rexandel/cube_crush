@@ -59,11 +59,17 @@ fun GameScreen(
         }
     }
 
+    val handleExitToMenu: () -> Unit = {
+        gameViewModel.restartGame()
+        onExitToMenu()
+    }
+
     if (gameState.isGameOver) {
         GameOverDialog(
             score = gameState.score,
             highScore = gameState.highScore,
-            onRestart = { gameViewModel.restartGame() }
+            onRestart = { gameViewModel.restartGame() },
+            onExit = handleExitToMenu
         )
     }
 
@@ -76,7 +82,7 @@ fun GameScreen(
             },
             onExit = {
                 isPaused = false
-                onExitToMenu()
+                handleExitToMenu()
             }
         )
     }

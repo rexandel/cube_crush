@@ -10,9 +10,9 @@ import com.rexandel.cube_crush.data.managers.AppTheme
 private val DarkColorScheme = darkColorScheme(
     primary = DarkYellow,
     secondary = Brown,
-    tertiary = Yellow,
-    background = DarkBlue,
-    surface = DarkBlue,
+    tertiary = Black,
+    background = Black,
+    surface = Black,
     onPrimary = White,
     onSecondary = White,
     onBackground = White,

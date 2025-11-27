@@ -16,9 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.data.managers.AppTheme
 import com.rexandel.cube_crush.data.managers.ThemeManager
 import com.rexandel.cube_crush.data.managers.StringResources
@@ -51,6 +50,9 @@ import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangeEmailDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangePasswordDialog
 import com.rexandel.cube_crush.ui.components.settings.LogoutConfirmationDialog
+import com.rexandel.cube_crush.ui.components.common.PixelButton
+import com.rexandel.cube_crush.ui.components.common.ButtonColor
+import com.rexandel.cube_crush.ui.components.common.ButtonSize
 
 @Composable
 fun SettingsScreen(
@@ -84,7 +86,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .background(MaterialTheme.colorScheme.primary)
+                .background(MaterialTheme.colorScheme.tertiary)
         ) {
             Row(
                 modifier = Modifier
@@ -96,10 +98,10 @@ fun SettingsScreen(
                     onClick = onBackToMenu,
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    androidx.compose.foundation.Image(
+                        painter = painterResource(id = R.drawable.arrow_left_solid),
                         contentDescription = StringResources.back,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
@@ -171,133 +173,54 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Card(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                onClick = { showThemeDialog = true }
+                    .padding(horizontal = 32.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DarkMode,
-                        contentDescription = StringResources.theme,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = StringResources.changeTheme,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                PixelButton(
+                    text = "",
+                    onClick = { showThemeDialog = true },
+                    buttonColor = ButtonColor.PURPLE,
+                    size = ButtonSize.SMALL,
+                    iconResId = R.drawable.themes_solid,
+                    modifier = Modifier.weight(1f)
+                )
+
+                PixelButton(
+                    text = "",
+                    onClick = { showLanguageDialog = true },
+                    buttonColor = ButtonColor.GREEN,
+                    size = ButtonSize.SMALL,
+                    iconResId = R.drawable.translate_solid,
+                    modifier = Modifier.weight(1f)
+                )
+
+                PixelButton(
+                    text = "",
+                    onClick = { showChangePasswordDialog = true },
+                    buttonColor = ButtonColor.YELLOW,
+                    size = ButtonSize.SMALL,
+                    iconResId = R.drawable.settings_solid,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(64.dp))
 
-            Card(
+            PixelButton(
+                text = StringResources.logout,
+                onClick = { showLogoutDialog = true },
+                buttonColor = ButtonColor.RED,
+                size = ButtonSize.NORMAL,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                onClick = { showLanguageDialog = true }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Language,
-                        contentDescription = StringResources.language,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = StringResources.changeLanguage,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                onClick = { showChangePasswordDialog = true }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = StringResources.changePassword,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = StringResources.changePassword,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                ),
-                onClick = { showLogoutDialog = true }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = StringResources.logout,
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = StringResources.logout,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+                    .height(70.dp)
+                        .padding(horizontal = 16.dp)
+            )
         }
     }
 

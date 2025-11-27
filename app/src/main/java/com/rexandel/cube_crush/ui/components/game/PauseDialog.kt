@@ -1,19 +1,25 @@
 package com.rexandel.cube_crush.ui.components.game
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.data.managers.StringResources
+import com.rexandel.cube_crush.ui.components.common.ButtonColor
+import com.rexandel.cube_crush.ui.components.common.ButtonSize
+import com.rexandel.cube_crush.ui.components.common.PixelButton
 
 @Composable
 fun PauseDialog(
@@ -29,67 +35,65 @@ fun PauseDialog(
                 StringResources.pause,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         },
         text = {
-            Text(
-                StringResources.gamePaused,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onResume,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    StringResources.resume,
+                    StringResources.gamePaused,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
                 )
             }
         },
-        dismissButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+        confirmButton = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = onRestart,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ),
-                    modifier = Modifier.weight(1f)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        StringResources.restart,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSecondary
+                    PixelButton(
+                        text = StringResources.resume,
+                        onClick = onResume,
+                        buttonColor = ButtonColor.GREEN,
+                        size = ButtonSize.SMALL,
+                        iconResId = R.drawable.play_solid
                     )
-                }
 
-                Button(
-                    onClick = onExit,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    ),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        StringResources.exitToMenu,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onError
+                    PixelButton(
+                        text = StringResources.restart,
+                        onClick = onRestart,
+                        buttonColor = ButtonColor.YELLOW,
+                        size = ButtonSize.SMALL,
+                        iconResId = R.drawable.arrow_solid
+                    )
+
+                    PixelButton(
+                        text = StringResources.exitToMenu,
+                        onClick = onExit,
+                        buttonColor = ButtonColor.RED,
+                        size = ButtonSize.SMALL,
+                        iconResId = R.drawable.home_solid
                     )
                 }
             }
-        }
+        },
+        dismissButton = {}
     )
 }
