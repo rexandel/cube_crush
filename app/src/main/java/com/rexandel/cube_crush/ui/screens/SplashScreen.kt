@@ -27,7 +27,7 @@ fun SplashScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.pixel_logo),
                 contentDescription = StringResources.gameLogo,
                 modifier = Modifier.size(400.dp)
             )

@@ -40,7 +40,7 @@ fun MenuScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.pixel_logo),
                 contentDescription = StringResources.gameLogo,
                 modifier = Modifier.size(350.dp)
             )
