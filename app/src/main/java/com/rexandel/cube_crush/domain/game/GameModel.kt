@@ -13,6 +13,8 @@ class GameModel(
     private var _currentState: GameState
     private val boardManager: BoardManager = BoardManager(boardWidth, boardHeight)
     private val shapeFactory = ShapeFactory
+    private var comboCounter: Int = 0
+    private var hasClearedLineThisTurn: Boolean = false
 
     init {
         _currentState = createNewGame()
@@ -24,13 +26,16 @@ class GameModel(
         val board = boardManager.createEmptyBoard()
         val initialShapes = shapeFactory.generateSmartShapes(board, shapesPerMove)
         val boardWithInitialBlocks = boardManager.addInitialRandomBlocks(board, initialShapes)
+        comboCounter = 0
+        hasClearedLineThisTurn = false
 
         return GameState(
             board = boardWithInitialBlocks,
             availableShapes = initialShapes,
             score = 0,
             highScore = highScore,
-            isGameOver = false
+            isGameOver = false,
+            comboCount = 0
         )
     }
 
@@ -50,8 +55,18 @@ class GameModel(
         val newBoard = boardManager.placeShapeOnBoard(currentState.board, shape, position)
 
         val (boardAfterLineClear, linesCleared) = boardManager.checkAndClearLines(newBoard)
-        val newScore = currentState.score + (linesCleared * 100)
 
+        val baseScore = linesCleared * 100
+
+        val comboMultiplier = if (comboCounter > 0) 1 + (comboCounter * 0.5) else 1.0
+        val scoreWithCombo = (baseScore * comboMultiplier).toInt()
+
+        if (linesCleared > 0) {
+            hasClearedLineThisTurn = true
+            comboCounter++
+        }
+
+        val newScore = currentState.score + scoreWithCombo
         val newHighScore = maxOf(currentState.highScore, newScore)
 
         val newShapes = currentState.availableShapes.mapIndexed { index, existingShape ->
@@ -67,14 +82,15 @@ class GameModel(
             availableShapes = newShapes,
             score = newScore,
             highScore = newHighScore,
-            isGameOver = isGameOverAfterMove
+            isGameOver = isGameOverAfterMove,
+            comboCount = comboCounter
         )
 
         if (allShapesUsed && !isGameOverAfterMove) {
             generateNewSmartShapes()
         }
 
-        return PlaceShapeResult.Success(linesCleared)
+        return PlaceShapeResult.Success(linesCleared, scoreWithCombo, comboCounter)
     }
 
     internal fun canPlaceShape(shape: Shape, position: Pair<Int, Int>): Boolean {
@@ -118,9 +134,15 @@ class GameModel(
         val newShapes = shapeFactory.generateSmartShapes(_currentState.board, shapesPerMove)
         val isGameOverAfterNewShapes = checkGameOver(_currentState.board, newShapes)
 
+        if (!hasClearedLineThisTurn) {
+            comboCounter = 0
+        }
+        hasClearedLineThisTurn = false
+
         _currentState = _currentState.copy(
             availableShapes = newShapes,
-            isGameOver = isGameOverAfterNewShapes
+            isGameOver = isGameOverAfterNewShapes,
+            comboCount = comboCounter
         )
     }
 

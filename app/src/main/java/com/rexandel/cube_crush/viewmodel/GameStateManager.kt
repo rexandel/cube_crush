@@ -15,7 +15,11 @@ class GameStateManager(private val gameModel: GameModel) {
 
         return when (result) {
             is com.rexandel.cube_crush.domain.entities.PlaceShapeResult.Success -> {
-                PlaceShapeResult.Success(result.linesCleared)
+                PlaceShapeResult.Success(
+                    linesCleared = result.linesCleared,
+                    scoreEarned = result.scoreEarned,
+                    comboCount = result.comboCount
+                )
             }
             is com.rexandel.cube_crush.domain.entities.PlaceShapeResult.Failure -> {
                 Log.e("GameStateManager", "Failed to place shape: ${result.message}. Shape: $shapeIndex, Position: $position")

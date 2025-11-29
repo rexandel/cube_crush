@@ -4,10 +4,12 @@ class UiEffectsManager {
 
     private var _uiEffects = UiEffects()
 
-    fun showScoreAnimation(linesCleared: Int) {
+    fun showScoreAnimation(linesCleared: Int, scoreEarned: Int, comboCount: Int) {
         _uiEffects = UiEffects(
             shouldAnimateScore = true,
-            linesCleared = linesCleared
+            linesCleared = linesCleared,
+            scoreEarned = scoreEarned,
+            comboCount = comboCount
         )
     }
 
@@ -31,5 +33,13 @@ class UiEffectsManager {
 
     fun getLinesCleared(): Int {
         return _uiEffects.linesCleared
+    }
+
+    fun getComboCount(): Int {
+        return _uiEffects.comboCount
+    }
+
+    fun getScoreEarned(): Int {
+        return _uiEffects.scoreEarned
     }
 }

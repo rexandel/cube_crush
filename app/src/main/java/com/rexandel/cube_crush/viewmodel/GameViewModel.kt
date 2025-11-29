@@ -59,7 +59,11 @@ class GameViewModel(
         val result = gameStateManager.placeShape(shapeIndex, position)
 
         if (result is PlaceShapeResult.Success) {
-            uiEffectsManager.showScoreAnimation(result.linesCleared)
+            uiEffectsManager.showScoreAnimation(
+                linesCleared = result.linesCleared,
+                scoreEarned = result.scoreEarned,
+                comboCount = result.comboCount
+            )
 
             val currentState = gameStateManager.getCurrentState()
             if (currentState.score == currentState.highScore) {

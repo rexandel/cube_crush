@@ -27,13 +27,23 @@ data class DragState(
 
 data class UiEffects(
     val shouldAnimateScore: Boolean = false,
-    val linesCleared: Int = 0
+    val linesCleared: Int = 0,
+    val comboCount: Int = 0,
+    val scoreEarned: Int = 0
 ) {
     val shouldShowLineClearEffect: Boolean
         get() = linesCleared > 0
+
+    val shouldShowComboEffect: Boolean
+        get() = comboCount > 0
 }
 
 sealed class PlaceShapeResult {
-    data class Success(val linesCleared: Int) : PlaceShapeResult()
+    data class Success(
+        val linesCleared: Int,
+        val scoreEarned: Int = linesCleared * 100,
+        val comboCount: Int = 0
+    ) : PlaceShapeResult()
+
     data class Failure(val message: String) : PlaceShapeResult()
 }
