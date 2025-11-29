@@ -125,6 +125,7 @@ fun GameScreen(
         GameHeader(
             highScore = animatedHighScore.value.toInt(),
             score = animatedScore.value.toInt(),
+            comboCount = gameState.comboCount,
             onPauseClick = { isPaused = true }
         )
 
