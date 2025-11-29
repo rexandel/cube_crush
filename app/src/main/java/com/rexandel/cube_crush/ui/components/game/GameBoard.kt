@@ -22,10 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
@@ -143,7 +140,6 @@ fun BoardBlockView(
     val borderWidth = if (previewBlock != null) 2.dp else 1.dp
 
     val buzzOffsetX = remember { Animatable(0f) }
-
     val previewPulseAlpha = remember { Animatable(0.6f) }
 
     LaunchedEffect(isInLineToClear) {
@@ -225,28 +221,9 @@ fun BoardBlockView(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .graphicsLayer {
-                        compositingStrategy = CompositingStrategy.Offscreen
-                    }
-                    .drawWithCache {
-                        val subtleGlow = Brush.radialGradient(
-                            colors = listOf(
-                                Color.Red.copy(alpha = 0.2f),
-                                Color.Yellow.copy(alpha = 0.3f),
-                                Color.Transparent
-                            ),
-                            center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
-                            radius = size.minDimension / 1.8f
-                        )
-
-                        onDrawWithContent {
-                            drawContent()
-                            drawRect(
-                                brush = subtleGlow,
-                                blendMode = BlendMode.Plus
-                            )
-                        }
-                    }
+                    .background(
+                        Color.Red.copy(alpha = 0.3f)
+                    )
             )
         }
 
@@ -271,27 +248,9 @@ fun BoardBlockView(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .graphicsLayer {
-                        compositingStrategy = CompositingStrategy.Offscreen
-                    }
-                    .drawWithCache {
-                        val previewGlow = Brush.radialGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = previewPulseAlpha.value * 0.3f),
-                                Color.Transparent
-                            ),
-                            center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
-                            radius = size.minDimension / 2f
-                        )
-
-                        onDrawWithContent {
-                            drawContent()
-                            drawRect(
-                                brush = previewGlow,
-                                blendMode = BlendMode.Plus
-                            )
-                        }
-                    }
+                    .background(
+                        Color.Cyan.copy(alpha = previewPulseAlpha.value * 0.3f)
+                    )
             )
         }
 
