@@ -243,33 +243,6 @@ fun BoardBlockView(
                     }
             )
         }
-
-        if (previewDrawableResId != null && isValidPosition && !isInLineToClear) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        Color.Cyan.copy(alpha = previewPulseAlpha.value * 0.3f)
-                    )
-            )
-        }
-
-        if (previewDrawableResId != null && isValidPosition && !isInLineToClear) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .drawWithCache {
-                        onDrawBehind {
-                            drawRoundRect(
-                                color = Color.Cyan.copy(alpha = 0.6f),
-                                size = size,
-                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f),
-                                style = Stroke(width = 1.5f)
-                            )
-                        }
-                    }
-            )
-        }
     }
 }
 
