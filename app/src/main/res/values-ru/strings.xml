@@ -59,7 +59,7 @@
     <string name="change_email">Изменение почты</string>
     <string name="new_email">Новая почта</string>
     <string name="password_for_confirmation">Пароль для подтверждения</string>
-    <string name="save">Сохранить</string>
+    <string name="save">ОК</string>
     <string name="invalid_password">Неверный пароль</string>
     <string name="email_already_used">Эта почта уже используется</string>
     <string name="current_password">Текущий пароль</string>
