@@ -43,23 +43,6 @@ class UserRepository private constructor(context: Context) {
         return sharedPref.getString("current_user", null)
     }
 
-    fun getHighScore(): Int {
-        return sharedPref.getInt("high_score", 0)
-    }
-
-    fun saveHighScore(score: Int) {
-        sharedPref.edit().putInt("high_score", score).apply()
-    }
-
-    fun updateHighScore(newScore: Int): Int {
-        val currentHighScore = getHighScore()
-        if (newScore > currentHighScore) {
-            saveHighScore(newScore)
-            return newScore
-        }
-        return currentHighScore
-    }
-
     fun logout() {
         sharedPref.edit().remove("current_user").apply()
     }

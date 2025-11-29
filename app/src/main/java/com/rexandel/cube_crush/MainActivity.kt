@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.data.repositories.ScoreRepository
 import com.rexandel.cube_crush.data.repositories.SettingsRepository
 import com.rexandel.cube_crush.data.managers.AppLocale
 import com.rexandel.cube_crush.data.managers.LocaleManager
@@ -27,6 +28,7 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private lateinit var userRepository: UserRepository
+    private lateinit var scoreRepository: ScoreRepository
     private lateinit var settingsRepository: SettingsRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
         userRepository = UserRepository.getInstance(this)
+        scoreRepository = ScoreRepository.getInstance(this)
         settingsRepository = SettingsRepository.getInstance(this)
 
         applySavedLocale()
@@ -56,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     androidx.compose.material3.Surface(
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        AppNavigation(themeManager, localeManager, userRepository)
+                        AppNavigation(themeManager, localeManager, userRepository, scoreRepository)
                     }
                 }
             }
@@ -99,7 +102,8 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(
     themeManager: ThemeManager,
     localeManager: LocaleManager,
-    userRepository: UserRepository
+    userRepository: UserRepository,
+    scoreRepository: ScoreRepository
 ) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }
@@ -145,7 +149,8 @@ fun AppNavigation(
                 },
                 themeManager = themeManager,
                 localeManager = localeManager,
-                userRepository = userRepository
+                userRepository = userRepository,
+                scoreRepository = scoreRepository
             )
         }
     }

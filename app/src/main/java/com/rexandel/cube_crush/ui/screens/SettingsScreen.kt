@@ -12,10 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,6 +42,7 @@ import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.data.managers.AppLocale
 import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.data.repositories.ScoreRepository
 import com.rexandel.cube_crush.ui.components.settings.SettingsInfoItem
 import com.rexandel.cube_crush.ui.components.settings.ThemeSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
@@ -60,7 +59,8 @@ fun SettingsScreen(
     onLogout: () -> Unit,
     themeManager: ThemeManager,
     localeManager: LocaleManager,
-    userRepository: UserRepository
+    userRepository: UserRepository,
+    scoreRepository: ScoreRepository
 ) {
     val context = LocalContext.current
 
@@ -74,7 +74,7 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         currentUser = userRepository.getCurrentUser()
-        highScore = userRepository.getHighScore()
+        highScore = scoreRepository.getHighScore()
     }
 
     Box(
@@ -219,7 +219,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(70.dp)
-                        .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
     }

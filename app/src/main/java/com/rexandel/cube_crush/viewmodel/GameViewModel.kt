@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rexandel.cube_crush.domain.game.GameModel
 import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.data.repositories.ScoreRepository
 import com.rexandel.cube_crush.domain.entities.Shape
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class GameViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val scoreRepository: ScoreRepository
 ) : ViewModel() {
 
     private val gameModel = GameModel()
@@ -108,13 +110,13 @@ class GameViewModel(
     private fun updateHighScore() {
         viewModelScope.launch {
             val currentScore = _uiState.value.gameState.score
-            userRepository.updateHighScore(currentScore)
+            scoreRepository.updateHighScore(currentScore)
         }
     }
 
     private fun updateHighScoreFromRepository() {
         viewModelScope.launch {
-            val savedHighScore = userRepository.getHighScore()
+            val savedHighScore = scoreRepository.getHighScore()
             gameStateManager.updateHighScore(savedHighScore)
             updateUiState()
         }
