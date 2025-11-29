@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,6 +76,7 @@ fun SettingsScreen(
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showUserMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         currentUser = userRepository.getCurrentUser()
@@ -120,7 +123,45 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Spacer(modifier = Modifier.size(24.dp))
+                Box {
+                    IconButton(
+                        onClick = { showUserMenu = true },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(id = R.drawable.ellipses_vertical_solid),
+                            contentDescription = StringResources.userMenu,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showUserMenu,
+                        onDismissRequest = { showUserMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(StringResources.changeNickname) },
+                            onClick = {
+                                showChangeNicknameDialog = true
+                                showUserMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(StringResources.changeEmail) },
+                            onClick = {
+                                showChangeEmailDialog = true
+                                showUserMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(StringResources.changePassword) },
+                            onClick = {
+                                showChangePasswordDialog = true
+                                showUserMenu = false
+                            }
+                        )
+                    }
+                }
             }
         }
 
@@ -175,15 +216,13 @@ fun SettingsScreen(
                     SettingsInfoItem(
                         label = StringResources.nickname,
                         value = currentNickname ?: StringResources.notAvailable,
-                        showEditIcon = true,
-                        onEditClick = { showChangeNicknameDialog = true }
+                        showEditIcon = false
                     )
 
                     SettingsInfoItem(
                         label = StringResources.email,
                         value = currentUser ?: StringResources.notAvailable,
-                        showEditIcon = true,
-                        onEditClick = { showChangeEmailDialog = true }
+                        showEditIcon = false
                     )
 
                     SettingsInfoItem(
@@ -221,26 +260,13 @@ fun SettingsScreen(
 
                 PixelButton(
                     text = "",
-                    onClick = { showChangePasswordDialog = true },
-                    buttonColor = ButtonColor.YELLOW,
+                    onClick = { showLogoutDialog = true },
+                    buttonColor = ButtonColor.RED,
                     size = ButtonSize.SMALL,
-                    iconResId = R.drawable.settings_solid,
+                    iconResId = R.drawable.logout_solid,
                     modifier = Modifier.weight(1f)
                 )
             }
-
-            Spacer(modifier = Modifier.height(64.dp))
-
-            PixelButton(
-                text = StringResources.logout,
-                onClick = { showLogoutDialog = true },
-                buttonColor = ButtonColor.RED,
-                size = ButtonSize.NORMAL,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(70.dp)
-                    .padding(horizontal = 16.dp)
-            )
         }
     }
 

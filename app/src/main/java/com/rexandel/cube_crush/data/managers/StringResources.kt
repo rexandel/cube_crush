@@ -203,4 +203,7 @@ object StringResources {
 
     val nicknameLabel: String
         @Composable get() = stringResource(R.string.nickname)
+
+    val userMenu: String
+        @Composable get() = stringResource(R.string.user_menu)
 }

@@ -77,4 +77,5 @@
     <string name="nickname_exists">Это имя пользователя уже занято</string>
     <string name="nickname_empty">Имя пользователя не может быть пустым</string>
     <string name="registration_failed">Ошибка регистрации</string>
+    <string name="user_menu">Меню пользователя</string>
 </resources>
