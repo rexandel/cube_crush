@@ -1,5 +1,7 @@
 package com.rexandel.cube_crush.ui.screens
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,7 @@ import com.rexandel.cube_crush.ui.components.game.PauseDialog
 import com.rexandel.cube_crush.ui.components.game.ShapesPanel
 import com.rexandel.cube_crush.viewmodel.GameViewModel
 import com.rexandel.cube_crush.viewmodel.GameViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun GameScreen(
@@ -54,14 +57,35 @@ fun GameScreen(
     var boardSize by remember { mutableStateOf(0.dp) }
     var shapeStartPositions by remember { mutableStateOf<List<Offset>>(emptyList()) }
     var dragOffsets by remember { mutableStateOf(List(3) { Offset.Zero }) }
-    var animatedScore by remember { mutableStateOf(gameState.score) }
 
-    LaunchedEffect(gameState.score, uiEffects.shouldAnimateScore) {
+    val animatedScore = remember { Animatable(gameState.score.toFloat()) }
+    val animatedHighScore = remember { Animatable(gameState.highScore.toFloat()) }
+
+    LaunchedEffect(gameState.score) {
+        if (gameState.score != animatedScore.value.toInt()) {
+            launch {
+                animatedScore.animateTo(
+                    targetValue = gameState.score.toFloat(),
+                    animationSpec = tween(durationMillis = 1000)
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(gameState.highScore) {
+        if (gameState.highScore != animatedHighScore.value.toInt()) {
+            launch {
+                animatedHighScore.animateTo(
+                    targetValue = gameState.highScore.toFloat(),
+                    animationSpec = tween(durationMillis = 1000)
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(uiEffects.shouldAnimateScore) {
         if (uiEffects.shouldAnimateScore) {
-            animatedScore = gameState.score
             gameViewModel.scoreAnimationCompleted()
-        } else if (gameState.score != animatedScore) {
-            animatedScore = gameState.score
         }
     }
 
@@ -99,8 +123,8 @@ fun GameScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         GameHeader(
-            highScore = gameState.highScore,
-            score = animatedScore,
+            highScore = animatedHighScore.value.toInt(),
+            score = animatedScore.value.toInt(),
             onPauseClick = { isPaused = true }
         )
 
