@@ -70,4 +70,11 @@
     <string name="password_change_error">Error changing password</string>
     <string name="logout_confirmation">Are you sure you want to logout?</string>
     <string name="high_score_title">Record</string>
+    <string name="nickname">Nickname</string>
+    <string name="change_nickname">Change Nickname</string>
+    <string name="new_nickname">New Nickname</string>
+    <string name="nickname_too_short">Nickname must be at least 3 characters long</string>
+    <string name="nickname_exists">Nickname is already taken</string>
+    <string name="nickname_empty">Nickname cannot be empty</string>
+    <string name="registration_failed">Registration failed</string>
 </resources>

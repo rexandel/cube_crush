@@ -21,6 +21,7 @@ fun RegisterScreen(
     userRepository: UserRepositoryImpl
 ) {
     var email by remember { mutableStateOf("") }
+    var nickname by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -52,6 +53,30 @@ fun RegisterScreen(
                 label = {
                     Text(
                         StringResources.email,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                ),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = nickname,
+                onValueChange = { nickname = it },
+                label = {
+                    Text(
+                        StringResources.nickname,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -132,19 +157,27 @@ fun RegisterScreen(
                 text = StringResources.registerButton,
                 onClick = {
                     when {
-                        email.isEmpty() || password.isEmpty() ->
+                        email.isEmpty() || password.isEmpty() || nickname.isEmpty() ->
                             errorMessage = StringResources.fillAllFields(context)
                         password.length < 6 ->
                             errorMessage = StringResources.passwordTooShort(context)
                         password != confirmPassword ->
                             errorMessage = StringResources.passwordsDontMatch(context)
+                        nickname.length < 3 ->
+                            errorMessage = StringResources.nicknameTooShort(context)
                         else -> {
-                            if (userRepository.registerUser(email, password)) {
+                            if (userRepository.registerUser(email, password, nickname)) {
                                 userRepository.setCurrentUser(email)
                                 errorMessage = ""
                                 onRegisterSuccess()
                             } else {
-                                errorMessage = StringResources.userExists(context)
+                                if (userRepository.isEmailExists(email)) {
+                                    errorMessage = StringResources.userExists(context)
+                                } else if (userRepository.isNicknameExists(nickname)) {
+                                    errorMessage = StringResources.nicknameExists(context)
+                                } else {
+                                    errorMessage = StringResources.registrationFailed(context)
+                                }
                             }
                         }
                     }

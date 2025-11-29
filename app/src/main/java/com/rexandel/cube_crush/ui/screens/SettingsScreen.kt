@@ -49,6 +49,7 @@ import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangeEmailDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangePasswordDialog
 import com.rexandel.cube_crush.ui.components.settings.LogoutConfirmationDialog
+import com.rexandel.cube_crush.ui.components.settings.ChangeNicknameDialog
 import com.rexandel.cube_crush.ui.components.common.PixelButton
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
 import com.rexandel.cube_crush.ui.components.common.ButtonSize
@@ -65,15 +66,18 @@ fun SettingsScreen(
     val context = LocalContext.current
 
     var currentUser by remember { mutableStateOf<String?>(null) }
+    var currentNickname by remember { mutableStateOf<String?>(null) }
     var highScore by remember { mutableStateOf(0) }
     var showChangeEmailDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
+    var showChangeNicknameDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         currentUser = userRepository.getCurrentUser()
+        currentNickname = userRepository.getCurrentUserNickname()
         highScore = scoreRepository.getHighScore()
     }
 
@@ -143,7 +147,16 @@ fun SettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = currentNickname ?: currentUser ?: StringResources.notAvailable,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Card(
                 modifier = Modifier
@@ -159,6 +172,13 @@ fun SettingsScreen(
                         .padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    SettingsInfoItem(
+                        label = StringResources.nickname,
+                        value = currentNickname ?: StringResources.notAvailable,
+                        showEditIcon = true,
+                        onEditClick = { showChangeNicknameDialog = true }
+                    )
+
                     SettingsInfoItem(
                         label = StringResources.email,
                         value = currentUser ?: StringResources.notAvailable,
@@ -242,6 +262,19 @@ fun SettingsScreen(
             onDismiss = { showChangePasswordDialog = false },
             onPasswordChanged = {
                 showChangePasswordDialog = false
+            },
+            userRepository = userRepository
+        )
+    }
+
+    if (showChangeNicknameDialog) {
+        ChangeNicknameDialog(
+            currentNickname = currentNickname ?: "",
+            onDismiss = { showChangeNicknameDialog = false },
+            onNicknameChanged = { newNickname ->
+                userRepository.updateUserNickname(newNickname)
+                currentNickname = newNickname
+                showChangeNicknameDialog = false
             },
             userRepository = userRepository
         )

@@ -185,4 +185,22 @@ object StringResources {
     fun logoutConfirmation(context: Context): String = context.getString(R.string.logout_confirmation)
     val highScoreLabel: String
         @Composable get() = stringResource(R.string.high_score_title)
+
+    val nickname: String
+        @Composable get() = stringResource(R.string.nickname)
+
+    val changeNickname: String
+        @Composable get() = stringResource(R.string.change_nickname)
+
+    val newNickname: String
+        @Composable get() = stringResource(R.string.new_nickname)
+
+    fun nicknameTooShort(context: Context): String = context.getString(R.string.nickname_too_short)
+    fun nicknameExists(context: Context): String = context.getString(R.string.nickname_exists)
+    fun nicknameEmpty(context: Context): String = context.getString(R.string.nickname_empty)
+
+    fun registrationFailed(context: Context): String = context.getString(R.string.registration_failed)
+
+    val nicknameLabel: String
+        @Composable get() = stringResource(R.string.nickname)
 }

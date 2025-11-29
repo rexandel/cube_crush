@@ -18,14 +18,20 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
         }
     }
 
-    override fun registerUser(email: String, password: String): Boolean {
+    override fun registerUser(email: String, password: String, nickname: String): Boolean {
         if (sharedPref.getString("email_$email", null) != null) {
+            return false
+        }
+
+        if (sharedPref.getString("nickname_$nickname", null) != null) {
             return false
         }
 
         sharedPref.edit().apply {
             putString("email_$email", email)
             putString("password_$email", password)
+            putString("nickname_$email", nickname)
+            putString("nickname_$nickname", email)
             apply()
         }
         return true
@@ -44,6 +50,15 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
         return sharedPref.getString("current_user", null)
     }
 
+    override fun getCurrentUserNickname(): String? {
+        val currentUser = getCurrentUser()
+        return if (currentUser != null) {
+            sharedPref.getString("nickname_$currentUser", null)
+        } else {
+            null
+        }
+    }
+
     override fun logout() {
         sharedPref.edit().remove("current_user").apply()
     }
@@ -52,14 +67,35 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
         val currentUser = getCurrentUser()
         if (currentUser != null) {
             val currentPassword = sharedPref.getString("password_$currentUser", "")
+            val currentNickname = sharedPref.getString("nickname_$currentUser", "")
 
             sharedPref.edit().apply {
                 remove("email_$currentUser")
                 remove("password_$currentUser")
+                remove("nickname_$currentUser")
+                remove("nickname_$currentNickname")
 
                 putString("email_$newEmail", newEmail)
                 putString("password_$newEmail", currentPassword)
+                putString("nickname_$newEmail", currentNickname)
+                putString("nickname_$currentNickname", newEmail)
                 putString("current_user", newEmail)
+                apply()
+            }
+        }
+    }
+
+    override fun updateUserNickname(newNickname: String) {
+        val currentUser = getCurrentUser()
+        if (currentUser != null) {
+            val oldNickname = sharedPref.getString("nickname_$currentUser", "")
+
+            sharedPref.edit().apply {
+                if (oldNickname != null) {
+                    remove("nickname_$oldNickname")
+                }
+                putString("nickname_$currentUser", newNickname)
+                putString("nickname_$newNickname", currentUser)
                 apply()
             }
         }
@@ -85,5 +121,9 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
 
     override fun isEmailExists(email: String): Boolean {
         return sharedPref.getString("email_$email", null) != null
+    }
+
+    override fun isNicknameExists(nickname: String): Boolean {
+        return sharedPref.getString("nickname_$nickname", null) != null
     }
 }

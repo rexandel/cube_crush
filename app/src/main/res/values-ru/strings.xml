@@ -70,4 +70,11 @@
     <string name="password_change_error">Ошибка при смене пароля</string>
     <string name="logout_confirmation">Вы уверены, что хотите выйти из аккаунта?</string>
     <string name="high_score_title">Рекорд</string>
+    <string name="nickname">Имя пользователя</string>
+    <string name="change_nickname">Изменение имени пользователя</string>
+    <string name="new_nickname">Новое имя пользователя</string>
+    <string name="nickname_too_short">Имя пользователя должно быть не менее 3 символов</string>
+    <string name="nickname_exists">Это имя пользователя уже занято</string>
+    <string name="nickname_empty">Имя пользователя не может быть пустым</string>
+    <string name="registration_failed">Ошибка регистрации</string>
 </resources>
