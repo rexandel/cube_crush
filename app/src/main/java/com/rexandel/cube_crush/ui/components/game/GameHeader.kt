@@ -17,7 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,12 +58,10 @@ fun GameHeader(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            if (comboCount > 0) {
-                CompactComboCounter(
-                    comboCount = comboCount,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
+            CompactComboCounter(
+                comboCount = comboCount,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
 
             PixelButton(
                 text = "",
@@ -118,11 +118,15 @@ fun CompactComboCounter(
     val scaleAnim = remember { Animatable(1f) }
     val rotationAnim = remember { Animatable(0f) }
     val alphaAnim = remember { Animatable(1f) }
+    val explodeScaleAnim = remember { Animatable(1f) }
+    val explodeAlphaAnim = remember { Animatable(1f) }
+
+    var previousComboCount by remember { androidx.compose.runtime.mutableStateOf(comboCount) }
 
     LaunchedEffect(comboCount) {
-        if (comboCount > 0) {
+        if (comboCount > previousComboCount) {
             scaleAnim.animateTo(
-                targetValue = 1.2f,
+                targetValue = 1.4f,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioLowBouncy,
                     stiffness = Spring.StiffnessLow
@@ -136,36 +140,57 @@ fun CompactComboCounter(
 
             alphaAnim.animateTo(0.7f, tween(durationMillis = 200))
             alphaAnim.animateTo(1f, tween(durationMillis = 200))
+        } else if (comboCount == 0 && previousComboCount > 0) {
+            explodeScaleAnim.animateTo(
+                targetValue = 1.5f,
+                animationSpec = tween(durationMillis = 400)
+            )
+            explodeAlphaAnim.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = 400)
+            )
+
+            explodeScaleAnim.snapTo(1f)
+            explodeAlphaAnim.snapTo(1f)
         }
+
+        previousComboCount = comboCount
     }
 
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "COMBO",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
-
-        Text(
-            text = "x${comboCount}",
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold
-            ),
-            color = getComboColor(comboCount),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .graphicsLayer {
-                    scaleX = scaleAnim.value
-                    scaleY = scaleAnim.value
-                    rotationZ = rotationAnim.value
-                    alpha = alphaAnim.value
+    if (comboCount > 0 || (comboCount == 0 && explodeAlphaAnim.value > 0f && previousComboCount > 0)) {
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "COMBO",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.graphicsLayer {
+                    scaleX = explodeScaleAnim.value
+                    scaleY = explodeScaleAnim.value
+                    alpha = explodeAlphaAnim.value
                 }
-        )
+            )
+
+            Text(
+                text = "x${if (comboCount > 0) comboCount else previousComboCount}",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = getComboColor(if (comboCount > 0) comboCount else previousComboCount),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .graphicsLayer {
+                        scaleX = if (comboCount > 0) scaleAnim.value else explodeScaleAnim.value
+                        scaleY = if (comboCount > 0) scaleAnim.value else explodeScaleAnim.value
+                        rotationZ = if (comboCount > 0) rotationAnim.value else 0f
+                        alpha = if (comboCount > 0) alphaAnim.value else explodeAlphaAnim.value
+                    }
+            )
+        }
     }
 }
 
