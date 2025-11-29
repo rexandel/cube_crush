@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
 import com.rexandel.cube_crush.ui.components.common.PixelButton
@@ -33,7 +32,7 @@ fun ChangeEmailDialog(
     currentEmail: String,
     onDismiss: () -> Unit,
     onEmailChanged: (String) -> Unit,
-    userRepository: UserRepository
+    userRepository: UserRepositoryImpl
 ) {
     val context = LocalContext.current
     var newEmail by remember { mutableStateOf(currentEmail) }

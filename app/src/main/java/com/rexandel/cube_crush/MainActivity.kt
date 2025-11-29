@@ -9,10 +9,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
-import com.rexandel.cube_crush.data.repositories.UserRepository
-import com.rexandel.cube_crush.data.repositories.ScoreRepository
-import com.rexandel.cube_crush.data.repositories.SettingsRepository
-import com.rexandel.cube_crush.data.managers.AppLocale
+import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
+import com.rexandel.cube_crush.data.repositories.ScoreRepositoryImpl
+import com.rexandel.cube_crush.data.repositories.SettingsRepositoryImpl
+import com.rexandel.cube_crush.domain.managers.AppLocale
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.data.managers.ThemeManager
 import com.rexandel.cube_crush.data.managers.rememberLocaleManager
@@ -27,17 +27,17 @@ import com.rexandel.cube_crush.ui.theme.CubeCrushTheme
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
-    private lateinit var userRepository: UserRepository
-    private lateinit var scoreRepository: ScoreRepository
-    private lateinit var settingsRepository: SettingsRepository
+    private lateinit var userRepository: UserRepositoryImpl
+    private lateinit var scoreRepository: ScoreRepositoryImpl
+    private lateinit var settingsRepository: SettingsRepositoryImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
-        userRepository = UserRepository.getInstance(this)
-        scoreRepository = ScoreRepository.getInstance(this)
-        settingsRepository = SettingsRepository.getInstance(this)
+        userRepository = UserRepositoryImpl.getInstance(this)
+        scoreRepository = ScoreRepositoryImpl.getInstance(this)
+        settingsRepository = SettingsRepositoryImpl.getInstance(this)
 
         applySavedLocale()
 
@@ -102,8 +102,8 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(
     themeManager: ThemeManager,
     localeManager: LocaleManager,
-    userRepository: UserRepository,
-    scoreRepository: ScoreRepository
+    userRepository: UserRepositoryImpl,
+    scoreRepository: ScoreRepositoryImpl
 ) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }

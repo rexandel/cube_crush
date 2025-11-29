@@ -1,6 +1,5 @@
 package com.rexandel.cube_crush.ui.screens.auth
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,11 +7,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.rexandel.cube_crush.R
-import com.rexandel.cube_crush.data.repositories.UserRepository
+import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.PixelButton
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
@@ -21,7 +18,7 @@ import com.rexandel.cube_crush.ui.components.common.ButtonColor
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    userRepository: UserRepository
+    userRepository: UserRepositoryImpl
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

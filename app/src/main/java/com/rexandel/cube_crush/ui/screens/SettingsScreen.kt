@@ -36,13 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rexandel.cube_crush.R
-import com.rexandel.cube_crush.data.managers.AppTheme
+import com.rexandel.cube_crush.domain.managers.AppTheme
 import com.rexandel.cube_crush.data.managers.ThemeManager
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.data.managers.LocaleManager
-import com.rexandel.cube_crush.data.managers.AppLocale
-import com.rexandel.cube_crush.data.repositories.UserRepository
-import com.rexandel.cube_crush.data.repositories.ScoreRepository
+import com.rexandel.cube_crush.domain.managers.AppLocale
+import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
+import com.rexandel.cube_crush.data.repositories.ScoreRepositoryImpl
 import com.rexandel.cube_crush.ui.components.settings.SettingsInfoItem
 import com.rexandel.cube_crush.ui.components.settings.ThemeSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
@@ -59,8 +59,8 @@ fun SettingsScreen(
     onLogout: () -> Unit,
     themeManager: ThemeManager,
     localeManager: LocaleManager,
-    userRepository: UserRepository,
-    scoreRepository: ScoreRepository
+    userRepository: UserRepositoryImpl,
+    scoreRepository: ScoreRepositoryImpl
 ) {
     val context = LocalContext.current
 

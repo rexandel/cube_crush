@@ -2,22 +2,23 @@ package com.rexandel.cube_crush.data.repositories
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.rexandel.cube_crush.domain.repositories.UserRepository
 
-class UserRepository private constructor(context: Context) {
+class UserRepositoryImpl private constructor(context: Context) : UserRepository {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
 
     companion object {
         @Volatile
-        private var INSTANCE: UserRepository? = null
+        private var INSTANCE: UserRepositoryImpl? = null
 
-        fun getInstance(context: Context): UserRepository {
+        fun getInstance(context: Context): UserRepositoryImpl {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: UserRepository(context.applicationContext).also { INSTANCE = it }
+                INSTANCE ?: UserRepositoryImpl(context.applicationContext).also { INSTANCE = it }
             }
         }
     }
 
-    fun registerUser(email: String, password: String): Boolean {
+    override fun registerUser(email: String, password: String): Boolean {
         if (sharedPref.getString("email_$email", null) != null) {
             return false
         }
@@ -30,24 +31,24 @@ class UserRepository private constructor(context: Context) {
         return true
     }
 
-    fun loginUser(email: String, password: String): Boolean {
+    override fun loginUser(email: String, password: String): Boolean {
         val savedPassword = sharedPref.getString("password_$email", "")
         return savedPassword == password
     }
 
-    fun setCurrentUser(email: String) {
+    override fun setCurrentUser(email: String) {
         sharedPref.edit().putString("current_user", email).apply()
     }
 
-    fun getCurrentUser(): String? {
+    override fun getCurrentUser(): String? {
         return sharedPref.getString("current_user", null)
     }
 
-    fun logout() {
+    override fun logout() {
         sharedPref.edit().remove("current_user").apply()
     }
 
-    fun updateUserEmail(newEmail: String) {
+    override fun updateUserEmail(newEmail: String) {
         val currentUser = getCurrentUser()
         if (currentUser != null) {
             val currentPassword = sharedPref.getString("password_$currentUser", "")
@@ -64,7 +65,7 @@ class UserRepository private constructor(context: Context) {
         }
     }
 
-    fun verifyPassword(password: String): Boolean {
+    override fun verifyPassword(password: String): Boolean {
         val currentUser = getCurrentUser()
         if (currentUser != null) {
             val savedPassword = sharedPref.getString("password_$currentUser", "")
@@ -73,7 +74,7 @@ class UserRepository private constructor(context: Context) {
         return false
     }
 
-    fun updatePassword(newPassword: String): Boolean {
+    override fun updatePassword(newPassword: String): Boolean {
         val currentUser = getCurrentUser()
         if (currentUser != null) {
             sharedPref.edit().putString("password_$currentUser", newPassword).apply()
@@ -82,7 +83,7 @@ class UserRepository private constructor(context: Context) {
         return false
     }
 
-    fun isEmailExists(email: String): Boolean {
+    override fun isEmailExists(email: String): Boolean {
         return sharedPref.getString("email_$email", null) != null
     }
 }
