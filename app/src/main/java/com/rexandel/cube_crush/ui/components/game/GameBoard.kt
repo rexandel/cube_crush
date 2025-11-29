@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -33,7 +34,6 @@ import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.domain.entities.Block
 import com.rexandel.cube_crush.domain.entities.BlockColor
 import com.rexandel.cube_crush.domain.entities.Shape
-import kotlinx.coroutines.launch
 
 data class PreviewBlock(
     val color: BlockColor
@@ -142,21 +142,35 @@ fun BoardBlockView(
 
     val borderWidth = if (previewBlock != null) 2.dp else 1.dp
 
-    val glowAlpha = remember { Animatable(0.3f) }
+    val buzzOffsetX = remember { Animatable(0f) }
+
+    val previewPulseAlpha = remember { Animatable(0.6f) }
 
     LaunchedEffect(isInLineToClear) {
         if (isInLineToClear) {
-            launch {
-                glowAlpha.animateTo(
-                    targetValue = 0.8f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(durationMillis = 800, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse
-                    )
+            buzzOffsetX.animateTo(
+                targetValue = 8f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 80, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
                 )
-            }
+            )
         } else {
-            glowAlpha.snapTo(0.3f)
+            buzzOffsetX.animateTo(0f, tween(durationMillis = 150))
+        }
+    }
+
+    LaunchedEffect(previewBlock) {
+        if (previewBlock != null && isValidPosition) {
+            previewPulseAlpha.animateTo(
+                targetValue = 0.8f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 1000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
+        } else {
+            previewPulseAlpha.snapTo(0.6f)
         }
     }
 
@@ -182,7 +196,13 @@ fun BoardBlockView(
             Image(
                 painter = painterResource(id = mainDrawableResId),
                 contentDescription = null,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier
+                    .size(40.dp)
+                    .graphicsLayer {
+                        if (isInLineToClear) {
+                            translationX = buzzOffsetX.value
+                        }
+                    }
             )
         }
 
@@ -192,7 +212,12 @@ fun BoardBlockView(
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
-                    .alpha(0.6f)
+                    .alpha(previewPulseAlpha.value)
+                    .graphicsLayer {
+                        if (isInLineToClear) {
+                            translationX = buzzOffsetX.value
+                        }
+                    }
             )
         }
 
@@ -204,25 +229,83 @@ fun BoardBlockView(
                         compositingStrategy = CompositingStrategy.Offscreen
                     }
                     .drawWithCache {
-                        val centerX = size.width / 2
-                        val centerY = size.height / 2
-                        val radius = size.minDimension / 2
-
-                        val glowBrush = Brush.radialGradient(
+                        val subtleGlow = Brush.radialGradient(
                             colors = listOf(
-                                Color.Yellow.copy(alpha = glowAlpha.value),
-                                Color.Yellow.copy(alpha = 0.2f),
+                                Color.Red.copy(alpha = 0.2f),
+                                Color.Yellow.copy(alpha = 0.3f),
                                 Color.Transparent
                             ),
-                            center = androidx.compose.ui.geometry.Offset(centerX, centerY),
-                            radius = radius
+                            center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
+                            radius = size.minDimension / 1.8f
                         )
 
                         onDrawWithContent {
                             drawContent()
                             drawRect(
-                                brush = glowBrush,
+                                brush = subtleGlow,
                                 blendMode = BlendMode.Plus
+                            )
+                        }
+                    }
+            )
+        }
+
+        if (isInLineToClear) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .drawWithCache {
+                        onDrawBehind {
+                            drawRoundRect(
+                                color = Color.Red.copy(alpha = 0.8f),
+                                size = size,
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f),
+                                style = Stroke(width = 2f)
+                            )
+                        }
+                    }
+            )
+        }
+
+        if (previewDrawableResId != null && isValidPosition && !isInLineToClear) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .graphicsLayer {
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }
+                    .drawWithCache {
+                        val previewGlow = Brush.radialGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = previewPulseAlpha.value * 0.3f),
+                                Color.Transparent
+                            ),
+                            center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
+                            radius = size.minDimension / 2f
+                        )
+
+                        onDrawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = previewGlow,
+                                blendMode = BlendMode.Plus
+                            )
+                        }
+                    }
+            )
+        }
+
+        if (previewDrawableResId != null && isValidPosition && !isInLineToClear) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .drawWithCache {
+                        onDrawBehind {
+                            drawRoundRect(
+                                color = Color.Cyan.copy(alpha = 0.6f),
+                                size = size,
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f),
+                                style = Stroke(width = 1.5f)
                             )
                         }
                     }
