@@ -206,4 +206,11 @@ object StringResources {
 
     val userMenu: String
         @Composable get() = stringResource(R.string.user_menu)
+
+    fun getLoadingPreparing(context: Context): String = context.getString(R.string.loading_preparing)
+    fun getLoadingCreatingBoard(context: Context): String = context.getString(R.string.loading_creating_board)
+    fun getLoadingInitializingSystems(context: Context): String = context.getString(R.string.loading_initializing_systems)
+    fun getLoadingComplete(context: Context): String = context.getString(R.string.loading_complete)
+    fun getLoadingReady(context: Context): String = context.getString(R.string.loading_ready)
+    fun getLoadingError(context: Context, message: String): String = context.getString(R.string.loading_error, message)
 }

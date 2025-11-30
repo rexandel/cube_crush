@@ -59,7 +59,12 @@ class MainActivity : ComponentActivity() {
                     androidx.compose.material3.Surface(
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        AppNavigation(themeManager, localeManager, userRepository, scoreRepository)
+                        AppNavigation(
+                            themeManager = themeManager,
+                            localeManager = localeManager,
+                            userRepository = userRepository,
+                            scoreRepository = scoreRepository
+                        )
                     }
                 }
             }
@@ -107,24 +112,31 @@ fun AppNavigation(
 ) {
     var showSplash by remember { mutableStateOf(true) }
     var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Splash) }
+    var isLoadingComplete by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(3000)
-        showSplash = false
-
-        val currentUser = userRepository.getCurrentUser()
-        currentScreen = if (currentUser != null) {
-            AppScreen.Menu
-        } else {
-            AppScreen.Login
+    LaunchedEffect(isLoadingComplete) {
+        if (isLoadingComplete) {
+            val currentUser = userRepository.getCurrentUser()
+            currentScreen = if (currentUser != null) {
+                AppScreen.Menu
+            } else {
+                AppScreen.Login
+            }
+            showSplash = false
         }
     }
 
     if (showSplash) {
-        SplashScreen()
+        SplashScreen(
+            onLoadingComplete = {
+                isLoadingComplete = true
+            }
+        )
     } else {
         when (currentScreen) {
-            AppScreen.Splash -> SplashScreen()
+            AppScreen.Splash -> SplashScreen(
+                onLoadingComplete = { isLoadingComplete = true }
+            )
             AppScreen.Login -> LoginScreen(
                 onLoginSuccess = { currentScreen = AppScreen.Menu },
                 onNavigateToRegister = { currentScreen = AppScreen.Register },
@@ -145,6 +157,7 @@ fun AppNavigation(
             AppScreen.Settings -> SettingsScreen(
                 onBackToMenu = { currentScreen = AppScreen.Menu },
                 onLogout = {
+                    userRepository.logout()
                     currentScreen = AppScreen.Login
                 },
                 themeManager = themeManager,

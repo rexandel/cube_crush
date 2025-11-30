@@ -78,4 +78,10 @@
     <string name="nickname_empty">Имя пользователя не может быть пустым</string>
     <string name="registration_failed">Ошибка регистрации</string>
     <string name="user_menu">Меню пользователя</string>
+    <string name="loading_preparing">Подготовка к загрузке…</string>
+    <string name="loading_creating_board">Создание игрового поля…</string>
+    <string name="loading_initializing_systems">Инициализация игровых систем…</string>
+    <string name="loading_complete">Загрузка завершена!</string>
+    <string name="loading_ready">Готово!</string>
+    <string name="loading_error">Ошибка загрузки: %s</string>
 </resources>
