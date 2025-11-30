@@ -21,7 +21,7 @@
     <string name="share_dialog_title">Share record</string>
     <string name="game_logo">Game Logo</string>
     <string name="game_description">Make lines and beat the record!</string>
-    <string name="start_game">Classic</string>
+    <string name="start_game">Play</string>
     <string name="exit">Exit</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
@@ -84,4 +84,5 @@
     <string name="loading_complete">Loading complete!</string>
     <string name="loading_ready">Ready!</string>
     <string name="loading_error">Loading error: %s</string>
+    <string name="combo">COMBO</string>
 </resources>

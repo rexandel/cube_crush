@@ -21,7 +21,7 @@
     <string name="share_dialog_title">Поделиться рекордом</string>
     <string name="game_logo">Логотип игры</string>
     <string name="game_description">Собери линии и побей рекорд!</string>
-    <string name="start_game">Классика</string>
+    <string name="start_game">Играть</string>
     <string name="exit">Выйти</string>
     <string name="login">Вход</string>
     <string name="register">Регистрация</string>
@@ -33,10 +33,10 @@
     <string name="no_account">Нет аккаунта?</string>
     <string name="have_account">Уже есть аккаунт?</string>
     <string name="fill_all_fields">Заполните все поля</string>
-    <string name="invalid_email_password">Неверный email или пароль</string>
+    <string name="invalid_email_password">Неверная эл. почта или пароль</string>
     <string name="password_too_short">Пароль должен быть не менее 6 символов</string>
     <string name="passwords_dont_match">Пароли не совпадают</string>
-    <string name="user_exists">Пользователь с таким email уже существует</string>
+    <string name="user_exists">Пользователь с такой эл. почтой уже существует</string>
     <string name="settings">Настройки</string>
     <string name="back">Назад</string>
     <string name="profile">Профиль</string>
@@ -56,12 +56,12 @@
     <string name="select_language">Выбор языка</string>
     <string name="system_language">Системный</string>
     <string name="edit">Изменить</string>
-    <string name="change_email">Изменение почты</string>
-    <string name="new_email">Новая почта</string>
+    <string name="change_email">Изменение эл. почты</string>
+    <string name="new_email">Новая эл. почта</string>
     <string name="password_for_confirmation">Пароль для подтверждения</string>
     <string name="save">ОК</string>
     <string name="invalid_password">Неверный пароль</string>
-    <string name="email_already_used">Эта почта уже используется</string>
+    <string name="email_already_used">Эта эл. почта уже используется</string>
     <string name="current_password">Текущий пароль</string>
     <string name="new_password">Новый пароль</string>
     <string name="confirm_new_password">Подтвердите новый пароль</string>
@@ -84,4 +84,5 @@
     <string name="loading_complete">Загрузка завершена!</string>
     <string name="loading_ready">Готово!</string>
     <string name="loading_error">Ошибка загрузки: %s</string>
+    <string name="combo">КОМБО</string>
 </resources>

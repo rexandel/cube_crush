@@ -163,7 +163,7 @@ fun CompactComboCounter(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "COMBO",
+                text = StringResources.combo,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,

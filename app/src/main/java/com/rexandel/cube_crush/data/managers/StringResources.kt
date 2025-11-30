@@ -213,4 +213,6 @@ object StringResources {
     fun getLoadingComplete(context: Context): String = context.getString(R.string.loading_complete)
     fun getLoadingReady(context: Context): String = context.getString(R.string.loading_ready)
     fun getLoadingError(context: Context, message: String): String = context.getString(R.string.loading_error, message)
+    val combo: String
+        @Composable get() = stringResource(R.string.combo)
 }
