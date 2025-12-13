@@ -139,7 +139,16 @@ fun DraggableShape(
                     .pointerInput(shapeIndex) {
                         detectDragGestures(
                             onDragStart = { offset ->
-                                onDragStart(shapeIndex)
+                                val centerX = size.width / 2f
+                                val centerY = size.height / 2f
+                                val dx = offset.x - centerX
+                                val dy = offset.y - centerY
+                                val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+
+                                val maxDistance = 40.dp.toPx()
+                                if (distance <= maxDistance) {
+                                    onDragStart(shapeIndex)
+                                }
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()

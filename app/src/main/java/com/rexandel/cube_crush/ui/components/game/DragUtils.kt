@@ -16,7 +16,7 @@ object DragUtils {
         val boardRight = boardPosition.x + 8 * boardSize
         val boardBottom = boardPosition.y + 8 * boardSize
 
-        val captureMargin = boardSize * 0.5f
+        val captureMargin = boardSize * 5.0f
 
         if (absoluteX < boardPosition.x - captureMargin ||
             absoluteX > boardRight + captureMargin ||
@@ -28,16 +28,39 @@ object DragUtils {
         val shapeWidth = shape.width
         val shapeHeight = shape.height
 
-        val relativeX = absoluteX - boardPosition.x
-        val relativeY = absoluteY - boardPosition.y
+        val shapeCenterX = calculateShapeCenter(shape, isHorizontal = true)
+        val shapeCenterY = calculateShapeCenter(shape, isHorizontal = false)
 
-        val boardX = (relativeX / boardSize).roundToInt()
-        val boardY = (relativeY / boardSize).roundToInt()
+        val adjustedX = absoluteX + (shapeCenterX * boardSize)
+        val adjustedY = absoluteY + (shapeCenterY * boardSize)
 
-        val clampedX = boardX.coerceIn(0, 8 - shapeWidth)
-        val clampedY = boardY.coerceIn(0, 8 - shapeHeight)
+        val relativeX = adjustedX - boardPosition.x
+        val relativeY = adjustedY - boardPosition.y
+
+        val targetX = (relativeX / boardSize - shapeCenterX).roundToInt()
+        val targetY = (relativeY / boardSize - shapeCenterY).roundToInt()
+
+        val clampedX = targetX.coerceIn(0, 8 - shapeWidth)
+        val clampedY = targetY.coerceIn(0, 8 - shapeHeight)
 
         return Pair(clampedX, clampedY)
+    }
+
+    private fun calculateShapeCenter(shape: Shape, isHorizontal: Boolean): Float {
+        val matrix = shape.matrix
+        var total = 0f
+        var blockCount = 0
+
+        for (y in matrix.indices) {
+            for (x in matrix[y].indices) {
+                if (matrix[y][x]) {
+                    total += if (isHorizontal) x + 0.5f else y + 0.5f
+                    blockCount++
+                }
+            }
+        }
+
+        return if (blockCount > 0) total / blockCount else 0f
     }
 
     fun calculateShapeCenterOffset(shape: Shape): Offset {
