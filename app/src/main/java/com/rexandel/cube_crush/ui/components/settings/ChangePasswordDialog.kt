@@ -22,6 +22,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
@@ -34,6 +36,7 @@ fun ChangePasswordDialog(
     userRepository: UserRepositoryImpl
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -108,28 +111,30 @@ fun ChangePasswordDialog(
                 PixelButton(
                     text = StringResources.save,
                     onClick = {
-                        when {
-                            currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
-                                errorMessage = StringResources.fillAllFields(context)
-                                return@PixelButton
-                            }
-                            !userRepository.verifyPassword(currentPassword) -> {
-                                errorMessage = StringResources.invalidCurrentPassword(context)
-                                return@PixelButton
-                            }
-                            newPassword.length < 6 -> {
-                                errorMessage = StringResources.passwordMinLength(context)
-                                return@PixelButton
-                            }
-                            newPassword != confirmPassword -> {
-                                errorMessage = StringResources.passwordsDontMatch(context)
-                                return@PixelButton
-                            }
-                            else -> {
-                                if (userRepository.updatePassword(newPassword)) {
-                                    onPasswordChanged()
-                                } else {
-                                    errorMessage = StringResources.passwordChangeError(context)
+                        scope.launch {
+                            when {
+                                currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
+                                    errorMessage = StringResources.fillAllFields(context)
+                                    return@launch
+                                }
+                                !userRepository.verifyPassword(currentPassword) -> {
+                                    errorMessage = StringResources.invalidCurrentPassword(context)
+                                    return@launch
+                                }
+                                newPassword.length < 6 -> {
+                                    errorMessage = StringResources.passwordMinLength(context)
+                                    return@launch
+                                }
+                                newPassword != confirmPassword -> {
+                                    errorMessage = StringResources.passwordsDontMatch(context)
+                                    return@launch
+                                }
+                                else -> {
+                                    if (userRepository.updatePassword(newPassword)) {
+                                        onPasswordChanged()
+                                    } else {
+                                        errorMessage = StringResources.passwordChangeError(context)
+                                    }
                                 }
                             }
                         }

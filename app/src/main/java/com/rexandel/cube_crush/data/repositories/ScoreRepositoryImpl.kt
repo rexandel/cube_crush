@@ -1,11 +1,17 @@
 package com.rexandel.cube_crush.data.repositories
 
 import android.content.Context
-import android.content.SharedPreferences
+import com.rexandel.cube_crush.data.database.AppDatabase
+import com.rexandel.cube_crush.data.database.entities.ScoreEntity
 import com.rexandel.cube_crush.domain.repositories.ScoreRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepository {
-    private val sharedPref: SharedPreferences = context.getSharedPreferences("game_data", Context.MODE_PRIVATE)
+    private val db = AppDatabase.getDatabase(context)
+    private val scoreDao = db.scoreDao()
+    private val userDao = db.userDao()
+    private val userRepository = UserRepositoryImpl.getInstance(context)
 
     companion object {
         @Volatile
@@ -18,20 +24,28 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
         }
     }
 
-    override fun getHighScore(): Int {
-        return sharedPref.getInt("high_score", 0)
+    private suspend fun getCurrentUserId(): Long? {
+        val email = userRepository.getCurrentUser() ?: return null
+        return userDao.findByEmail(email)?.id
     }
 
-    override fun saveHighScore(score: Int) {
-        sharedPref.edit().putInt("high_score", score).apply()
+    override suspend fun getHighScore(): Int = withContext(Dispatchers.IO) {
+        val userId = getCurrentUserId() ?: return@withContext 0
+        scoreDao.getBestScore(userId) ?: 0
     }
 
-    override fun updateHighScore(newScore: Int): Int {
+    override suspend fun saveScore(score: Int) = withContext(Dispatchers.IO) {
+        val userId = getCurrentUserId() ?: return@withContext
+        val scoreEntity = ScoreEntity(userId = userId, score = score)
+        scoreDao.insert(scoreEntity)
+        Unit
+    }
+
+    override suspend fun submitScore(newScore: Int): Int = withContext(Dispatchers.IO) {
         val currentHighScore = getHighScore()
-        if (newScore > currentHighScore) {
-            saveHighScore(newScore)
-            return newScore
-        }
-        return currentHighScore
+
+        saveScore(newScore)
+        
+        return@withContext if (newScore > currentHighScore) newScore else currentHighScore
     }
 }

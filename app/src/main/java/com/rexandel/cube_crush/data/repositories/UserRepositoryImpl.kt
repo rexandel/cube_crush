@@ -2,10 +2,17 @@ package com.rexandel.cube_crush.data.repositories
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.rexandel.cube_crush.data.database.AppDatabase
+import com.rexandel.cube_crush.data.database.entities.UserEntity
 import com.rexandel.cube_crush.domain.repositories.UserRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.security.MessageDigest
 
 class UserRepositoryImpl private constructor(context: Context) : UserRepository {
-    private val sharedPref: SharedPreferences = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
+    private val db = AppDatabase.getDatabase(context)
+    private val userDao = db.userDao()
+    private val sessionPref: SharedPreferences = context.getSharedPreferences("session_prefs", Context.MODE_PRIVATE)
 
     companion object {
         @Volatile
@@ -18,112 +25,79 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
         }
     }
 
-    override fun registerUser(email: String, password: String, nickname: String): Boolean {
-        if (sharedPref.getString("email_$email", null) != null) {
-            return false
-        }
-
-        if (sharedPref.getString("nickname_$nickname", null) != null) {
-            return false
-        }
-
-        sharedPref.edit().apply {
-            putString("email_$email", email)
-            putString("password_$email", password)
-            putString("nickname_$email", nickname)
-            putString("nickname_$nickname", email)
-            apply()
-        }
-        return true
+    private fun hashPassword(password: String): String {
+        val bytes = password.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("") { str, it -> str + "%02x".format(it) }
     }
 
-    override fun loginUser(email: String, password: String): Boolean {
-        val savedPassword = sharedPref.getString("password_$email", "")
-        return savedPassword == password
+    override suspend fun registerUser(email: String, password: String, nickname: String): Boolean = withContext(Dispatchers.IO) {
+        if (userDao.findByEmail(email) != null) return@withContext false
+        if (userDao.findByNickname(nickname) != null) return@withContext false
+
+        val user = UserEntity(
+            email = email,
+            passwordHash = hashPassword(password),
+            nickname = nickname
+        )
+        userDao.insert(user)
+        true
     }
 
-    override fun setCurrentUser(email: String) {
-        sharedPref.edit().putString("current_user", email).apply()
+    override suspend fun loginUser(email: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        val user = userDao.findByEmail(email) ?: return@withContext false
+        user.passwordHash == hashPassword(password)
     }
 
-    override fun getCurrentUser(): String? {
-        return sharedPref.getString("current_user", null)
+    override suspend fun setCurrentUser(email: String) = withContext(Dispatchers.IO) {
+        sessionPref.edit().putString("current_user", email).apply()
     }
 
-    override fun getCurrentUserNickname(): String? {
-        val currentUser = getCurrentUser()
-        return if (currentUser != null) {
-            sharedPref.getString("nickname_$currentUser", null)
-        } else {
-            null
-        }
+    override suspend fun getCurrentUser(): String? = withContext(Dispatchers.IO) {
+        sessionPref.getString("current_user", null)
+    }
+    
+    override suspend fun getCurrentUserNickname(): String? = withContext(Dispatchers.IO) {
+        val email = getCurrentUser() ?: return@withContext null
+        userDao.findByEmail(email)?.nickname
     }
 
-    override fun logout() {
-        sharedPref.edit().remove("current_user").apply()
+    override suspend fun logout() = withContext(Dispatchers.IO) {
+        sessionPref.edit().remove("current_user").apply()
     }
 
-    override fun updateUserEmail(newEmail: String) {
-        val currentUser = getCurrentUser()
-        if (currentUser != null) {
-            val currentPassword = sharedPref.getString("password_$currentUser", "")
-            val currentNickname = sharedPref.getString("nickname_$currentUser", "")
-
-            sharedPref.edit().apply {
-                remove("email_$currentUser")
-                remove("password_$currentUser")
-                remove("nickname_$currentUser")
-                remove("nickname_$currentNickname")
-
-                putString("email_$newEmail", newEmail)
-                putString("password_$newEmail", currentPassword)
-                putString("nickname_$newEmail", currentNickname)
-                putString("nickname_$currentNickname", newEmail)
-                putString("current_user", newEmail)
-                apply()
-            }
-        }
+    override suspend fun updateUserEmail(newEmail: String) = withContext(Dispatchers.IO) {
+        val currentEmail = getCurrentUser() ?: return@withContext
+        val user = userDao.findByEmail(currentEmail) ?: return@withContext
+        userDao.updateEmail(user.id, newEmail)
+        setCurrentUser(newEmail)
     }
 
-    override fun updateUserNickname(newNickname: String) {
-        val currentUser = getCurrentUser()
-        if (currentUser != null) {
-            val oldNickname = sharedPref.getString("nickname_$currentUser", "")
-
-            sharedPref.edit().apply {
-                if (oldNickname != null) {
-                    remove("nickname_$oldNickname")
-                }
-                putString("nickname_$currentUser", newNickname)
-                putString("nickname_$newNickname", currentUser)
-                apply()
-            }
-        }
+    override suspend fun updateUserNickname(newNickname: String) = withContext(Dispatchers.IO) {
+        val currentEmail = getCurrentUser() ?: return@withContext
+        val user = userDao.findByEmail(currentEmail) ?: return@withContext
+        userDao.updateNickname(user.id, newNickname)
     }
 
-    override fun verifyPassword(password: String): Boolean {
-        val currentUser = getCurrentUser()
-        if (currentUser != null) {
-            val savedPassword = sharedPref.getString("password_$currentUser", "")
-            return savedPassword == password
-        }
-        return false
+    override suspend fun verifyPassword(password: String): Boolean = withContext(Dispatchers.IO) {
+        val currentEmail = getCurrentUser() ?: return@withContext false
+        val user = userDao.findByEmail(currentEmail) ?: return@withContext false
+        user.passwordHash == hashPassword(password)
     }
 
-    override fun updatePassword(newPassword: String): Boolean {
-        val currentUser = getCurrentUser()
-        if (currentUser != null) {
-            sharedPref.edit().putString("password_$currentUser", newPassword).apply()
-            return true
-        }
-        return false
+    override suspend fun updatePassword(newPassword: String): Boolean = withContext(Dispatchers.IO) {
+        val currentEmail = getCurrentUser() ?: return@withContext false
+        val user = userDao.findByEmail(currentEmail) ?: return@withContext false
+        userDao.updatePassword(user.id, hashPassword(newPassword))
+        true
     }
 
-    override fun isEmailExists(email: String): Boolean {
-        return sharedPref.getString("email_$email", null) != null
+    override suspend fun isEmailExists(email: String): Boolean = withContext(Dispatchers.IO) {
+        userDao.findByEmail(email) != null
     }
 
-    override fun isNicknameExists(nickname: String): Boolean {
-        return sharedPref.getString("nickname_$nickname", null) != null
+    override suspend fun isNicknameExists(nickname: String): Boolean = withContext(Dispatchers.IO) {
+        userDao.findByNickname(nickname) != null
     }
 }

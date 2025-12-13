@@ -32,7 +32,7 @@ class GameViewModel(
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     init {
-        updateHighScoreFromRepository()
+        refreshHighScore()
     }
 
     fun startDrag(shapeIndex: Int) {
@@ -66,8 +66,8 @@ class GameViewModel(
             )
 
             val currentState = gameStateManager.getCurrentState()
-            if (currentState.score == currentState.highScore) {
-                updateHighScore()
+            if (currentState.isGameOver) {
+                submitScore()
             }
         }
 
@@ -90,10 +90,14 @@ class GameViewModel(
     }
 
     fun restartGame() {
+        val currentState = gameStateManager.getCurrentState()
+        if (!currentState.isGameOver && currentState.score > 0) {
+            submitScore(currentState.score)
+        }
         gameStateManager.restartGame()
         dragHandler.reset()
         uiEffectsManager.reset()
-        updateHighScoreFromRepository()
+        refreshHighScore()
         updateUiState()
     }
 
@@ -111,14 +115,14 @@ class GameViewModel(
         )
     }
 
-    private fun updateHighScore() {
+    private fun submitScore(score: Int? = null) {
+        val scoreToSave = score ?: _uiState.value.gameState.score
         viewModelScope.launch {
-            val currentScore = _uiState.value.gameState.score
-            scoreRepository.updateHighScore(currentScore)
+            scoreRepository.submitScore(scoreToSave)
         }
     }
 
-    private fun updateHighScoreFromRepository() {
+    private fun refreshHighScore() {
         viewModelScope.launch {
             val savedHighScore = scoreRepository.getHighScore()
             gameStateManager.updateHighScore(savedHighScore)

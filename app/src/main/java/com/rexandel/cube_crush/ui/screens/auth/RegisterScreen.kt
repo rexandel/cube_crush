@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.PixelButton
@@ -26,6 +27,7 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -156,27 +158,29 @@ fun RegisterScreen(
             PixelButton(
                 text = StringResources.registerButton,
                 onClick = {
-                    when {
-                        email.isEmpty() || password.isEmpty() || nickname.isEmpty() ->
-                            errorMessage = StringResources.fillAllFields(context)
-                        password.length < 6 ->
-                            errorMessage = StringResources.passwordTooShort(context)
-                        password != confirmPassword ->
-                            errorMessage = StringResources.passwordsDontMatch(context)
-                        nickname.length < 3 ->
-                            errorMessage = StringResources.nicknameTooShort(context)
-                        else -> {
-                            if (userRepository.registerUser(email, password, nickname)) {
-                                userRepository.setCurrentUser(email)
-                                errorMessage = ""
-                                onRegisterSuccess()
-                            } else {
-                                if (userRepository.isEmailExists(email)) {
-                                    errorMessage = StringResources.userExists(context)
-                                } else if (userRepository.isNicknameExists(nickname)) {
-                                    errorMessage = StringResources.nicknameExists(context)
+                    scope.launch {
+                        when {
+                            email.isEmpty() || password.isEmpty() || nickname.isEmpty() ->
+                                errorMessage = StringResources.fillAllFields(context)
+                            password.length < 6 ->
+                                errorMessage = StringResources.passwordTooShort(context)
+                            password != confirmPassword ->
+                                errorMessage = StringResources.passwordsDontMatch(context)
+                            nickname.length < 3 ->
+                                errorMessage = StringResources.nicknameTooShort(context)
+                            else -> {
+                                if (userRepository.registerUser(email, password, nickname)) {
+                                    userRepository.setCurrentUser(email)
+                                    errorMessage = ""
+                                    onRegisterSuccess()
                                 } else {
-                                    errorMessage = StringResources.registrationFailed(context)
+                                    if (userRepository.isEmailExists(email)) {
+                                        errorMessage = StringResources.userExists(context)
+                                    } else if (userRepository.isNicknameExists(nickname)) {
+                                        errorMessage = StringResources.nicknameExists(context)
+                                    } else {
+                                        errorMessage = StringResources.registrationFailed(context)
+                                    }
                                 }
                             }
                         }

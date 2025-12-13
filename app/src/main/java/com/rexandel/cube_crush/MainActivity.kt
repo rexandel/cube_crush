@@ -157,7 +157,6 @@ fun AppNavigation(
             AppScreen.Settings -> SettingsScreen(
                 onBackToMenu = { currentScreen = AppScreen.Menu },
                 onLogout = {
-                    userRepository.logout()
                     currentScreen = AppScreen.Login
                 },
                 themeManager = themeManager,

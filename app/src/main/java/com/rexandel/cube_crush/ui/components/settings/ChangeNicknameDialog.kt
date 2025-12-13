@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
@@ -34,6 +36,7 @@ fun ChangeNicknameDialog(
     userRepository: UserRepositoryImpl
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var newNickname by remember { mutableStateOf(currentNickname) }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -91,25 +94,27 @@ fun ChangeNicknameDialog(
                 PixelButton(
                     text = StringResources.save,
                     onClick = {
-                        when {
-                            newNickname.isEmpty() -> {
-                                errorMessage = StringResources.nicknameEmpty(context)
-                                return@PixelButton
-                            }
-                            newNickname.length < 3 -> {
-                                errorMessage = StringResources.nicknameTooShort(context)
-                                return@PixelButton
-                            }
-                            newNickname == currentNickname -> {
-                                onDismiss()
-                                return@PixelButton
-                            }
-                            userRepository.isNicknameExists(newNickname) -> {
-                                errorMessage = StringResources.nicknameExists(context)
-                                return@PixelButton
-                            }
-                            else -> {
-                                onNicknameChanged(newNickname)
+                        scope.launch {
+                            when {
+                                newNickname.isEmpty() -> {
+                                    errorMessage = StringResources.nicknameEmpty(context)
+                                    return@launch
+                                }
+                                newNickname.length < 3 -> {
+                                    errorMessage = StringResources.nicknameTooShort(context)
+                                    return@launch
+                                }
+                                newNickname == currentNickname -> {
+                                    onDismiss()
+                                    return@launch
+                                }
+                                userRepository.isNicknameExists(newNickname) -> {
+                                    errorMessage = StringResources.nicknameExists(context)
+                                    return@launch
+                                }
+                                else -> {
+                                    onNicknameChanged(newNickname)
+                                }
                             }
                         }
                     },

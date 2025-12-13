@@ -37,6 +37,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.rexandel.cube_crush.R
 import com.rexandel.cube_crush.domain.managers.AppTheme
 import com.rexandel.cube_crush.data.managers.ThemeManager
@@ -66,6 +68,7 @@ fun SettingsScreen(
     scoreRepository: ScoreRepositoryImpl
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var currentUser by remember { mutableStateOf<String?>(null) }
     var currentNickname by remember { mutableStateOf<String?>(null) }
@@ -275,9 +278,11 @@ fun SettingsScreen(
             currentEmail = currentUser ?: "",
             onDismiss = { showChangeEmailDialog = false },
             onEmailChanged = { newEmail ->
-                userRepository.updateUserEmail(newEmail)
-                currentUser = newEmail
-                showChangeEmailDialog = false
+                scope.launch {
+                    userRepository.updateUserEmail(newEmail)
+                    currentUser = newEmail
+                    showChangeEmailDialog = false
+                }
             },
             userRepository = userRepository
         )
@@ -298,9 +303,11 @@ fun SettingsScreen(
             currentNickname = currentNickname ?: "",
             onDismiss = { showChangeNicknameDialog = false },
             onNicknameChanged = { newNickname ->
-                userRepository.updateUserNickname(newNickname)
-                currentNickname = newNickname
-                showChangeNicknameDialog = false
+                scope.launch {
+                    userRepository.updateUserNickname(newNickname)
+                    currentNickname = newNickname
+                    showChangeNicknameDialog = false
+                }
             },
             userRepository = userRepository
         )
@@ -310,8 +317,10 @@ fun SettingsScreen(
         LogoutConfirmationDialog(
             onDismiss = { showLogoutDialog = false },
             onConfirm = {
-                userRepository.logout()
-                onLogout()
+                scope.launch {
+                    userRepository.logout()
+                    onLogout()
+                }
             }
         )
     }

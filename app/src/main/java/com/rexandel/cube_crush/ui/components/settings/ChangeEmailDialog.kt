@@ -22,6 +22,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
@@ -35,6 +37,7 @@ fun ChangeEmailDialog(
     userRepository: UserRepositoryImpl
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var newEmail by remember { mutableStateOf(currentEmail) }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -98,22 +101,24 @@ fun ChangeEmailDialog(
                 PixelButton(
                     text = StringResources.save,
                     onClick = {
-                        if (newEmail.isEmpty() || password.isEmpty()) {
-                            errorMessage = StringResources.fillAllFields(context)
-                            return@PixelButton
-                        }
+                        scope.launch {
+                            if (newEmail.isEmpty() || password.isEmpty()) {
+                                errorMessage = StringResources.fillAllFields(context)
+                                return@launch
+                            }
 
-                        if (!userRepository.verifyPassword(password)) {
-                            errorMessage = StringResources.invalidPassword(context)
-                            return@PixelButton
-                        }
+                            if (!userRepository.verifyPassword(password)) {
+                                errorMessage = StringResources.invalidPassword(context)
+                                return@launch
+                            }
 
-                        if (userRepository.isEmailExists(newEmail) && newEmail != currentEmail) {
-                            errorMessage = StringResources.emailAlreadyUsed(context)
-                            return@PixelButton
-                        }
+                            if (userRepository.isEmailExists(newEmail) && newEmail != currentEmail) {
+                                errorMessage = StringResources.emailAlreadyUsed(context)
+                                return@launch
+                            }
 
-                        onEmailChanged(newEmail)
+                            onEmailChanged(newEmail)
+                        }
                     },
                     buttonColor = ButtonColor.BLUE,
                     modifier = Modifier,

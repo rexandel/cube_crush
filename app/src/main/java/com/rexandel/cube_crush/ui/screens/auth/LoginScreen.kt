@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.ui.components.common.PixelButton
@@ -24,6 +25,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -105,15 +107,17 @@ fun LoginScreen(
             PixelButton(
                 text = StringResources.loginButton,
                 onClick = {
-                    if (email.isEmpty() || password.isEmpty()) {
-                        errorMessage = StringResources.fillAllFields(context)
-                    } else {
-                        if (userRepository.loginUser(email, password)) {
-                            userRepository.setCurrentUser(email)
-                            errorMessage = ""
-                            onLoginSuccess()
+                    scope.launch {
+                        if (email.isEmpty() || password.isEmpty()) {
+                            errorMessage = StringResources.fillAllFields(context)
                         } else {
-                            errorMessage = StringResources.invalidEmailPassword(context)
+                            if (userRepository.loginUser(email, password)) {
+                                userRepository.setCurrentUser(email)
+                                errorMessage = ""
+                                onLoginSuccess()
+                            } else {
+                                errorMessage = StringResources.invalidEmailPassword(context)
+                            }
                         }
                     }
                 },
