@@ -7,8 +7,7 @@ import kotlin.math.roundToInt
 object DragUtils {
 
     fun findSnapPosition(
-        absoluteX: Float,
-        absoluteY: Float,
+        dragCenter: Offset,
         boardPosition: Offset,
         boardSize: Float,
         shape: Shape
@@ -16,12 +15,12 @@ object DragUtils {
         val boardRight = boardPosition.x + 8 * boardSize
         val boardBottom = boardPosition.y + 8 * boardSize
 
-        val captureMargin = boardSize * 5.0f
+        val captureMargin = boardSize * 3.0f
 
-        if (absoluteX < boardPosition.x - captureMargin ||
-            absoluteX > boardRight + captureMargin ||
-            absoluteY < boardPosition.y - captureMargin ||
-            absoluteY > boardBottom + captureMargin) {
+        if (dragCenter.x < boardPosition.x - captureMargin ||
+            dragCenter.x > boardRight + captureMargin ||
+            dragCenter.y < boardPosition.y - captureMargin ||
+            dragCenter.y > boardBottom + captureMargin) {
             return null
         }
 
@@ -31,19 +30,27 @@ object DragUtils {
         val shapeCenterX = calculateShapeCenter(shape, isHorizontal = true)
         val shapeCenterY = calculateShapeCenter(shape, isHorizontal = false)
 
-        val adjustedX = absoluteX + (shapeCenterX * boardSize)
-        val adjustedY = absoluteY + (shapeCenterY * boardSize)
+        var bestPosition: Pair<Int, Int>? = null
+        var minDistance = Float.MAX_VALUE
+        val snapThreshold = boardSize * 2.5f
 
-        val relativeX = adjustedX - boardPosition.x
-        val relativeY = adjustedY - boardPosition.y
+        for (y in 0..8 - shapeHeight) {
+            for (x in 0..8 - shapeWidth) {
+                val candidateCenterX = boardPosition.x + (x + shapeCenterX) * boardSize
+                val candidateCenterY = boardPosition.y + (y + shapeCenterY) * boardSize
 
-        val targetX = (relativeX / boardSize - shapeCenterX).roundToInt()
-        val targetY = (relativeY / boardSize - shapeCenterY).roundToInt()
+                val dx = dragCenter.x - candidateCenterX
+                val dy = dragCenter.y - candidateCenterY
+                val distance = kotlin.math.sqrt(dx * dx + dy * dy)
 
-        val clampedX = targetX.coerceIn(0, 8 - shapeWidth)
-        val clampedY = targetY.coerceIn(0, 8 - shapeHeight)
+                if (distance < minDistance && distance < snapThreshold) {
+                    minDistance = distance
+                    bestPosition = Pair(x, y)
+                }
+            }
+        }
 
-        return Pair(clampedX, clampedY)
+        return bestPosition
     }
 
     private fun calculateShapeCenter(shape: Shape, isHorizontal: Boolean): Float {
@@ -63,40 +70,5 @@ object DragUtils {
         return if (blockCount > 0) total / blockCount else 0f
     }
 
-    fun calculateShapeCenterOffset(shape: Shape): Offset {
-        val matrix = shape.matrix
-        var totalX = 0f
-        var totalY = 0f
-        var blockCount = 0
 
-        for (y in matrix.indices) {
-            for (x in matrix[y].indices) {
-                if (matrix[y][x]) {
-                    totalX += x + 0.5f
-                    totalY += y + 0.5f
-                    blockCount++
-                }
-            }
-        }
-
-        if (blockCount == 0) return Offset.Zero
-
-        val centerX = totalX / blockCount
-        val centerY = totalY / blockCount
-
-        return Offset(centerX * 40f, centerY * 40f)
-    }
-
-    fun calculateAbsoluteShapePosition(
-        shapeStartPosition: Offset,
-        dragOffset: Offset,
-        shapeCenterOffset: Offset,
-        fingerOffset: Offset = Offset(0f, -200f)
-    ): Offset {
-        val absolutePosition = shapeStartPosition + dragOffset
-        return Offset(
-            absolutePosition.x - shapeCenterOffset.x + fingerOffset.x,
-            absolutePosition.y - shapeCenterOffset.y + fingerOffset.y
-        )
-    }
 }

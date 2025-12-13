@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rexandel.cube_crush.data.repositories.ScoreRepositoryImpl
@@ -40,6 +41,7 @@ fun GameScreen(
     onExitToMenu: () -> Unit
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
     val gameViewModel: GameViewModel = viewModel(
         factory = GameViewModelFactory(
             userRepository = UserRepositoryImpl.getInstance(context),
@@ -174,16 +176,15 @@ fun GameScreen(
                 val currentShape = gameState.availableShapes.getOrNull(shapeIndex)
 
                 if (boardSize.value > 0 && currentShape != null) {
-                    val shapeCenterOffset = DragUtils.calculateShapeCenterOffset(currentShape)
-                    val absolutePosition = DragUtils.calculateAbsoluteShapePosition(
-                        shapeStartPosition = shapeStartPosition,
-                        dragOffset = currentDragOffset,
-                        shapeCenterOffset = shapeCenterOffset
-                    )
+                    val containerSizePx = with(density) { 110.dp.toPx() }
+                    val fingerOffset = Offset(0f, -150f)
+                    val dragCenter = shapeStartPosition +
+                            Offset(containerSizePx / 2, containerSizePx / 2) +
+                            currentDragOffset +
+                            fingerOffset
 
                     val snapPosition = DragUtils.findSnapPosition(
-                        absoluteX = absolutePosition.x,
-                        absoluteY = absolutePosition.y,
+                        dragCenter = dragCenter,
                         boardPosition = boardPosition,
                         boardSize = boardSize.value,
                         shape = currentShape
@@ -203,16 +204,15 @@ fun GameScreen(
 
                 val finalPosition = dragState.snapPreviewPosition ?: run {
                     if (boardSize.value > 0 && shapeStartPosition != null && currentShape != null) {
-                        val shapeCenterOffset = DragUtils.calculateShapeCenterOffset(currentShape)
-                        val absolutePosition = DragUtils.calculateAbsoluteShapePosition(
-                            shapeStartPosition = shapeStartPosition,
-                            dragOffset = currentDragOffset,
-                            shapeCenterOffset = shapeCenterOffset
-                        )
+                        val containerSizePx = with(density) { 110.dp.toPx() }
+                        val fingerOffset = Offset(0f, -150f)
+                        val dragCenter = shapeStartPosition +
+                                Offset(containerSizePx / 2, containerSizePx / 2) +
+                                currentDragOffset +
+                                fingerOffset
 
                         DragUtils.findSnapPosition(
-                            absoluteX = absolutePosition.x,
-                            absoluteY = absolutePosition.y,
+                            dragCenter = dragCenter,
                             boardPosition = boardPosition,
                             boardSize = boardSize.value,
                             shape = currentShape
