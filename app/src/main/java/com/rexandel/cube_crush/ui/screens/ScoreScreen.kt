@@ -18,6 +18,7 @@ import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.data.repositories.ScoreRepositoryImpl
 import com.rexandel.cube_crush.domain.entities.PlayerScore
 import com.rexandel.cube_crush.domain.entities.Score
+import com.rexandel.cube_crush.domain.entities.UserStats
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,10 +35,12 @@ fun ScoreScreen(
     var selectedTab by remember { mutableStateOf(0) }
     var history by remember { mutableStateOf<List<Score>>(emptyList()) }
     var topPlayers by remember { mutableStateOf<List<PlayerScore>>(emptyList()) }
+    var userStats by remember { mutableStateOf<UserStats?>(null) }
 
     LaunchedEffect(Unit) {
         history = scoreRepository.getHistory()
         topPlayers = scoreRepository.getTopPlayers()
+        userStats = scoreRepository.getUserStats()
     }
 
     Box(
@@ -93,20 +96,25 @@ fun ScoreScreen(
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text(StringResources.tabHistory) }
+                    text = { Text(StringResources.tabTopPlayers, fontSize = 12.sp) }
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text(StringResources.tabTopPlayers) }
+                    text = { Text(StringResources.tabStatistics, fontSize = 8.sp) }
+                )
+                Tab(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    text = { Text(StringResources.tabHistory, fontSize = 12.sp) }
                 )
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (selectedTab == 0) {
-                    HistoryList(history)
-                } else {
-                    TopPlayersList(topPlayers)
+                when (selectedTab) {
+                    0 -> TopPlayersList(topPlayers)
+                    1 -> StatisticsView(userStats)
+                    2 -> HistoryList(history)
                 }
             }
         }
@@ -201,4 +209,64 @@ fun TopPlayersList(topPlayers: List<PlayerScore>) {
 private fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp))
+}
+
+@Composable
+fun StatisticsView(userStats: UserStats?) {
+    if (userStats == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        StatCard(
+            title = StringResources.statsBestScore,
+            value = userStats.bestScore.toString()
+        )
+        StatCard(
+            title = StringResources.statsGamesPlayed,
+            value = userStats.gamesPlayed.toString()
+        )
+        StatCard(
+            title = StringResources.statsAverageScore,
+            value = userStats.averageScore.toString()
+        )
+    }
+}
+
+@Composable
+fun StatCard(title: String, value: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = value,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
 }

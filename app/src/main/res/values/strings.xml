@@ -88,4 +88,8 @@
     <string name="scores_screen_title">Scores</string>
     <string name="tab_history">History</string>
     <string name="tab_top_players">Top Players</string>
+    <string name="tab_statistics">Statistics</string>
+    <string name="stats_games_played">Games Played</string>
+    <string name="stats_average_score">Average Score</string>
+    <string name="stats_best_score">Best Score</string>
 </resources>

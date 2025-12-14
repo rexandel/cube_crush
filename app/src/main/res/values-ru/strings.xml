@@ -88,4 +88,8 @@
     <string name="scores_screen_title">Рекорды</string>
     <string name="tab_history">История</string>
     <string name="tab_top_players">Топ игроков</string>
+    <string name="tab_statistics">Статистика</string>
+    <string name="stats_games_played">Количество Игр</string>
+    <string name="stats_average_score">Средний Счёт</string>
+    <string name="stats_best_score">Рекорд</string>
 </resources>

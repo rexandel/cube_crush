@@ -224,4 +224,16 @@ object StringResources {
 
     val tabTopPlayers: String
         @Composable get() = stringResource(R.string.tab_top_players)
+
+    val tabStatistics: String
+        @Composable get() = stringResource(R.string.tab_statistics)
+
+    val statsGamesPlayed: String
+        @Composable get() = stringResource(R.string.stats_games_played)
+
+    val statsAverageScore: String
+        @Composable get() = stringResource(R.string.stats_average_score)
+
+    val statsBestScore: String
+        @Composable get() = stringResource(R.string.stats_best_score)
 }

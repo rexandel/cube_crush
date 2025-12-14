@@ -5,6 +5,7 @@ import com.rexandel.cube_crush.data.database.AppDatabase
 import com.rexandel.cube_crush.data.database.entities.ScoreEntity
 import com.rexandel.cube_crush.domain.entities.PlayerScore
 import com.rexandel.cube_crush.domain.entities.Score
+import com.rexandel.cube_crush.domain.entities.UserStats
 import com.rexandel.cube_crush.domain.repositories.ScoreRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -61,6 +62,17 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
     override suspend fun getTopPlayers(): List<PlayerScore> = withContext(Dispatchers.IO) {
         scoreDao.getTopPlayers().map {
             PlayerScore(nickname = it.nickname, score = it.score)
+        }
+    }
+
+    override suspend fun getUserStats(): UserStats? = withContext(Dispatchers.IO) {
+        val userId = getCurrentUserId() ?: return@withContext null
+        scoreDao.getUserStats(userId)?.let {
+            UserStats(
+                gamesPlayed = it.gamesPlayed,
+                bestScore = it.bestScore ?: 0,
+                averageScore = it.averageScore ?: 0
+            )
         }
     }
 }
