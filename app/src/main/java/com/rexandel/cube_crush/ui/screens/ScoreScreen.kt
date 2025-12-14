@@ -49,7 +49,6 @@ fun ScoreScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Top Bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

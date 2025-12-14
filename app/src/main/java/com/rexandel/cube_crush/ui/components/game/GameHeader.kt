@@ -102,7 +102,7 @@ private fun HighScoreSection(highScore: Int) {
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = StringResources.highScore(highScore),
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 28.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier.padding(top = 14.dp)

@@ -8,34 +8,34 @@ import androidx.compose.runtime.Composable
 import com.rexandel.cube_crush.domain.managers.AppTheme
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkYellow,
-    secondary = Brown,
-    tertiary = Black,
+    primary = Blue,
+    secondary = LightBlue,
+    tertiary = DarkYellow,
     background = Black,
-    surface = Black,
+    surface = Gray,
     onPrimary = White,
-    onSecondary = White,
+    onSecondary = Black,
     onBackground = White,
     onSurface = White,
 
-    primaryContainer = Purple,
+    primaryContainer = LightBlue,
     secondaryContainer = Cyan,
     error = Red
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Yellow,
+    primary = Blue,
     secondary = LightBlue,
-    tertiary = Orange,
-    background = White,
+    tertiary = Yellow,
+    background = OffWhite,
     surface = White,
-    onPrimary = Black,
+    onPrimary = White,
     onSecondary = Black,
     onBackground = Black,
     onSurface = Black,
 
-    primaryContainer = Pink,
-    secondaryContainer = Teal,
+    primaryContainer = LightBlue,
+    secondaryContainer = Cyan,
     error = Red
 )
 

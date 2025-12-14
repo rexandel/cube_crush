@@ -3,6 +3,7 @@ package com.rexandel.cube_crush.ui.theme
 import androidx.compose.ui.graphics.Color
 val Blue = Color(0xFF0493E5)
 val DarkBlue = Color(0xFF1a237e)
+val SurfaceDarkBlue = Color(0xFF283593)
 val DarkYellow = Color(0xFFDE9027)
 val Yellow = Color(0xFFFAAD00)
 val Brown = Color(0xFF622917)
@@ -19,7 +20,8 @@ val Lime = Color(0xFFCDDC39)
 val Amber = Color(0xFFFFC107)
 
 val White = Color(0xFFFFFFFF)
+val OffWhite = Color(0xFFF5F5F5)
 val Black = Color(0xFF000000)
-val Gray = Color(0xFF9E9E9E)
+val Gray = Color(0xFF0E0E0E)
 val LightGray = Color(0xFFE0E0E0)
 val DarkGray = Color(0xFF424242)
