@@ -46,7 +46,6 @@ import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.domain.managers.AppLocale
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
-import com.rexandel.cube_crush.data.repositories.ScoreRepositoryImpl
 import com.rexandel.cube_crush.ui.components.settings.SettingsInfoItem
 import com.rexandel.cube_crush.ui.components.settings.ThemeSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
@@ -64,15 +63,13 @@ fun SettingsScreen(
     onLogout: () -> Unit,
     themeManager: ThemeManager,
     localeManager: LocaleManager,
-    userRepository: UserRepositoryImpl,
-    scoreRepository: ScoreRepositoryImpl
+    userRepository: UserRepositoryImpl
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     var currentUser by remember { mutableStateOf<String?>(null) }
     var currentNickname by remember { mutableStateOf<String?>(null) }
-    var highScore by remember { mutableStateOf(0) }
     var showChangeEmailDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showChangeNicknameDialog by remember { mutableStateOf(false) }
@@ -84,7 +81,6 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         currentUser = userRepository.getCurrentUser()
         currentNickname = userRepository.getCurrentUserNickname()
-        highScore = scoreRepository.getHighScore()
     }
 
     Box(
@@ -92,272 +88,268 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.tertiary)
-        ) {
-            Row(
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(MaterialTheme.colorScheme.tertiary)
             ) {
-                IconButton(
-                    onClick = onBackToMenu,
-                    modifier = Modifier.size(24.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(id = R.drawable.arrow_left_solid),
-                        contentDescription = StringResources.back,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Text(
-                    text = StringResources.settings,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Box {
                     IconButton(
-                        onClick = { showUserMenu = true },
+                        onClick = onBackToMenu,
                         modifier = Modifier.size(24.dp)
                     ) {
                         androidx.compose.foundation.Image(
-                            painter = painterResource(id = R.drawable.ellipses_vertical_solid),
-                            contentDescription = StringResources.userMenu,
+                            painter = painterResource(id = R.drawable.arrow_left_solid),
+                            contentDescription = StringResources.back,
                             modifier = Modifier.size(24.dp)
                         )
                     }
 
-                    DropdownMenu(
-                        expanded = showUserMenu,
-                        onDismissRequest = { showUserMenu = false }
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text = StringResources.settings,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Box {
+                        IconButton(
+                            onClick = { showUserMenu = true },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = painterResource(id = R.drawable.ellipses_vertical_solid),
+                                contentDescription = StringResources.userMenu,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showUserMenu,
+                            onDismissRequest = { showUserMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(StringResources.changeNickname) },
+                                onClick = {
+                                    showChangeNicknameDialog = true
+                                    showUserMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(StringResources.changeEmail) },
+                                onClick = {
+                                    showChangeEmailDialog = true
+                                    showUserMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(StringResources.changePassword) },
+                                onClick = {
+                                    showChangePasswordDialog = true
+                                    showUserMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 56.dp)
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = StringResources.profile,
+                        modifier = Modifier.size(60.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = currentNickname ?: currentUser ?: StringResources.notAvailable,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(StringResources.changeNickname) },
-                            onClick = {
-                                showChangeNicknameDialog = true
-                                showUserMenu = false
-                            }
+                        SettingsInfoItem(
+                            label = StringResources.nickname,
+                            value = currentNickname ?: StringResources.notAvailable,
+                            showEditIcon = false
                         )
-                        DropdownMenuItem(
-                            text = { Text(StringResources.changeEmail) },
-                            onClick = {
-                                showChangeEmailDialog = true
-                                showUserMenu = false
-                            }
+
+                        SettingsInfoItem(
+                            label = StringResources.email,
+                            value = currentUser ?: StringResources.notAvailable,
+                            showEditIcon = false
                         )
-                        DropdownMenuItem(
-                            text = { Text(StringResources.changePassword) },
-                            onClick = {
-                                showChangePasswordDialog = true
-                                showUserMenu = false
-                            }
+
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PixelButton(
+                            text = "",
+                            onClick = { showThemeDialog = true },
+                            buttonColor = ButtonColor.PURPLE,
+                            size = ButtonSize.SMALL,
+                            iconResId = R.drawable.themes_solid,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        PixelButton(
+                            text = "",
+                            onClick = { showLanguageDialog = true },
+                            buttonColor = ButtonColor.GREEN,
+                            size = ButtonSize.SMALL,
+                            iconResId = R.drawable.translate_solid,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        PixelButton(
+                            text = "",
+                            onClick = { showLogoutDialog = true },
+                            buttonColor = ButtonColor.RED,
+                            size = ButtonSize.SMALL,
+                            iconResId = R.drawable.logout_solid,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
-        }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 56.dp)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = StringResources.profile,
-                    modifier = Modifier.size(60.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+            if (showChangeEmailDialog) {
+                ChangeEmailDialog(
+                    currentEmail = currentUser ?: "",
+                    onDismiss = { showChangeEmailDialog = false },
+                    onEmailChanged = { newEmail ->
+                        scope.launch {
+                            userRepository.updateUserEmail(newEmail)
+                            currentUser = newEmail
+                            showChangeEmailDialog = false
+                        }
+                    },
+                    userRepository = userRepository
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = currentNickname ?: currentUser ?: StringResources.notAvailable,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SettingsInfoItem(
-                        label = StringResources.nickname,
-                        value = currentNickname ?: StringResources.notAvailable,
-                        showEditIcon = false
-                    )
-
-                    SettingsInfoItem(
-                        label = StringResources.email,
-                        value = currentUser ?: StringResources.notAvailable,
-                        showEditIcon = false
-                    )
-
-                    SettingsInfoItem(
-                        label = StringResources.highScoreLabel,
-                        value = highScore.toString()
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                PixelButton(
-                    text = "",
-                    onClick = { showThemeDialog = true },
-                    buttonColor = ButtonColor.PURPLE,
-                    size = ButtonSize.SMALL,
-                    iconResId = R.drawable.themes_solid,
-                    modifier = Modifier.weight(1f)
-                )
-
-                PixelButton(
-                    text = "",
-                    onClick = { showLanguageDialog = true },
-                    buttonColor = ButtonColor.GREEN,
-                    size = ButtonSize.SMALL,
-                    iconResId = R.drawable.translate_solid,
-                    modifier = Modifier.weight(1f)
-                )
-
-                PixelButton(
-                    text = "",
-                    onClick = { showLogoutDialog = true },
-                    buttonColor = ButtonColor.RED,
-                    size = ButtonSize.SMALL,
-                    iconResId = R.drawable.logout_solid,
-                    modifier = Modifier.weight(1f)
+            if (showChangePasswordDialog) {
+                ChangePasswordDialog(
+                    onDismiss = { showChangePasswordDialog = false },
+                    onPasswordChanged = {
+                        showChangePasswordDialog = false
+                    },
+                    userRepository = userRepository
                 )
             }
-        }
-    }
 
-    if (showChangeEmailDialog) {
-        ChangeEmailDialog(
-            currentEmail = currentUser ?: "",
-            onDismiss = { showChangeEmailDialog = false },
-            onEmailChanged = { newEmail ->
-                scope.launch {
-                    userRepository.updateUserEmail(newEmail)
-                    currentUser = newEmail
-                    showChangeEmailDialog = false
-                }
-            },
-            userRepository = userRepository
-        )
-    }
-
-    if (showChangePasswordDialog) {
-        ChangePasswordDialog(
-            onDismiss = { showChangePasswordDialog = false },
-            onPasswordChanged = {
-                showChangePasswordDialog = false
-            },
-            userRepository = userRepository
-        )
-    }
-
-    if (showChangeNicknameDialog) {
-        ChangeNicknameDialog(
-            currentNickname = currentNickname ?: "",
-            onDismiss = { showChangeNicknameDialog = false },
-            onNicknameChanged = { newNickname ->
-                scope.launch {
-                    userRepository.updateUserNickname(newNickname)
-                    currentNickname = newNickname
-                    showChangeNicknameDialog = false
-                }
-            },
-            userRepository = userRepository
-        )
-    }
-
-    if (showLogoutDialog) {
-        LogoutConfirmationDialog(
-            onDismiss = { showLogoutDialog = false },
-            onConfirm = {
-                scope.launch {
-                    userRepository.logout()
-                    onLogout()
-                }
+            if (showChangeNicknameDialog) {
+                ChangeNicknameDialog(
+                    currentNickname = currentNickname ?: "",
+                    onDismiss = { showChangeNicknameDialog = false },
+                    onNicknameChanged = { newNickname ->
+                        scope.launch {
+                            userRepository.updateUserNickname(newNickname)
+                            currentNickname = newNickname
+                            showChangeNicknameDialog = false
+                        }
+                    },
+                    userRepository = userRepository
+                )
             }
-        )
-    }
 
-    if (showThemeDialog) {
-        ThemeSelectionDialog(
-            onDismiss = { showThemeDialog = false },
-            onThemeSelected = { theme ->
-                val appTheme = when (theme) {
-                    "dark" -> AppTheme.DARK
-                    "light" -> AppTheme.LIGHT
-                    else -> AppTheme.SYSTEM
-                }
-                themeManager.setTheme(appTheme)
-                showThemeDialog = false
-            },
-            currentTheme = themeManager.currentTheme
-        )
-    }
+            if (showLogoutDialog) {
+                LogoutConfirmationDialog(
+                    onDismiss = { showLogoutDialog = false },
+                    onConfirm = {
+                        scope.launch {
+                            userRepository.logout()
+                            onLogout()
+                        }
+                    }
+                )
+            }
 
-    if (showLanguageDialog) {
-        LanguageSelectionDialog(
-            onDismiss = { showLanguageDialog = false },
-            onLanguageSelected = { language ->
-                val appLocale = when (language) {
-                    "ru" -> AppLocale.RUSSIAN
-                    "en" -> AppLocale.ENGLISH
-                    else -> AppLocale.SYSTEM
-                }
-                localeManager.setLocale(appLocale)
-                showLanguageDialog = false
+            if (showThemeDialog) {
+                ThemeSelectionDialog(
+                    onDismiss = { showThemeDialog = false },
+                    onThemeSelected = { theme ->
+                        val appTheme = when (theme) {
+                            "dark" -> AppTheme.DARK
+                            "light" -> AppTheme.LIGHT
+                            else -> AppTheme.SYSTEM
+                        }
+                        themeManager.setTheme(appTheme)
+                        showThemeDialog = false
+                    },
+                    currentTheme = themeManager.currentTheme
+                )
+            }
 
-                (context as? Activity)?.let { activity ->
-                    activity.recreate()
-                }
-            },
-            currentLocale = localeManager.currentLocale
-        )
+            if (showLanguageDialog) {
+                LanguageSelectionDialog(
+                    onDismiss = { showLanguageDialog = false },
+                    onLanguageSelected = { language ->
+                        val appLocale = when (language) {
+                            "ru" -> AppLocale.RUSSIAN
+                            "en" -> AppLocale.ENGLISH
+                            else -> AppLocale.SYSTEM
+                        }
+                        localeManager.setLocale(appLocale)
+                        showLanguageDialog = false
+
+                        (context as? Activity)?.let { activity ->
+                            activity.recreate()
+                        }
+                    },
+                    currentLocale = localeManager.currentLocale
+                )
+            }
     }
 }

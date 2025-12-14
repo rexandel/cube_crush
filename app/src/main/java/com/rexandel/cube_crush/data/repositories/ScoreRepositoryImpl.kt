@@ -3,6 +3,8 @@ package com.rexandel.cube_crush.data.repositories
 import android.content.Context
 import com.rexandel.cube_crush.data.database.AppDatabase
 import com.rexandel.cube_crush.data.database.entities.ScoreEntity
+import com.rexandel.cube_crush.domain.entities.PlayerScore
+import com.rexandel.cube_crush.domain.entities.Score
 import com.rexandel.cube_crush.domain.repositories.ScoreRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,5 +49,18 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
         saveScore(newScore)
         
         return@withContext if (newScore > currentHighScore) newScore else currentHighScore
+    }
+
+    override suspend fun getHistory(): List<Score> = withContext(Dispatchers.IO) {
+        val userId = getCurrentUserId() ?: return@withContext emptyList()
+        scoreDao.getHistory(userId).map { 
+            Score(score = it.score, date = it.achievedAt) 
+        }
+    }
+
+    override suspend fun getTopPlayers(): List<PlayerScore> = withContext(Dispatchers.IO) {
+        scoreDao.getTopPlayers().map {
+            PlayerScore(nickname = it.nickname, score = it.score)
+        }
     }
 }

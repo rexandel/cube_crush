@@ -19,6 +19,7 @@ import com.rexandel.cube_crush.data.managers.rememberLocaleManager
 import com.rexandel.cube_crush.data.managers.rememberThemeManager
 import com.rexandel.cube_crush.ui.screens.GameScreen
 import com.rexandel.cube_crush.ui.screens.MenuScreen
+import com.rexandel.cube_crush.ui.screens.ScoreScreen
 import com.rexandel.cube_crush.ui.screens.SettingsScreen
 import com.rexandel.cube_crush.ui.screens.SplashScreen
 import com.rexandel.cube_crush.ui.screens.auth.LoginScreen
@@ -149,10 +150,14 @@ fun AppNavigation(
             )
             AppScreen.Menu -> MenuScreen(
                 onStartGame = { currentScreen = AppScreen.Game },
-                onSettings = { currentScreen = AppScreen.Settings }
+                onSettings = { currentScreen = AppScreen.Settings },
+                onScores = { currentScreen = AppScreen.Scores }
             )
             AppScreen.Game -> GameScreen(
                 onExitToMenu = { currentScreen = AppScreen.Menu }
+            )
+            AppScreen.Scores -> ScoreScreen(
+                onBackToMenu = { currentScreen = AppScreen.Menu }
             )
             AppScreen.Settings -> SettingsScreen(
                 onBackToMenu = { currentScreen = AppScreen.Menu },
@@ -161,8 +166,7 @@ fun AppNavigation(
                 },
                 themeManager = themeManager,
                 localeManager = localeManager,
-                userRepository = userRepository,
-                scoreRepository = scoreRepository
+                userRepository = userRepository
             )
         }
     }
@@ -174,5 +178,6 @@ sealed class AppScreen {
     object Register : AppScreen()
     object Menu : AppScreen()
     object Game : AppScreen()
+    object Scores : AppScreen()
     object Settings : AppScreen()
 }

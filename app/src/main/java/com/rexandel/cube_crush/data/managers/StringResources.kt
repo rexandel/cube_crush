@@ -215,4 +215,13 @@ object StringResources {
     fun getLoadingError(context: Context, message: String): String = context.getString(R.string.loading_error, message)
     val combo: String
         @Composable get() = stringResource(R.string.combo)
+
+    val scoresScreenTitle: String
+        @Composable get() = stringResource(R.string.scores_screen_title)
+
+    val tabHistory: String
+        @Composable get() = stringResource(R.string.tab_history)
+
+    val tabTopPlayers: String
+        @Composable get() = stringResource(R.string.tab_top_players)
 }

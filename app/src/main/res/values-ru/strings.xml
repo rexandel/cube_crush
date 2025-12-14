@@ -85,4 +85,7 @@
     <string name="loading_ready">Готово!</string>
     <string name="loading_error">Ошибка загрузки: %s</string>
     <string name="combo">КОМБО</string>
+    <string name="scores_screen_title">Рекорды</string>
+    <string name="tab_history">История</string>
+    <string name="tab_top_players">Топ игроков</string>
 </resources>

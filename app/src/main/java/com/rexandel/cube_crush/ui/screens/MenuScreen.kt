@@ -25,7 +25,8 @@ import com.rexandel.cube_crush.ui.components.common.PixelButton
 @Composable
 fun MenuScreen(
     onStartGame: () -> Unit,
-    onSettings: () -> Unit
+    onSettings: () -> Unit,
+    onScores: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -54,6 +55,17 @@ fun MenuScreen(
                     .fillMaxWidth()
                     .height(70.dp),
                 buttonColor = ButtonColor.YELLOW
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            PixelButton(
+                text = StringResources.scoresScreenTitle,
+                onClick = onScores,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp),
+                buttonColor = ButtonColor.BLUE
             )
 
             Spacer(modifier = Modifier.height(16.dp))
