@@ -1,9 +1,12 @@
 package com.rexandel.cube_crush.domain.repositories
 
+import com.rexandel.cube_crush.domain.entities.User
+
 interface UserRepository {
     suspend fun registerUser(nickname: String, password: String): Boolean
     suspend fun loginUser(nickname: String, password: String): Boolean
     suspend fun getCurrentUserNickname(): String?
+    suspend fun getUserProfile(): User?
     suspend fun logout()
     suspend fun updateUserNickname(newNickname: String)
     suspend fun verifyPassword(password: String): Boolean

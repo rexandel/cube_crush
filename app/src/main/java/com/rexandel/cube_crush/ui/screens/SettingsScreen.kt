@@ -46,8 +46,12 @@ import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.data.managers.LocaleManager
 import com.rexandel.cube_crush.domain.managers.AppLocale
 import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
+import com.rexandel.cube_crush.domain.entities.User
 import com.rexandel.cube_crush.ui.components.settings.SettingsInfoItem
 import com.rexandel.cube_crush.ui.components.settings.ThemeSelectionDialog
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangePasswordDialog
 import com.rexandel.cube_crush.ui.components.settings.LogoutConfirmationDialog
@@ -69,8 +73,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var currentUser by remember { mutableStateOf<String?>(null) }
-    var currentNickname by remember { mutableStateOf<String?>(null) }
+    var userProfile by remember { mutableStateOf<User?>(null) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showChangeNicknameDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -82,7 +85,10 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         try {
-            currentNickname = userRepository.getCurrentUserNickname()
+            userProfile = userRepository.getUserProfile()
+        } catch (e: java.io.IOException) {
+            errorMessage = StringResources.getConnectionError(context)
+            showError = true
         } catch (e: Exception) {
             errorMessage = e.message ?: StringResources.getUnknownError(context)
             showError = true
@@ -195,15 +201,6 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = currentNickname ?: StringResources.notAvailable,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -220,10 +217,16 @@ fun SettingsScreen(
                     ) {
                         SettingsInfoItem(
                             label = StringResources.nickname,
-                            value = currentNickname ?: StringResources.notAvailable,
+                            value = userProfile?.nickname ?: StringResources.notAvailable,
                             showEditIcon = false
                         )
 
+                        val dateFormat = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
+                        SettingsInfoItem(
+                            label = StringResources.registrationDate,
+                            value = userProfile?.let { dateFormat.format(Date(it.registrationDate)) } ?: StringResources.notAvailable,
+                            showEditIcon = false
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -278,10 +281,10 @@ fun SettingsScreen(
 
             if (showChangeNicknameDialog) {
                 ChangeNicknameDialog(
-                    currentNickname = currentNickname ?: "",
+                    currentNickname = userProfile?.nickname ?: "",
                     onDismiss = { showChangeNicknameDialog = false },
                     onNicknameChanged = { newNickname ->
-                        currentNickname = newNickname
+                        userProfile = userProfile?.copy(nickname = newNickname)
                         showChangeNicknameDialog = false
                     },
                     userRepository = userRepository

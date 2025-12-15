@@ -97,4 +97,5 @@
     <string name="ok">ОК</string>
     <string name="unknown_error">Неизвестная ошибка</string>
     <string name="connection_error">Ошибка соединения</string>
+    <string name="registration_date">Дата регистрации</string>
 </resources>

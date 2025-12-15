@@ -2,16 +2,21 @@ package com.rexandel.cube_crush.data.repositories
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.rexandel.cube_crush.data.network.NetworkModule
 import com.rexandel.cube_crush.data.network.dto.ChangePasswordRequest
 import com.rexandel.cube_crush.data.network.dto.LoginRequest
 import com.rexandel.cube_crush.data.network.dto.RegisterRequest
 import com.rexandel.cube_crush.data.network.dto.UpdateNicknameRequest
 import com.rexandel.cube_crush.data.network.dto.UserProfile
+import com.rexandel.cube_crush.domain.entities.User
 import com.rexandel.cube_crush.domain.repositories.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.format.DateTimeParseException
 
 class UserRepositoryImpl private constructor(context: Context) : UserRepository {
     private val authApi = NetworkModule.getAuthApi(context)
@@ -76,6 +81,38 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
 
     override suspend fun getCurrentUserNickname(): String? = withContext(Dispatchers.IO) {
         sessionPref.getString("current_user", null)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun getUserProfile(): User? = withContext(Dispatchers.IO) {
+        Log.d(TAG, "getUserProfile")
+        try {
+            val profile = userApi.getCurrentUser()
+            Log.d(TAG, "getUserProfile: success")
+            User(
+                id = profile.id,
+                nickname = profile.nickname,
+                registrationDate = parseDate(profile.createdAt)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "getUserProfile: error", e)
+            throw e
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun parseDate(dateString: String): Long {
+        return try {
+            Instant.parse(dateString).toEpochMilli()
+        } catch (e: DateTimeParseException) {
+            try {
+                java.time.LocalDateTime.parse(dateString).toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+            } catch (e2: Exception) {
+                System.currentTimeMillis()
+            }
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
     }
 
     override suspend fun logout() = withContext(Dispatchers.IO) {

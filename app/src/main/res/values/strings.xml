@@ -97,4 +97,5 @@
     <string name="ok">OK</string>
     <string name="unknown_error">Unknown error</string>
     <string name="connection_error">Connection error</string>
+    <string name="registration_date">Registration Date</string>
 </resources>
