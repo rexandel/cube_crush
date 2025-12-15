@@ -81,6 +81,7 @@
     <string name="loading_preparing">Preparing to load…</string>
     <string name="loading_creating_board">Creating game board…</string>
     <string name="loading_initializing_systems">Initializing game systems…</string>
+    <string name="loading_checking_server">Checking server connection…</string>
     <string name="loading_complete">Loading complete!</string>
     <string name="loading_ready">Ready!</string>
     <string name="loading_error">Loading error: %s</string>

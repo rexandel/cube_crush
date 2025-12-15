@@ -210,6 +210,7 @@ object StringResources {
     fun getLoadingPreparing(context: Context): String = context.getString(R.string.loading_preparing)
     fun getLoadingCreatingBoard(context: Context): String = context.getString(R.string.loading_creating_board)
     fun getLoadingInitializingSystems(context: Context): String = context.getString(R.string.loading_initializing_systems)
+    fun getLoadingCheckingServer(context: Context): String = context.getString(R.string.loading_checking_server)
     fun getLoadingComplete(context: Context): String = context.getString(R.string.loading_complete)
     fun getLoadingReady(context: Context): String = context.getString(R.string.loading_ready)
     fun getLoadingError(context: Context, message: String): String = context.getString(R.string.loading_error, message)

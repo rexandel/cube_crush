@@ -81,6 +81,7 @@
     <string name="loading_preparing">Подготовка к загрузке…</string>
     <string name="loading_creating_board">Создание игрового поля…</string>
     <string name="loading_initializing_systems">Инициализация игровых систем…</string>
+    <string name="loading_checking_server">Проверка соединения с сервером…</string>
     <string name="loading_complete">Загрузка завершена!</string>
     <string name="loading_ready">Готово!</string>
     <string name="loading_error">Ошибка загрузки: %s</string>

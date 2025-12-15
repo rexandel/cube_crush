@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import com.rexandel.cube_crush.data.managers.StringResources
+import com.rexandel.cube_crush.data.network.NetworkModule
 import com.rexandel.cube_crush.domain.entities.GameState
 
 data class LoadingState(
@@ -27,11 +28,14 @@ class ResourceLoader(private val context: Context) {
         )
 
         try {
-            updateProgress(StringResources.getLoadingCreatingBoard(context), 0.3f)
+            updateProgress(StringResources.getLoadingCreatingBoard(context), 0.2f)
             val gameState = preloadGameState()
 
-            updateProgress(StringResources.getLoadingInitializingSystems(context), 0.7f)
+            updateProgress(StringResources.getLoadingInitializingSystems(context), 0.5f)
             initializeGameComponents()
+
+            updateProgress(StringResources.getLoadingCheckingServer(context), 0.8f)
+            checkServerConnection()
 
             updateProgress(StringResources.getLoadingComplete(context), 1.0f)
 
@@ -77,6 +81,20 @@ class ResourceLoader(private val context: Context) {
         testModel.createNewGame()
         val boardManager = BoardManager()
         boardManager.createEmptyBoard()
+    }
+
+    private suspend fun checkServerConnection() = withContext(Dispatchers.IO) {
+        try {
+            val gameApi = NetworkModule.getGameApi(context)
+            gameApi.getTopPlayers()
+        } catch (e: Exception) {
+            // Log error but don't block app startup if offline play is desired
+            // Or throw exception if server is required
+            // For now, we'll just let it pass or maybe log it
+            e.printStackTrace()
+            // If strict server requirement:
+            // throw Exception("Server unavailable: ${e.message}")
+        }
     }
 
     private fun updateProgress(step: String, progress: Float) {
