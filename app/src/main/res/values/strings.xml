@@ -93,4 +93,8 @@
     <string name="stats_games_played">Games Played</string>
     <string name="stats_average_score">Average Score</string>
     <string name="stats_best_score">Best Score</string>
+    <string name="error_title">Error</string>
+    <string name="ok">OK</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="connection_error">Connection error</string>
 </resources>

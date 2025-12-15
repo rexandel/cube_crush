@@ -35,6 +35,8 @@ import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.domain.game.ResourceLoader
 import kotlinx.coroutines.delay
 
+import com.rexandel.cube_crush.ui.components.common.ErrorDialog
+
 @Composable
 fun SplashScreen(
     onLoadingComplete: () -> Unit = {}
@@ -56,10 +58,21 @@ fun SplashScreen(
     }
 
     LaunchedEffect(loadingState.isComplete) {
-        if (loadingState.isComplete) {
+        if (loadingState.isComplete && loadingState.error == null) {
             delay(300)
             onLoadingComplete()
         }
+    }
+
+    if (loadingState.error != null) {
+        ErrorDialog(
+            errorMessage = loadingState.error!!,
+            onDismiss = { 
+                if (loadingState.isComplete) {
+                    onLoadingComplete()
+                }
+            }
+        )
     }
 
     Box(

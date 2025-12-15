@@ -1,7 +1,9 @@
 package com.rexandel.cube_crush.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.rexandel.cube_crush.data.managers.StringResources
 import com.rexandel.cube_crush.domain.game.GameModel
 import com.rexandel.cube_crush.domain.repositories.UserRepository
 import com.rexandel.cube_crush.domain.repositories.ScoreRepository
@@ -12,9 +14,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class GameViewModel(
+    application: Application,
     private val userRepository: UserRepository,
     private val scoreRepository: ScoreRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val gameModel = GameModel()
     private val gameStateManager = GameStateManager(gameModel)
@@ -111,22 +114,39 @@ class GameViewModel(
             gameState = gameStateManager.getCurrentState(),
             dragState = dragHandler.getCurrentDragState(),
             uiEffects = uiEffectsManager.getCurrentEffects(),
-            linesToClear = _uiState.value.linesToClear
+            linesToClear = _uiState.value.linesToClear,
+            error = _uiState.value.error
         )
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
     private fun submitScore(score: Int? = null) {
         val scoreToSave = score ?: _uiState.value.gameState.score
         viewModelScope.launch {
-            scoreRepository.submitScore(scoreToSave)
+            try {
+                scoreRepository.submitScore(scoreToSave)
+            } catch (e: java.io.IOException) {
+                // Suppress connection errors in game screen as user is already aware
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message ?: StringResources.getUnknownError(getApplication()))
+            }
         }
     }
 
     private fun refreshHighScore() {
         viewModelScope.launch {
-            val savedHighScore = scoreRepository.getHighScore()
-            gameStateManager.updateHighScore(savedHighScore)
-            updateUiState()
+            try {
+                val savedHighScore = scoreRepository.getHighScore()
+                gameStateManager.updateHighScore(savedHighScore)
+                updateUiState()
+            } catch (e: java.io.IOException) {
+                // Suppress connection errors in game screen as user is already aware
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message ?: StringResources.getUnknownError(getApplication()))
+            }
         }
     }
 

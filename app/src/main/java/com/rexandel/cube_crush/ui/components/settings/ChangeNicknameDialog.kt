@@ -113,7 +113,14 @@ fun ChangeNicknameDialog(
                                     return@launch
                                 }
                                 else -> {
-                                    onNicknameChanged(newNickname)
+                                    try {
+                                        userRepository.updateUserNickname(newNickname)
+                                        onNicknameChanged(newNickname)
+                                    } catch (e: java.io.IOException) {
+                                        errorMessage = StringResources.getConnectionError(context)
+                                    } catch (e: Exception) {
+                                        errorMessage = e.message ?: StringResources.getUnknownError(context)
+                                    }
                                 }
                             }
                         }

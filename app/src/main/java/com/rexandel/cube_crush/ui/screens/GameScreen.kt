@@ -36,14 +36,18 @@ import com.rexandel.cube_crush.viewmodel.GameViewModel
 import com.rexandel.cube_crush.viewmodel.GameViewModelFactory
 import kotlinx.coroutines.launch
 
+import com.rexandel.cube_crush.ui.components.common.ErrorDialog
+
 @Composable
 fun GameScreen(
     onExitToMenu: () -> Unit
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val application = context.applicationContext as android.app.Application
     val gameViewModel: GameViewModel = viewModel(
         factory = GameViewModelFactory(
+            application = application,
             userRepository = UserRepositoryImpl.getInstance(context),
             scoreRepository = ScoreRepositoryImpl.getInstance(context)
         )
@@ -53,6 +57,13 @@ fun GameScreen(
     val gameState = uiState.gameState
     val dragState = uiState.dragState
     val uiEffects = uiState.uiEffects
+
+    if (uiState.error != null) {
+        ErrorDialog(
+            errorMessage = uiState.error!!,
+            onDismiss = { gameViewModel.clearError() }
+        )
+    }
 
     var isPaused by remember { mutableStateOf(false) }
     var boardPosition by remember { mutableStateOf(Offset.Zero) }

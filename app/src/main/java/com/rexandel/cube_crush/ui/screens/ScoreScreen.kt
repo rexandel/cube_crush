@@ -1,5 +1,7 @@
 package com.rexandel.cube_crush.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +25,9 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.rexandel.cube_crush.ui.components.common.ErrorDialog
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoreScreen(
@@ -37,10 +42,28 @@ fun ScoreScreen(
     var topPlayers by remember { mutableStateOf<List<PlayerScore>>(emptyList()) }
     var userStats by remember { mutableStateOf<UserStats?>(null) }
 
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
-        history = scoreRepository.getHistory()
-        topPlayers = scoreRepository.getTopPlayers()
-        userStats = scoreRepository.getUserStats()
+        try {
+            history = scoreRepository.getHistory()
+            topPlayers = scoreRepository.getTopPlayers()
+            userStats = scoreRepository.getUserStats()
+        } catch (e: java.io.IOException) {
+            errorMessage = StringResources.getConnectionError(context)
+            showError = true
+        } catch (e: Exception) {
+            errorMessage = e.message ?: StringResources.getUnknownError(context)
+            showError = true
+        }
+    }
+
+    if (showError) {
+        ErrorDialog(
+            errorMessage = errorMessage,
+            onDismiss = { showError = false }
+        )
     }
 
     Box(

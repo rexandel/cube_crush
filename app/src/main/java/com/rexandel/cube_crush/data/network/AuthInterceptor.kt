@@ -28,7 +28,6 @@ class AuthInterceptor(private val context: Context) : Interceptor {
             val refreshToken = prefs.getString("refresh_token", null)
             if (refreshToken != null) {
                 synchronized(this) {
-                    // Check if token was already updated by another thread
                     val currentToken = prefs.getString("access_token", null)
                     if (currentToken != null && currentToken != token) {
                         Log.d(TAG, "Token already refreshed, retrying request")
@@ -40,9 +39,6 @@ class AuthInterceptor(private val context: Context) : Interceptor {
                     }
 
                     try {
-                        // Create a new Retrofit instance to avoid circular dependency or use a separate OkHttpClient
-                        // For simplicity, we'll use the existing NetworkModule but be careful about recursion
-                        // Ideally, we should have a separate Authenticator, but Interceptor works for simple cases
                         val authApi = NetworkModule.getAuthApi(context)
                         val refreshResponse = authApi.refreshToken(RefreshTokenRequest(refreshToken)).execute()
 
@@ -63,7 +59,6 @@ class AuthInterceptor(private val context: Context) : Interceptor {
                             }
                         } else {
                             Log.e(TAG, "Token refresh failed: ${refreshResponse.code()}")
-                            // Optional: Logout user if refresh fails
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Token refresh error", e)

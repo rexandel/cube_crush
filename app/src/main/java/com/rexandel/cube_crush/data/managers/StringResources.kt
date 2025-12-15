@@ -237,4 +237,7 @@ object StringResources {
 
     val statsBestScore: String
         @Composable get() = stringResource(R.string.stats_best_score)
+
+    fun getUnknownError(context: Context): String = context.getString(R.string.unknown_error)
+    fun getConnectionError(context: Context): String = context.getString(R.string.connection_error)
 }

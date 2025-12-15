@@ -85,6 +85,7 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
             Log.d(TAG, "logout: success")
         } catch (e: Exception) {
             Log.e(TAG, "logout: error", e)
+            throw e
         } finally {
             sessionPref.edit().clear().apply()
         }
@@ -99,7 +100,7 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
             saveUserProfile(profile)
         } catch (e: Exception) {
             Log.e(TAG, "updateUserNickname: error", e)
-            e.printStackTrace()
+            throw e
         }
     }
 
@@ -110,9 +111,16 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
             authApi.login(LoginRequest(nickname, password))
             Log.d(TAG, "verifyPassword: success")
             true
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 401) {
+                Log.d(TAG, "verifyPassword: wrong password")
+                return@withContext false
+            }
+            Log.e(TAG, "verifyPassword: error", e)
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "verifyPassword: error", e)
-            false
+            throw e
         }
     }
 
@@ -124,8 +132,7 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
             true
         } catch (e: Exception) {
             Log.e(TAG, "updatePassword: error", e)
-            e.printStackTrace()
-            false
+            throw e
         }
     }
 

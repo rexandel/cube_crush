@@ -112,30 +112,36 @@ fun ChangePasswordDialog(
                     text = StringResources.save,
                     onClick = {
                         scope.launch {
-                            when {
-                                currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
-                                    errorMessage = StringResources.fillAllFields(context)
-                                    return@launch
-                                }
-                                !userRepository.verifyPassword(currentPassword) -> {
-                                    errorMessage = StringResources.invalidCurrentPassword(context)
-                                    return@launch
-                                }
-                                newPassword.length < 6 -> {
-                                    errorMessage = StringResources.passwordMinLength(context)
-                                    return@launch
-                                }
-                                newPassword != confirmPassword -> {
-                                    errorMessage = StringResources.passwordsDontMatch(context)
-                                    return@launch
-                                }
-                                else -> {
-                                    if (userRepository.updatePassword(currentPassword, newPassword)) {
-                                        onPasswordChanged()
-                                    } else {
-                                        errorMessage = StringResources.passwordChangeError(context)
+                            try {
+                                when {
+                                    currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() -> {
+                                        errorMessage = StringResources.fillAllFields(context)
+                                        return@launch
+                                    }
+                                    !userRepository.verifyPassword(currentPassword) -> {
+                                        errorMessage = StringResources.invalidCurrentPassword(context)
+                                        return@launch
+                                    }
+                                    newPassword.length < 6 -> {
+                                        errorMessage = StringResources.passwordMinLength(context)
+                                        return@launch
+                                    }
+                                    newPassword != confirmPassword -> {
+                                        errorMessage = StringResources.passwordsDontMatch(context)
+                                        return@launch
+                                    }
+                                    else -> {
+                                        if (userRepository.updatePassword(currentPassword, newPassword)) {
+                                            onPasswordChanged()
+                                        } else {
+                                            errorMessage = StringResources.passwordChangeError(context)
+                                        }
                                     }
                                 }
+                            } catch (e: java.io.IOException) {
+                                errorMessage = StringResources.getConnectionError(context)
+                            } catch (e: Exception) {
+                                errorMessage = e.message ?: StringResources.getUnknownError(context)
                             }
                         }
                     },

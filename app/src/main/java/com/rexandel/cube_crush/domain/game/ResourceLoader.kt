@@ -13,7 +13,8 @@ data class LoadingState(
     val progress: Float = 0f,
     val currentStep: String = "",
     val isComplete: Boolean = false,
-    val preloadedGameState: GameState? = null
+    val preloadedGameState: GameState? = null,
+    val error: String? = null
 )
 
 class ResourceLoader(private val context: Context) {
@@ -35,7 +36,13 @@ class ResourceLoader(private val context: Context) {
             initializeGameComponents()
 
             updateProgress(StringResources.getLoadingCheckingServer(context), 0.8f)
-            checkServerConnection()
+            
+            var connectionError: String? = null
+            try {
+                checkServerConnection()
+            } catch (e: Exception) {
+                connectionError = StringResources.getConnectionError(context)
+            }
 
             updateProgress(StringResources.getLoadingComplete(context), 1.0f)
 
@@ -43,14 +50,16 @@ class ResourceLoader(private val context: Context) {
                 progress = 1.0f,
                 currentStep = StringResources.getLoadingReady(context),
                 isComplete = true,
-                preloadedGameState = gameState
+                preloadedGameState = gameState,
+                error = connectionError
             )
 
         } catch (e: Exception) {
             _loadingState.value = LoadingState(
                 progress = 0f,
                 currentStep = StringResources.getLoadingError(context, e.message ?: ""),
-                isComplete = false
+                isComplete = false,
+                error = e.message ?: StringResources.getUnknownError(context)
             )
         }
     }
@@ -88,12 +97,8 @@ class ResourceLoader(private val context: Context) {
             val gameApi = NetworkModule.getGameApi(context)
             gameApi.getTopPlayers()
         } catch (e: Exception) {
-            // Log error but don't block app startup if offline play is desired
-            // Or throw exception if server is required
-            // For now, we'll just let it pass or maybe log it
             e.printStackTrace()
-            // If strict server requirement:
-            // throw Exception("Server unavailable: ${e.message}")
+            throw e
         }
     }
 

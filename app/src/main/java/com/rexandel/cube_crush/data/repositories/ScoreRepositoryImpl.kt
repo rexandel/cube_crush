@@ -38,7 +38,7 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
             score
         } catch (e: Exception) {
             Log.e(TAG, "getHighScore: error", e)
-            0
+            throw e
         }
     }
 
@@ -50,7 +50,7 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
             Unit
         } catch (e: Exception) {
             Log.e(TAG, "saveScore: error", e)
-            e.printStackTrace()
+            throw e
         }
     }
 
@@ -63,8 +63,7 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
             stats.bestScore
         } catch (e: Exception) {
             Log.e(TAG, "submitScore: error", e)
-            e.printStackTrace()
-            newScore
+            throw e
         }
     }
 
@@ -79,7 +78,7 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
             history
         } catch (e: Exception) {
             Log.e(TAG, "getHistory: error", e)
-            emptyList()
+            throw e
         }
     }
 
@@ -93,7 +92,7 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
             top
         } catch (e: Exception) {
             Log.e(TAG, "getTopPlayers: error", e)
-            emptyList()
+            throw e
         }
     }
 
@@ -109,7 +108,7 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
             )
         } catch (e: Exception) {
             Log.e(TAG, "getUserStats: error", e)
-            null
+            throw e
         }
     }
 

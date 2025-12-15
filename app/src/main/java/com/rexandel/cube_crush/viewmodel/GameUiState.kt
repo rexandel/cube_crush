@@ -6,7 +6,8 @@ data class GameUiState(
     val gameState: GameState,
     val dragState: DragState,
     val uiEffects: UiEffects,
-    val linesToClear: Set<Int> = emptySet()
+    val linesToClear: Set<Int> = emptySet(),
+    val error: String? = null
 ) {
     fun isHorizontalLine(lineIndex: Int): Boolean {
         return lineIndex < 8

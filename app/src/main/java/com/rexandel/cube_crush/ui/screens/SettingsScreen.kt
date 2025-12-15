@@ -56,6 +56,8 @@ import com.rexandel.cube_crush.ui.components.common.PixelButton
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
 import com.rexandel.cube_crush.ui.components.common.ButtonSize
 
+import com.rexandel.cube_crush.ui.components.common.ErrorDialog
+
 @Composable
 fun SettingsScreen(
     onBackToMenu: () -> Unit,
@@ -75,9 +77,23 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showUserMenu by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        currentNickname = userRepository.getCurrentUserNickname()
+        try {
+            currentNickname = userRepository.getCurrentUserNickname()
+        } catch (e: Exception) {
+            errorMessage = e.message ?: StringResources.getUnknownError(context)
+            showError = true
+        }
+    }
+
+    if (showError) {
+        ErrorDialog(
+            errorMessage = errorMessage,
+            onDismiss = { showError = false }
+        )
     }
 
     Box(
@@ -265,11 +281,8 @@ fun SettingsScreen(
                     currentNickname = currentNickname ?: "",
                     onDismiss = { showChangeNicknameDialog = false },
                     onNicknameChanged = { newNickname ->
-                        scope.launch {
-                            userRepository.updateUserNickname(newNickname)
-                            currentNickname = newNickname
-                            showChangeNicknameDialog = false
-                        }
+                        currentNickname = newNickname
+                        showChangeNicknameDialog = false
                     },
                     userRepository = userRepository
                 )
@@ -280,8 +293,16 @@ fun SettingsScreen(
                     onDismiss = { showLogoutDialog = false },
                     onConfirm = {
                         scope.launch {
-                            userRepository.logout()
-                            onLogout()
+                            try {
+                                userRepository.logout()
+                                onLogout()
+                            } catch (e: java.io.IOException) {
+                                errorMessage = StringResources.getConnectionError(context)
+                                showError = true
+                            } catch (e: Exception) {
+                                errorMessage = e.message ?: StringResources.getUnknownError(context)
+                                showError = true
+                            }
                         }
                     }
                 )

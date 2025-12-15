@@ -93,4 +93,8 @@
     <string name="stats_games_played">Количество Игр</string>
     <string name="stats_average_score">Средний Счёт</string>
     <string name="stats_best_score">Рекорд</string>
+    <string name="error_title">Ошибка</string>
+    <string name="ok">ОК</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="connection_error">Ошибка соединения</string>
 </resources>
