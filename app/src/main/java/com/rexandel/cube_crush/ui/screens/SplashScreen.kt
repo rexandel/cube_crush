@@ -36,6 +36,7 @@ import com.rexandel.cube_crush.domain.game.ResourceLoader
 import kotlinx.coroutines.delay
 
 import com.rexandel.cube_crush.ui.components.common.ErrorDialog
+import com.rexandel.cube_crush.data.managers.SoundManager
 
 @Composable
 fun SplashScreen(
@@ -45,6 +46,7 @@ fun SplashScreen(
     val resourceLoader = remember { ResourceLoader(context) }
     val loadingState by resourceLoader.loadingState.collectAsState()
     val animatedProgress = remember { Animatable(0f) }
+    val soundManager = remember { SoundManager.getInstance(context) }
 
     LaunchedEffect(Unit) {
         resourceLoader.loadAllResources()
@@ -59,6 +61,7 @@ fun SplashScreen(
 
     LaunchedEffect(loadingState.isComplete) {
         if (loadingState.isComplete && loadingState.error == null) {
+            soundManager.playSound(SoundManager.Sound.LOADING_COMPLETE)
             delay(300)
             onLoadingComplete()
         }

@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+import com.rexandel.cube_crush.data.managers.SoundManager
+
 class GameViewModel(
     application: Application,
     private val userRepository: UserRepository,
@@ -23,6 +25,7 @@ class GameViewModel(
     private val gameStateManager = GameStateManager(gameModel)
     private val dragHandler = DragHandler(gameModel)
     private val uiEffectsManager = UiEffectsManager()
+    private val soundManager = SoundManager.getInstance(application)
 
     private val _uiState = MutableStateFlow(
         GameUiState(
@@ -62,6 +65,7 @@ class GameViewModel(
         val result = gameStateManager.placeShape(shapeIndex, position)
 
         if (result is PlaceShapeResult.Success) {
+            soundManager.playSound(SoundManager.Sound.BLOCK)
             uiEffectsManager.showScoreAnimation(
                 linesCleared = result.linesCleared,
                 scoreEarned = result.scoreEarned,
@@ -70,6 +74,7 @@ class GameViewModel(
 
             val currentState = gameStateManager.getCurrentState()
             if (currentState.isGameOver) {
+                soundManager.playSound(SoundManager.Sound.GAME_OVER)
                 submitScore()
             }
         }
