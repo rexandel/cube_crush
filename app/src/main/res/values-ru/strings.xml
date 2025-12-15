@@ -33,7 +33,7 @@
     <string name="no_account">Нет аккаунта?</string>
     <string name="have_account">Уже есть аккаунт?</string>
     <string name="fill_all_fields">Заполните все поля</string>
-    <string name="invalid_email_password">Неверная эл. почта или пароль</string>
+    <string name="invalid_nickname_password">Неверное имя пользователя или пароль</string>
     <string name="password_too_short">Пароль должен быть не менее 6 символов</string>
     <string name="passwords_dont_match">Пароли не совпадают</string>
     <string name="user_exists">Пользователь с такой эл. почтой уже существует</string>

@@ -138,19 +138,28 @@ fun HistoryList(history: List<Score>) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(vertical = 24.dp, horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = StringResources.score(score.score),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        text = formatDate(score.date),
+                        text = formatTime(score.date),
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = formatDateOnly(score.date),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+
+                    Text(
+                        text = score.score.toString(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -205,8 +214,13 @@ fun TopPlayersList(topPlayers: List<PlayerScore>) {
     }
 }
 
-private fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+private fun formatTime(timestamp: Long): String {
+    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+    return sdf.format(Date(timestamp))
+}
+
+private fun formatDateOnly(timestamp: Long): String {
+    val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
     return sdf.format(Date(timestamp))
 }
 

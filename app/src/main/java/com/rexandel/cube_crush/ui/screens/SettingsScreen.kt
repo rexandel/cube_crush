@@ -49,7 +49,6 @@ import com.rexandel.cube_crush.data.repositories.UserRepositoryImpl
 import com.rexandel.cube_crush.ui.components.settings.SettingsInfoItem
 import com.rexandel.cube_crush.ui.components.settings.ThemeSelectionDialog
 import com.rexandel.cube_crush.ui.components.settings.LanguageSelectionDialog
-import com.rexandel.cube_crush.ui.components.settings.ChangeEmailDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangePasswordDialog
 import com.rexandel.cube_crush.ui.components.settings.LogoutConfirmationDialog
 import com.rexandel.cube_crush.ui.components.settings.ChangeNicknameDialog
@@ -70,7 +69,6 @@ fun SettingsScreen(
 
     var currentUser by remember { mutableStateOf<String?>(null) }
     var currentNickname by remember { mutableStateOf<String?>(null) }
-    var showChangeEmailDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showChangeNicknameDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -79,7 +77,6 @@ fun SettingsScreen(
     var showUserMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        currentUser = userRepository.getCurrentUser()
         currentNickname = userRepository.getCurrentUserNickname()
     }
 
@@ -146,13 +143,6 @@ fun SettingsScreen(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(StringResources.changeEmail) },
-                                onClick = {
-                                    showChangeEmailDialog = true
-                                    showUserMenu = false
-                                }
-                            )
-                            DropdownMenuItem(
                                 text = { Text(StringResources.changePassword) },
                                 onClick = {
                                     showChangePasswordDialog = true
@@ -190,7 +180,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = currentNickname ?: currentUser ?: StringResources.notAvailable,
+                    text = currentNickname ?: StringResources.notAvailable,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
@@ -215,12 +205,6 @@ fun SettingsScreen(
                         SettingsInfoItem(
                             label = StringResources.nickname,
                             value = currentNickname ?: StringResources.notAvailable,
-                            showEditIcon = false
-                        )
-
-                        SettingsInfoItem(
-                            label = StringResources.email,
-                            value = currentUser ?: StringResources.notAvailable,
                             showEditIcon = false
                         )
 
@@ -264,21 +248,6 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
                 }
-            }
-
-            if (showChangeEmailDialog) {
-                ChangeEmailDialog(
-                    currentEmail = currentUser ?: "",
-                    onDismiss = { showChangeEmailDialog = false },
-                    onEmailChanged = { newEmail ->
-                        scope.launch {
-                            userRepository.updateUserEmail(newEmail)
-                            currentUser = newEmail
-                            showChangeEmailDialog = false
-                        }
-                    },
-                    userRepository = userRepository
-                )
             }
 
             if (showChangePasswordDialog) {

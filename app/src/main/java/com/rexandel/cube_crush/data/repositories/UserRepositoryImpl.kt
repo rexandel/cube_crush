@@ -2,17 +2,22 @@ package com.rexandel.cube_crush.data.repositories
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.rexandel.cube_crush.data.database.AppDatabase
-import com.rexandel.cube_crush.data.database.entities.UserEntity
+import android.util.Log
+import com.rexandel.cube_crush.data.network.NetworkModule
+import com.rexandel.cube_crush.data.network.dto.ChangePasswordRequest
+import com.rexandel.cube_crush.data.network.dto.LoginRequest
+import com.rexandel.cube_crush.data.network.dto.RegisterRequest
+import com.rexandel.cube_crush.data.network.dto.UpdateNicknameRequest
+import com.rexandel.cube_crush.data.network.dto.UserProfile
 import com.rexandel.cube_crush.domain.repositories.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.security.MessageDigest
 
 class UserRepositoryImpl private constructor(context: Context) : UserRepository {
-    private val db = AppDatabase.getDatabase(context)
-    private val userDao = db.userDao()
+    private val authApi = NetworkModule.getAuthApi(context)
+    private val userApi = NetworkModule.getUserApi(context)
     private val sessionPref: SharedPreferences = context.getSharedPreferences("session_prefs", Context.MODE_PRIVATE)
+    private val TAG = "UserRepository"
 
     companion object {
         @Volatile
@@ -25,79 +30,106 @@ class UserRepositoryImpl private constructor(context: Context) : UserRepository 
         }
     }
 
-    private fun hashPassword(password: String): String {
-        val bytes = password.toByteArray()
-        val md = MessageDigest.getInstance("SHA-256")
-        val digest = md.digest(bytes)
-        return digest.fold("") { str, it -> str + "%02x".format(it) }
+    private fun saveTokens(accessToken: String, refreshToken: String) {
+        sessionPref.edit()
+            .putString("access_token", accessToken)
+            .putString("refresh_token", refreshToken)
+            .apply()
     }
 
-    override suspend fun registerUser(email: String, password: String, nickname: String): Boolean = withContext(Dispatchers.IO) {
-        if (userDao.findByEmail(email) != null) return@withContext false
-        if (userDao.findByNickname(nickname) != null) return@withContext false
-
-        val user = UserEntity(
-            email = email,
-            passwordHash = hashPassword(password),
-            nickname = nickname
-        )
-        userDao.insert(user)
-        true
+    private fun saveUserProfile(profile: UserProfile) {
+        sessionPref.edit()
+            .putString("current_user", profile.nickname)
+            .putLong("user_id", profile.id)
+            .apply()
     }
 
-    override suspend fun loginUser(email: String, password: String): Boolean = withContext(Dispatchers.IO) {
-        val user = userDao.findByEmail(email) ?: return@withContext false
-        user.passwordHash == hashPassword(password)
+    override suspend fun registerUser(nickname: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        Log.d(TAG, "registerUser: nickname=$nickname")
+        try {
+            val response = authApi.register(RegisterRequest(nickname, password))
+            Log.d(TAG, "registerUser: success")
+            saveTokens(response.accessToken, response.refreshToken)
+            saveUserProfile(response.userProfile)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "registerUser: error", e)
+            e.printStackTrace()
+            false
+        }
     }
 
-    override suspend fun setCurrentUser(email: String) = withContext(Dispatchers.IO) {
-        sessionPref.edit().putString("current_user", email).apply()
+    override suspend fun loginUser(nickname: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        Log.d(TAG, "loginUser: nickname=$nickname")
+        try {
+            val response = authApi.login(LoginRequest(nickname, password))
+            Log.d(TAG, "loginUser: success")
+            saveTokens(response.accessToken, response.refreshToken)
+            saveUserProfile(response.userProfile)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "loginUser: error", e)
+            e.printStackTrace()
+            false
+        }
     }
 
-    override suspend fun getCurrentUser(): String? = withContext(Dispatchers.IO) {
-        sessionPref.getString("current_user", null)
-    }
-    
     override suspend fun getCurrentUserNickname(): String? = withContext(Dispatchers.IO) {
-        val email = getCurrentUser() ?: return@withContext null
-        userDao.findByEmail(email)?.nickname
+        sessionPref.getString("current_user", null)
     }
 
     override suspend fun logout() = withContext(Dispatchers.IO) {
-        sessionPref.edit().remove("current_user").apply()
-    }
-
-    override suspend fun updateUserEmail(newEmail: String) = withContext(Dispatchers.IO) {
-        val currentEmail = getCurrentUser() ?: return@withContext
-        val user = userDao.findByEmail(currentEmail) ?: return@withContext
-        userDao.updateEmail(user.id, newEmail)
-        setCurrentUser(newEmail)
+        Log.d(TAG, "logout")
+        try {
+            authApi.logout()
+            Log.d(TAG, "logout: success")
+        } catch (e: Exception) {
+            Log.e(TAG, "logout: error", e)
+        } finally {
+            sessionPref.edit().clear().apply()
+        }
+        Unit
     }
 
     override suspend fun updateUserNickname(newNickname: String) = withContext(Dispatchers.IO) {
-        val currentEmail = getCurrentUser() ?: return@withContext
-        val user = userDao.findByEmail(currentEmail) ?: return@withContext
-        userDao.updateNickname(user.id, newNickname)
+        Log.d(TAG, "updateUserNickname: newNickname=$newNickname")
+        try {
+            val profile = userApi.updateNickname(UpdateNicknameRequest(newNickname))
+            Log.d(TAG, "updateUserNickname: success")
+            saveUserProfile(profile)
+        } catch (e: Exception) {
+            Log.e(TAG, "updateUserNickname: error", e)
+            e.printStackTrace()
+        }
     }
 
     override suspend fun verifyPassword(password: String): Boolean = withContext(Dispatchers.IO) {
-        val currentEmail = getCurrentUser() ?: return@withContext false
-        val user = userDao.findByEmail(currentEmail) ?: return@withContext false
-        user.passwordHash == hashPassword(password)
+        Log.d(TAG, "verifyPassword")
+        val nickname = getCurrentUserNickname() ?: return@withContext false
+        try {
+            authApi.login(LoginRequest(nickname, password))
+            Log.d(TAG, "verifyPassword: success")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "verifyPassword: error", e)
+            false
+        }
     }
 
-    override suspend fun updatePassword(newPassword: String): Boolean = withContext(Dispatchers.IO) {
-        val currentEmail = getCurrentUser() ?: return@withContext false
-        val user = userDao.findByEmail(currentEmail) ?: return@withContext false
-        userDao.updatePassword(user.id, hashPassword(newPassword))
-        true
-    }
-
-    override suspend fun isEmailExists(email: String): Boolean = withContext(Dispatchers.IO) {
-        userDao.findByEmail(email) != null
+    override suspend fun updatePassword(currentPassword: String, newPassword: String): Boolean = withContext(Dispatchers.IO) {
+        Log.d(TAG, "updatePassword")
+        try {
+            userApi.updatePassword(ChangePasswordRequest(currentPassword, newPassword))
+            Log.d(TAG, "updatePassword: success")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "updatePassword: error", e)
+            e.printStackTrace()
+            false
+        }
     }
 
     override suspend fun isNicknameExists(nickname: String): Boolean = withContext(Dispatchers.IO) {
-        userDao.findByNickname(nickname) != null
+        false
     }
 }

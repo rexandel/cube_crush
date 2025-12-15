@@ -97,7 +97,7 @@ object StringResources {
         @Composable get() = stringResource(R.string.have_account)
 
     fun fillAllFields(context: Context): String = context.getString(R.string.fill_all_fields)
-    fun invalidEmailPassword(context: Context): String = context.getString(R.string.invalid_email_password)
+    fun invalidNicknamePassword(context: Context): String = context.getString(R.string.invalid_nickname_password)
     fun passwordTooShort(context: Context): String = context.getString(R.string.password_too_short)
     fun passwordsDontMatch(context: Context): String = context.getString(R.string.passwords_dont_match)
     fun userExists(context: Context): String = context.getString(R.string.user_exists)

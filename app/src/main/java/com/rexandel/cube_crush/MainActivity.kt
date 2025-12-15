@@ -117,7 +117,7 @@ fun AppNavigation(
 
     LaunchedEffect(isLoadingComplete) {
         if (isLoadingComplete) {
-            val currentUser = userRepository.getCurrentUser()
+            val currentUser = userRepository.getCurrentUserNickname()
             currentScreen = if (currentUser != null) {
                 AppScreen.Menu
             } else {

@@ -21,7 +21,7 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     userRepository: UserRepositoryImpl
 ) {
-    var email by remember { mutableStateOf("") }
+    var nickname by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -48,11 +48,11 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = nickname,
+                onValueChange = { nickname = it },
                 label = {
                     Text(
-                        StringResources.email,
+                        StringResources.nickname,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -108,15 +108,14 @@ fun LoginScreen(
                 text = StringResources.loginButton,
                 onClick = {
                     scope.launch {
-                        if (email.isEmpty() || password.isEmpty()) {
+                        if (nickname.isEmpty() || password.isEmpty()) {
                             errorMessage = StringResources.fillAllFields(context)
                         } else {
-                            if (userRepository.loginUser(email, password)) {
-                                userRepository.setCurrentUser(email)
+                            if (userRepository.loginUser(nickname, password)) {
                                 errorMessage = ""
                                 onLoginSuccess()
                             } else {
-                                errorMessage = StringResources.invalidEmailPassword(context)
+                                errorMessage = StringResources.invalidNicknamePassword(context)
                             }
                         }
                     }

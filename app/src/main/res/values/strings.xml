@@ -33,7 +33,7 @@
     <string name="no_account">Don\'t have an account? Register</string>
     <string name="have_account">Already have an account? Login</string>
     <string name="fill_all_fields">Please fill in all fields</string>
-    <string name="invalid_email_password">Invalid email or password</string>
+    <string name="invalid_nickname_password">Invalid nickname or password</string>
     <string name="password_too_short">Password must be at least 6 characters</string>
     <string name="passwords_dont_match">Passwords don\'t match</string>
     <string name="user_exists">User with this email already exists</string>

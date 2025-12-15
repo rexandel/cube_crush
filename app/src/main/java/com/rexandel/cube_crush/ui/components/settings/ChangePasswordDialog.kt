@@ -130,7 +130,7 @@ fun ChangePasswordDialog(
                                     return@launch
                                 }
                                 else -> {
-                                    if (userRepository.updatePassword(newPassword)) {
+                                    if (userRepository.updatePassword(currentPassword, newPassword)) {
                                         onPasswordChanged()
                                     } else {
                                         errorMessage = StringResources.passwordChangeError(context)

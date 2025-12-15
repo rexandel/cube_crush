@@ -1,20 +1,23 @@
 package com.rexandel.cube_crush.data.repositories
 
 import android.content.Context
-import com.rexandel.cube_crush.data.database.AppDatabase
-import com.rexandel.cube_crush.data.database.entities.ScoreEntity
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.rexandel.cube_crush.data.network.NetworkModule
+import com.rexandel.cube_crush.data.network.dto.ScoreRequest
 import com.rexandel.cube_crush.domain.entities.PlayerScore
 import com.rexandel.cube_crush.domain.entities.Score
 import com.rexandel.cube_crush.domain.entities.UserStats
 import com.rexandel.cube_crush.domain.repositories.ScoreRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.format.DateTimeParseException
 
 class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepository {
-    private val db = AppDatabase.getDatabase(context)
-    private val scoreDao = db.scoreDao()
-    private val userDao = db.userDao()
-    private val userRepository = UserRepositoryImpl.getInstance(context)
+    private val gameApi = NetworkModule.getGameApi(context)
+    private val TAG = "ScoreRepository"
 
     companion object {
         @Volatile
@@ -27,52 +30,101 @@ class ScoreRepositoryImpl private constructor(context: Context) : ScoreRepositor
         }
     }
 
-    private suspend fun getCurrentUserId(): Long? {
-        val email = userRepository.getCurrentUser() ?: return null
-        return userDao.findByEmail(email)?.id
-    }
-
     override suspend fun getHighScore(): Int = withContext(Dispatchers.IO) {
-        val userId = getCurrentUserId() ?: return@withContext 0
-        scoreDao.getBestScore(userId) ?: 0
+        Log.d(TAG, "getHighScore")
+        try {
+            val score = gameApi.getUserStats().bestScore
+            Log.d(TAG, "getHighScore: $score")
+            score
+        } catch (e: Exception) {
+            Log.e(TAG, "getHighScore: error", e)
+            0
+        }
     }
 
     override suspend fun saveScore(score: Int) = withContext(Dispatchers.IO) {
-        val userId = getCurrentUserId() ?: return@withContext
-        val scoreEntity = ScoreEntity(userId = userId, score = score)
-        scoreDao.insert(scoreEntity)
-        Unit
+        Log.d(TAG, "saveScore: $score")
+        try {
+            gameApi.submitScore(ScoreRequest(score))
+            Log.d(TAG, "saveScore: success")
+            Unit
+        } catch (e: Exception) {
+            Log.e(TAG, "saveScore: error", e)
+            e.printStackTrace()
+        }
     }
 
     override suspend fun submitScore(newScore: Int): Int = withContext(Dispatchers.IO) {
-        val currentHighScore = getHighScore()
-
-        saveScore(newScore)
-        
-        return@withContext if (newScore > currentHighScore) newScore else currentHighScore
+        Log.d(TAG, "submitScore: $newScore")
+        try {
+            gameApi.submitScore(ScoreRequest(newScore))
+            val stats = gameApi.getUserStats()
+            Log.d(TAG, "submitScore: success, new best=${stats.bestScore}")
+            stats.bestScore
+        } catch (e: Exception) {
+            Log.e(TAG, "submitScore: error", e)
+            e.printStackTrace()
+            newScore
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getHistory(): List<Score> = withContext(Dispatchers.IO) {
-        val userId = getCurrentUserId() ?: return@withContext emptyList()
-        scoreDao.getHistory(userId).map { 
-            Score(score = it.score, date = it.achievedAt) 
+        Log.d(TAG, "getHistory")
+        try {
+            val history = gameApi.getHistory().map { 
+                Score(score = it.score, date = parseDate(it.achievedAt)) 
+            }
+            Log.d(TAG, "getHistory: success, count=${history.size}")
+            history
+        } catch (e: Exception) {
+            Log.e(TAG, "getHistory: error", e)
+            emptyList()
         }
     }
 
     override suspend fun getTopPlayers(): List<PlayerScore> = withContext(Dispatchers.IO) {
-        scoreDao.getTopPlayers().map {
-            PlayerScore(nickname = it.nickname, score = it.score)
+        Log.d(TAG, "getTopPlayers")
+        try {
+            val top = gameApi.getTopPlayers().map {
+                PlayerScore(nickname = it.nickname, score = it.score)
+            }
+            Log.d(TAG, "getTopPlayers: success, count=${top.size}")
+            top
+        } catch (e: Exception) {
+            Log.e(TAG, "getTopPlayers: error", e)
+            emptyList()
         }
     }
 
     override suspend fun getUserStats(): UserStats? = withContext(Dispatchers.IO) {
-        val userId = getCurrentUserId() ?: return@withContext null
-        scoreDao.getUserStats(userId)?.let {
+        Log.d(TAG, "getUserStats")
+        try {
+            val stats = gameApi.getUserStats()
+            Log.d(TAG, "getUserStats: success")
             UserStats(
-                gamesPlayed = it.gamesPlayed,
-                bestScore = it.bestScore ?: 0,
-                averageScore = it.averageScore ?: 0
+                gamesPlayed = stats.gamesPlayed.toInt(),
+                bestScore = stats.bestScore,
+                averageScore = stats.averageScore.toInt()
             )
+        } catch (e: Exception) {
+            Log.e(TAG, "getUserStats: error", e)
+            null
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun parseDate(dateString: String): Long {
+        return try {
+            Instant.parse(dateString).toEpochMilli()
+        } catch (e: DateTimeParseException) {
+            try {
+                java.time.LocalDateTime.parse(dateString).toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+            } catch (e2: Exception) {
+                System.currentTimeMillis()
+            }
+        } catch (e: Exception) {
+            System.currentTimeMillis()
         }
     }
 }
