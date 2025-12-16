@@ -59,6 +59,7 @@ import com.rexandel.cube_crush.ui.components.settings.ChangeNicknameDialog
 import com.rexandel.cube_crush.ui.components.common.PixelButton
 import com.rexandel.cube_crush.ui.components.common.ButtonColor
 import com.rexandel.cube_crush.ui.components.common.ButtonSize
+import com.rexandel.cube_crush.data.managers.SoundManager
 
 import com.rexandel.cube_crush.ui.components.common.ErrorDialog
 
@@ -72,6 +73,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val soundManager = remember { SoundManager.getInstance(context) }
 
     var userProfile by remember { mutableStateOf<User?>(null) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
@@ -82,6 +84,7 @@ fun SettingsScreen(
     var showUserMenu by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var isSoundEnabled by remember { mutableStateOf(soundManager.isSoundEnabled) }
 
     LaunchedEffect(Unit) {
         try {
@@ -182,25 +185,8 @@ fun SettingsScreen(
                     .padding(top = 56.dp)
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
+                verticalArrangement = Arrangement.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = StringResources.profile,
-                        modifier = Modifier.size(60.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -257,11 +243,29 @@ fun SettingsScreen(
 
                         PixelButton(
                             text = "",
+                            onClick = {
+                                soundManager.toggleSound()
+                                isSoundEnabled = soundManager.isSoundEnabled
+                            },
+                            buttonColor = ButtonColor.BLUE,
+                            size = ButtonSize.SMALL,
+                            iconResId = if (isSoundEnabled) R.drawable.sound_on else R.drawable.sound_mute,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        PixelButton(
+                            text = "",
                             onClick = { showLogoutDialog = true },
                             buttonColor = ButtonColor.RED,
                             size = ButtonSize.SMALL,
-                            iconResId = R.drawable.logout_solid,
-                            modifier = Modifier.weight(1f)
+                            iconResId = R.drawable.logout_solid
                         )
                     }
 

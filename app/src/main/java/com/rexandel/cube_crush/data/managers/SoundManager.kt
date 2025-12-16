@@ -8,7 +8,9 @@ import com.rexandel.cube_crush.R
 class SoundManager(context: Context) {
     private val soundPool: SoundPool
     private val soundMap = mutableMapOf<Sound, Int>()
-    private var isSoundEnabled = true
+    private val prefs = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+    var isSoundEnabled = prefs.getBoolean("sound_enabled", true)
+        private set
 
     init {
         val audioAttributes = AudioAttributes.Builder()
@@ -32,6 +34,11 @@ class SoundManager(context: Context) {
         
         val soundId = soundMap[sound] ?: return
         soundPool.play(soundId, 1f, 1f, 0, 0, 1f)
+    }
+
+    fun toggleSound() {
+        isSoundEnabled = !isSoundEnabled
+        prefs.edit().putBoolean("sound_enabled", isSoundEnabled).apply()
     }
 
     fun release() {
