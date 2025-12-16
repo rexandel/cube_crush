@@ -81,9 +81,16 @@ fun GameHeader(
                 .padding(vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
+            val scoreFontSize = when (score.toString().length) {
+                in 0..3 -> 48.sp
+                4 -> 42.sp
+                5 -> 36.sp
+                else -> 30.sp
+            }
+
             Text(
                 text = StringResources.score(score),
-                fontSize = 48.sp,
+                fontSize = scoreFontSize,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -93,6 +100,12 @@ fun GameHeader(
 
 @Composable
 private fun HighScoreSection(highScore: Int) {
+    val highScoreFontSize = when (highScore.toString().length) {
+        in 0..4 -> 28.sp
+        5 -> 24.sp
+        else -> 20.sp
+    }
+
     Row {
         Image(
             painter = painterResource(id = R.drawable.crown_solid),
@@ -103,7 +116,7 @@ private fun HighScoreSection(highScore: Int) {
         Text(
             text = StringResources.highScore(highScore),
             color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 28.sp,
+            fontSize = highScoreFontSize,
             fontWeight = FontWeight.Black,
             modifier = Modifier.padding(top = 14.dp)
         )
@@ -158,6 +171,13 @@ fun CompactComboCounter(
     }
 
     if (comboCount > 0 || (comboCount == 0 && explodeAlphaAnim.value > 0f && previousComboCount > 0)) {
+        val currentDisplayCombo = if (comboCount > 0) comboCount else previousComboCount
+        val comboFontSize = when (currentDisplayCombo.toString().length) {
+            1 -> 20.sp
+            2 -> 18.sp
+            else -> 16.sp
+        }
+
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -175,12 +195,12 @@ fun CompactComboCounter(
             )
 
             Text(
-                text = "x${if (comboCount > 0) comboCount else previousComboCount}",
+                text = "x$currentDisplayCombo",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 20.sp,
+                    fontSize = comboFontSize,
                     fontWeight = FontWeight.ExtraBold
                 ),
-                color = getComboColor(if (comboCount > 0) comboCount else previousComboCount),
+                color = getComboColor(currentDisplayCombo),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .graphicsLayer {
