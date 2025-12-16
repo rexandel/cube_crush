@@ -61,7 +61,7 @@ fun SplashScreen(
 
     LaunchedEffect(loadingState.isComplete) {
         if (loadingState.isComplete && loadingState.error == null) {
-            soundManager.playSound(SoundManager.Sound.LOADING_COMPLETE)
+            soundManager.playSound(SoundManager.Sound.LOGIN_SUCCESS)
             delay(300)
             onLoadingComplete()
         }

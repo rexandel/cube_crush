@@ -23,7 +23,8 @@ class SoundManager(context: Context) {
 
         soundMap[Sound.BLOCK] = soundPool.load(context, R.raw.block, 1)
         soundMap[Sound.GAME_OVER] = soundPool.load(context, R.raw.game_over, 1)
-        soundMap[Sound.LOADING_COMPLETE] = soundPool.load(context, R.raw.loading_complete, 1)
+        soundMap[Sound.LOGIN_SUCCESS] = soundPool.load(context, R.raw.login_success, 1)
+        soundMap[Sound.LINE_CLEARED] = soundPool.load(context, R.raw.line_cleared, 1)
     }
 
     fun playSound(sound: Sound) {
@@ -40,7 +41,8 @@ class SoundManager(context: Context) {
     enum class Sound {
         BLOCK,
         GAME_OVER,
-        LOADING_COMPLETE
+        LOGIN_SUCCESS,
+        LINE_CLEARED
     }
     
     companion object {

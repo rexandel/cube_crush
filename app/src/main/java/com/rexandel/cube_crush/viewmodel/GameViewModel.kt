@@ -72,6 +72,10 @@ class GameViewModel(
                 comboCount = result.comboCount
             )
 
+            if (result.linesCleared > 0) {
+                soundManager.playSound(SoundManager.Sound.LINE_CLEARED)
+            }
+
             val currentState = gameStateManager.getCurrentState()
             if (currentState.isGameOver) {
                 soundManager.playSound(SoundManager.Sound.GAME_OVER)
