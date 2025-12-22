@@ -1,7 +1,5 @@
 package com.rexandel.cube_crush.ui.components.game
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,10 +26,10 @@ fun GameOverDialog(
     score: Int,
     highScore: Int,
     onRestart: () -> Unit,
+    onShare: () -> Unit,
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
 
     AlertDialog(
         onDismissRequest = { },
@@ -84,9 +81,7 @@ fun GameOverDialog(
 
                     PixelButton(
                         text = StringResources.share,
-                        onClick = {
-                            shareScore(context, score, highScore)
-                        },
+                        onClick = onShare,
                         buttonColor = ButtonColor.BLUE,
                         size = ButtonSize.SMALL,
                         iconResId = R.drawable.share_solid
@@ -104,21 +99,4 @@ fun GameOverDialog(
         },
         dismissButton = {}
     )
-}
-
-private fun shareScore(context: Context, score: Int, highScore: Int) {
-    val shareText = if (score == highScore) {
-        StringResources.shareTextNewRecord(context, score)
-    } else {
-        StringResources.shareTextRegular(context, score, highScore)
-    }
-
-    val intent = Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, shareText)
-        type = "text/plain"
-    }
-
-    val shareIntent = Intent.createChooser(intent, StringResources.shareDialogTitle(context))
-    context.startActivity(shareIntent)
 }

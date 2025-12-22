@@ -112,6 +112,7 @@ fun GameScreen(
             score = gameState.score,
             highScore = gameState.highScore,
             onRestart = { gameViewModel.restartGame() },
+            onShare = { gameViewModel.shareScore() },
             onExit = handleExitToMenu
         )
     }

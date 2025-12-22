@@ -1,6 +1,7 @@
 package com.rexandel.cube_crush.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.rexandel.cube_crush.data.managers.StringResources
@@ -116,6 +117,29 @@ class GameViewModel(
     fun scoreAnimationCompleted() {
         uiEffectsManager.hideScoreAnimation()
         updateUiState()
+    }
+
+    fun shareScore() {
+        val context = getApplication<Application>()
+        val currentState = _uiState.value.gameState
+        val score = currentState.score
+        val highScore = currentState.highScore
+
+        val shareText = if (score == highScore) {
+            StringResources.shareTextNewRecord(context, score)
+        } else {
+            StringResources.shareTextRegular(context, score, highScore)
+        }
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+        }
+
+        val shareIntent = Intent.createChooser(intent, StringResources.shareDialogTitle(context))
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(shareIntent)
     }
 
     private fun updateUiState() {
